@@ -118,9 +118,13 @@
   .dist-section { padding:10px; border-bottom:1px solid var(--border); }
   .dist-selects { display:flex; flex-direction:column; gap:5px; margin-bottom:8px; }
   .dist-select {
-    width:100%; background:rgba(0,229,255,0.04); border:1px solid var(--border);
-    color:var(--text); font-family:"Share Tech Mono",monospace; font-size:10px;
+    width:100%; background:#0a1e2a; border:1px solid var(--border);
+    color:#c8e8f0; font-family:"Share Tech Mono",monospace; font-size:10px;
     padding:6px 8px; outline:none; cursor:pointer; letter-spacing:1px;
+    -webkit-appearance: none; appearance: none;
+  }
+  .dist-select option {
+    background:#0a1e2a; color:#c8e8f0;
   }
   .dist-select:focus { border-color:var(--accent); }
   .dist-btn {
@@ -139,7 +143,7 @@
     font-family:"Orbitron",sans-serif; font-size:14px; color:var(--accent);
     text-shadow:0 0 12px var(--accent); letter-spacing:2px; text-align:center;
   }
-  .dist-result-sub { font-size:9px; color:var(--dim); letter-spacing:1px; text-align:center; margin-top:4px; }
+  .dist-result-sub { font-size:10px; color:#8cc8d8; letter-spacing:1px; text-align:center; margin-top:5px; }
   .dist-line-toggle {
     width:100%; background:transparent; border:1px solid var(--border);
     color:var(--dim); font-family:"Share Tech Mono",monospace; font-size:9px;
