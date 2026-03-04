@@ -1650,11 +1650,11 @@ window.dealInitiative = function() {
     const deckCards  = shuffleDeck(10); // always 10 cards on table
     const pickDeck   = {};
     for (let i = 0; i < 10; i++) {
-      pickDeck['card_'+i] = { index:i, value: deckCards[i], takenBy: null };
+      pickDeck['card_'+i] = { index:i, value: deckCards[i], takenBy: '' };
     }
     const pickPlayers = {};
     allEntries.forEach((e,i) => {
-      pickPlayers['pp_'+i] = { id:'pp_'+i, name:e.name, color:e.color, type:e.type, cardIndex:null };
+      pickPlayers['pp_'+i] = { id:'pp_'+i, name:e.name, color:e.color, type:e.type, cardIndex: -1 };
     });
     set(initiativeRef, {
       style:'picktable', round:initRound, dealtAt:Date.now(),
@@ -1894,14 +1894,14 @@ function renderPickTable(area, data, now) {
 
   const deck    = data.deck;
   const players = data.players;
-  const allRev  = data.allRevealed;
+  const allRev  = data.allRevealed === true;
 
   // Find my player entry
   const myEntry = Object.values(players).find(p => p.name === myName);
-  const myPicked = myEntry && myEntry.cardIndex !== null;
+  const myPicked = myEntry && myEntry.cardIndex !== undefined && myEntry.cardIndex >= 0;
 
   // Count how many have picked
-  const pickedCount = Object.values(players).filter(p => p.cardIndex !== null).length;
+  const pickedCount = Object.values(players).filter(p => p.cardIndex !== undefined && p.cardIndex >= 0).length;
   const totalCount  = Object.values(players).length;
   const allPicked   = pickedCount >= totalCount;
 
@@ -1926,13 +1926,13 @@ function renderPickTable(area, data, now) {
   const chipsRow = document.createElement('div');
   chipsRow.className = 'pick-players-row';
   Object.values(players).sort((a,b)=>a.name.localeCompare(b.name)).forEach(p => {
-    const hasPicked = p.cardIndex !== null;
+    const hasPicked = p.cardIndex !== undefined && p.cardIndex >= 0;
     const chip = document.createElement('div');
     chip.className = 'pick-player-chip ' + (hasPicked ? 'picked-chip' : 'waiting') + (p.name===myName&&!myPicked?' my-turn':'');
     chip.style.borderColor = p.color;
     chip.style.color = p.color;
 
-    const cardVal = hasPicked && allRev ? Object.values(deck).find(c=>c.index===p.cardIndex)?.value : null;
+    const cardVal = hasPicked && allRev ? (Object.values(deck).find(c=>c.index===p.cardIndex)?.value ?? null) : null;
     chip.innerHTML = `
       <div class="pick-player-dot" style="background:${p.color}"></div>
       <span>${p.name}</span>
@@ -1951,7 +1951,7 @@ function renderPickTable(area, data, now) {
   deckRow.className = 'pick-deck-row';
 
   Object.values(deck).sort((a,b)=>a.index-b.index).forEach(card => {
-    const taken    = card.takenBy !== null;
+    const taken    = card.takenBy && card.takenBy !== '';
     const takenByMe = card.takenBy === myName;
 
     const cardWrap = document.createElement('div');
@@ -1993,7 +1993,7 @@ function renderPickTable(area, data, now) {
     }
 
     // Click to pick — only if this player hasn't picked yet and card is free
-    if (!taken && !myPicked && myEntry) {
+    if (!taken && !myPicked && myEntry && !allRev) {
       front.addEventListener('click', () => {
         pickCard(myEntry.id, card.index, data);
       });
@@ -2013,7 +2013,7 @@ function renderPickTable(area, data, now) {
   // After reveal: show sorted order
   if (allRev) {
     const sortedPicks = Object.values(players).map(p => {
-      const cardObj = Object.values(deck).find(c => c.index === p.cardIndex);
+      const cardObj = p.cardIndex >= 0 ? Object.values(deck).find(c => c.index === p.cardIndex) : null;
       return { ...p, cardValue: cardObj ? cardObj.value : 99 };
     }).sort((a,b) => a.cardValue - b.cardValue);
 
@@ -2044,9 +2044,7 @@ function renderPickTable(area, data, now) {
 }
 
 function pickCard(playerId, cardIndex, data) {
-  // Write pick to Firebase
-  const playerKey = playerId;
-  set(ref(db, 'session/initiative/players/'+playerKey+'/cardIndex'), cardIndex);
+  set(ref(db, 'session/initiative/players/'+playerId+'/cardIndex'), cardIndex);
   set(ref(db, 'session/initiative/deck/card_'+cardIndex+'/takenBy'), myName);
 }
 
