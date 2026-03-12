@@ -4034,12 +4034,17 @@ function _csSubscribe(playerName) {
     const data = snap.val() || {};
     _csAllSheets[playerName] = data;
     if (_csViewingPlayer === playerName) {
-      // Don't wipe the sheet if user is actively typing in it
-      const active = document.activeElement;
-      const body = document.getElementById('csBody');
-      const userIsTyping = body && body.contains(active) &&
-        (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA');
-      if (!userIsTyping) _csRender(playerName, data);
+      // Never re-render while user has focus in the sheet (typing or just clicked),
+      // and also debounce re-renders so rapid saves don't thrash the DOM.
+      clearTimeout(window._csRenderTimer);
+      window._csRenderTimer = setTimeout(() => {
+        const active = document.activeElement;
+        const body = document.getElementById('csBody');
+        const overlay = document.getElementById('charSheetOverlay');
+        // Skip if overlay is open and user has focus inside it anywhere
+        if (overlay && overlay.classList.contains('open') && body && body.contains(active)) return;
+        if (_csViewingPlayer === playerName) _csRender(playerName, data);
+      }, 1200); // longer than the debounce save (800ms) so our own saves don't trigger a re-render
     }
     if (isGM) _csRebuildTabs();
   }, err => {
@@ -4049,9 +4054,8 @@ function _csSubscribe(playerName) {
 
 // ── Save helpers (on window so event delegation can reach them) ───
 window._csSave = function(playerName, path, value) {
-  // Optimistic local update so subsequent reads see new value immediately
+  // Optimistic local update — navigate by dots so _csGet can read it back
   if (!_csAllSheets[playerName]) _csAllSheets[playerName] = {};
-  // Set nested path optimistically
   const parts = path.split('.');
   let obj = _csAllSheets[playerName];
   for (let i = 0; i < parts.length - 1; i++) {
@@ -4059,7 +4063,9 @@ window._csSave = function(playerName, path, value) {
     obj = obj[parts[i]];
   }
   obj[parts[parts.length - 1]] = value;
-  set(ref(db, 'characters/' + playerName + '/' + path), value);
+  // Firebase path uses / as separator so snap.val() returns nested objects
+  // that match the dot-navigation in _csGet
+  set(ref(db, 'characters/' + playerName + '/' + path.split('.').join('/')), value);
 };
 window._csDB = function(playerName, path, value) {
   const key = playerName + '\x01' + path;
