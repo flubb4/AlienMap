@@ -1201,7 +1201,7 @@
 }
 .cs-player-tab:hover, .cs-player-tab.active { border-color: #88cc44; color: #88cc44; background: #0a1a05; }
 
-.cs-body { padding: 20px; }
+.cs-body { padding: 20px; contain: content; }
 
 /* Section titles */
 .cs-section-title {
@@ -3512,6 +3512,7 @@ function shopRef() { return ref(db, 'session/shop'); }
 function _allItems() { return Object.values(_SHOP_CATALOG).flat(); }
 
 // ── Firebase listener ──────────────────────────────────────────
+let _shopRenderTimer = null;
 onValue(ref(db, 'session/shop'), snap => {
   const data = snap.val();
   if (!data) {
@@ -3526,8 +3527,12 @@ onValue(ref(db, 'session/shop'), snap => {
     _shopSeenTs = incomingTs; _shopDismissed = false;
   }
   _shopState = data;
-  renderShop();
-  if (!_shopDismissed) document.getElementById('shopOverlay').classList.add('open');
+  // Debounce: batch rapid Firebase updates (e.g. checkout writing multiple paths)
+  clearTimeout(_shopRenderTimer);
+  _shopRenderTimer = setTimeout(() => {
+    renderShop();
+    if (!_shopDismissed) document.getElementById('shopOverlay').classList.add('open');
+  }, 80);
 });
 
 // ── render ─────────────────────────────────────────────────────
@@ -3616,6 +3621,9 @@ window.shopSetCategory = function(cat, btn) {
 };
 
 function shopRenderCategory(cat) {
+  // Skip if shop overlay isn't visible - saves CPU when background updates fire
+  const overlay = document.getElementById('shopOverlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
   const title = document.getElementById('shopCatTitle');
   const grid  = document.getElementById('shopGrid');
   if (!grid) return;
@@ -3984,7 +3992,7 @@ function shopShowToast(msg) {
 let _csViewingPlayer = null;
 let _csDebounce      = {};
 let _csAllSheets     = {};
-const _CS_MS         = 800;
+const _CS_MS         = 300;
 
 // ── Open / close ──────────────────────────────────────────────────
 window.openCharSheet = function() {
@@ -4029,22 +4037,25 @@ function _csSubscribe(playerName) {
   if (_csSubs[playerName]) return; // already listening
   _csSubs[playerName] = true;
 
-  // Then sync with Firebase and re-render when data arrives
+  // Sync with Firebase
   onValue(ref(db, 'characters/' + playerName), snap => {
     const data = snap.val() || {};
     _csAllSheets[playerName] = data;
     if (_csViewingPlayer === playerName) {
-      // Never re-render while user has focus in the sheet (typing or just clicked),
-      // and also debounce re-renders so rapid saves don't thrash the DOM.
-      clearTimeout(window._csRenderTimer);
-      window._csRenderTimer = setTimeout(() => {
-        const active = document.activeElement;
-        const body = document.getElementById('csBody');
-        const overlay = document.getElementById('charSheetOverlay');
-        // Skip if overlay is open and user has focus inside it anywhere
-        if (overlay && overlay.classList.contains('open') && body && body.contains(active)) return;
-        if (_csViewingPlayer === playerName) _csRender(playerName, data);
-      }, 1200); // longer than the debounce save (800ms) so our own saves don't trigger a re-render
+      const body = document.getElementById('csBody');
+      const overlay = document.getElementById('charSheetOverlay');
+      const sheetOpen = overlay && overlay.classList.contains('open');
+      if (!sheetOpen) return; // don't touch DOM if sheet isn't visible
+
+      const active = document.activeElement;
+      const userFocused = body && body.contains(active);
+      if (userFocused) {
+        // User is active — do a light targeted patch (skip focused field)
+        _csPatchFields(playerName, data, active);
+      } else {
+        // No focus — safe to do a full re-render
+        _csRender(playerName, data);
+      }
     }
     if (isGM) _csRebuildTabs();
   }, err => {
@@ -4236,7 +4247,7 @@ function _csRender(pn, data) {
       <div class="cs-stat-box"><div class="cs-stat-label">FATIGUED</div><div class="cs-stat-val">${fatChk}</div></div>
     </div>
 
-    <div class="cs-section-title">// STRESS LEVEL <span style="color:#446633;font-size:9px;font-weight:normal">${stressLvl}/10</span></div>
+    <div class="cs-section-title">// STRESS LEVEL <span class="cs-stress-label" style="color:#446633;font-size:9px;font-weight:normal">${stressLvl}/10</span></div>
     <div class="cs-stress-row">${stressBoxes}</div>
 
     <div class="cs-section-title">// STRESS &amp; PANIC RESPONSE</div>
@@ -4302,26 +4313,35 @@ function _csRender(pn, data) {
     window._csSave(pn, path, el.checked);
   });
 
-  // Stress box OR death roll click — single handler, no stacking
+  // Stress box OR death roll click — instant DOM update then Firebase save
   overlay.addEventListener('click', e => {
-    // Stress
+    // ── Stress ──
     const sb = e.target.closest('.cs-stress-box:not(.readonly)');
     if (sb) {
       const pn = sb.dataset.pn, lvl = parseInt(sb.dataset.stress);
       if (!pn) return;
       const cur = parseInt(_csGet(_csAllSheets[pn]||{}, 'stressLevel')) || 0;
-      // lvl is 1-based index of clicked box.
-      // If cur already equals lvl: clicking again deselects (sets to lvl-1)
-      // Otherwise set to lvl (fills up to and including clicked box)
-      window._csSave(pn, 'stressLevel', cur === lvl ? lvl - 1 : lvl);
+      const next = (cur === lvl) ? lvl - 1 : lvl;
+      // Instant visual update — don't wait for Firebase
+      const row = sb.closest('.cs-stress-row') || sb.parentElement;
+      row.querySelectorAll('.cs-stress-box').forEach(box => {
+        const bi = parseInt(box.dataset.stress);
+        box.classList.toggle('filled', bi <= next);
+      });
+      // Update label if present
+      const lbl = sb.closest('.cs-body, #csBody')?.querySelector('.cs-stress-label');
+      if (lbl) lbl.textContent = next + '/10';
+      window._csSave(pn, 'stressLevel', next);
       return;
     }
-    // Death roll
+    // ── Death roll ──
     const db2 = e.target.closest('.cs-dr-box:not(.readonly)');
     if (db2) {
       const pn = db2.dataset.pn, path = db2.dataset.dr;
       if (!pn || !path) return;
       const cur = !!_csGet(_csAllSheets[pn]||{}, path);
+      // Instant visual update
+      db2.classList.toggle('filled', !cur);
       window._csSave(pn, path, !cur);
     }
   });
