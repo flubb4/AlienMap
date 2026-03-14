@@ -1583,6 +1583,7 @@ window.checkPassword = function() {
   const pwInput   = document.getElementById('pwInput');
   const unInput   = document.getElementById('pwUsername');
   const err       = document.getElementById('pwError');
+  const btn       = document.querySelector('.pw-btn');
   const username  = unInput.value.trim();
 
   if (!username) {
@@ -1609,6 +1610,47 @@ window.checkPassword = function() {
     return;
   }
 
+  const nameUpper = username.toUpperCase();
+
+  // GMs skip the allowedUsers check
+  if (isGM) {
+    _doLogin(nameUpper);
+    return;
+  }
+
+  // Players: verify name exists in Firebase allowedUsers
+  if (btn) { btn.disabled = true; btn.textContent = 'VERIFYING...'; }
+  err.textContent = '';
+
+  _authReadyPromise.then(() => {
+    get(ref(db, 'allowedUsers')).then(snap => {
+      const allowed = snap.val() || {};
+      // allowedUsers can be { NAME: true } or { NAME: { ... } } — just check key existence
+      const names = Object.keys(allowed).map(n => n.toUpperCase());
+      if (!names.includes(nameUpper)) {
+        err.textContent = 'CALLSIGN NOT RECOGNISED — CONTACT GM';
+        pwInput.classList.add('error');
+        unInput.classList.add('error');
+        pwInput.value = '';
+        if (btn) { btn.disabled = false; btn.textContent = 'Access Map'; }
+        setTimeout(() => {
+          pwInput.classList.remove('error');
+          unInput.classList.remove('error');
+          err.textContent = '';
+        }, 2500);
+        return;
+      }
+      if (btn) { btn.disabled = false; btn.textContent = 'Access Map'; }
+      _doLogin(nameUpper);
+    }).catch(() => {
+      // Firebase read failed (not authenticated yet?) — block login
+      err.textContent = 'AUTHENTICATION ERROR — TRY AGAIN';
+      if (btn) { btn.disabled = false; btn.textContent = 'Access Map'; }
+    });
+  });
+};
+
+function _doLogin(nameUpper) {
   // GM opening a closed session — auto-open it with a timestamp
   if (isGM && !sessionIsOpen) {
     set(sessionRef, true);
@@ -1616,18 +1658,15 @@ window.checkPassword = function() {
   }
 
   // Set identity — color is deterministic from name so it's always the same
-  myName = username.toUpperCase();
+  myName = nameUpper;
   myId   = 'user_' + myName.replace(/[^A-Z0-9]/g,'_');
   selectedColor = colorFromName(myName);
 
   // Persist in localStorage so they don't have to retype
-  try {
-    localStorage.setItem('alien-map-username', myName);
-  } catch(e) {}
+  try { localStorage.setItem('alien-map-username', myName); } catch(e) {}
 
   document.getElementById('myName').textContent  = myName + (isGM ? ' 🎖' : '');
   document.getElementById('myDot').style.background = selectedColor;
-  // Sync active color swatch to closest match (visual only)
   document.querySelectorAll('.color-swatch').forEach(s => {
     s.classList.toggle('active', s.dataset.color === selectedColor);
   });
@@ -1639,7 +1678,7 @@ window.checkPassword = function() {
   _authReadyPromise.then(() => {
     setTimeout(() => { screen.remove(); scans.remove(); _loggedIn = true; heartbeat(); renderDate(); applySessionGateAfterLogin(); updateSessionBtn(); }, 300);
   });
-};
+}
 
 // Pre-fill username if returning user
 try {
