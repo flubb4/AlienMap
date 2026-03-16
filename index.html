@@ -1796,7 +1796,8 @@ onValue(usersRef, snapshot => {
   list.innerHTML = active.map(u => {
     const isMe   = u.name === myName;
     const isCap  = u.name === captainName;
-    return `<div class="player-entry ${isCap ? 'player-captain' : ''}" onclick="setCaptain('${u.name}')" title="Click to make Captain">
+    const gmAttr = isGM ? `onclick="setCaptain('${u.name}')" title="Click to make Captain" style="cursor:pointer"` : '';
+    return `<div class="player-entry ${isCap ? 'player-captain' : ''}" ${gmAttr}>
       <div class="player-dot" style="background:${u.color};box-shadow:0 0 6px ${u.color};flex-shrink:0"></div>
       <div class="player-name" style="color:${u.color};flex:1">${u.name}${isCap ? ' 👑' : ''}</div>
       ${isMe ? '<div class="player-you">YOU</div>' : ''}
@@ -2965,6 +2966,7 @@ function updateCaptainUI() {
 }
 
 window.setCaptain = function(name) {
+  if (!isGM) return; // only GM can assign captain
   if (window._captainName === name) return; // already captain
   set(captainRef, name);
 };
