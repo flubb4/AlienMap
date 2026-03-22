@@ -843,6 +843,7 @@ const grid = document.getElementById('grid');
 
 fragments.forEach((f, idx) => {
   const card = document.createElement('div');
+  card.id = `fragment-${idx+1}`;
   card.className = `card ${f.cardType}`;
   card.innerHTML = `<div class="scanline-sweep"></div>` + buildCard(f);
   card.addEventListener('click', () => openOverlay(f));
@@ -863,6 +864,15 @@ function closeOverlay(e) {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeOverlay({target: document.getElementById('overlay')});
+});
+
+// Scroll to fragment on load if hash present
+window.addEventListener('load', () => {
+  const hash = window.location.hash;
+  if (hash) {
+    const el = document.querySelector(hash);
+    if (el) setTimeout(() => el.scrollIntoView({behavior:'smooth', block:'center'}), 300);
+  }
 });
 </script>
 
