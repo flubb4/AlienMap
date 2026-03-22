@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROJECT BLACK VEIL — Data Fragments</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Orbitron:wght@400;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #4dff91;
+  --green-dim: #1a6635;
+  --green-glow: rgba(77,255,145,0.15);
+  --amber: #ffb830;
+  --amber-dim: #7a4a00;
+  --red: #ff4444;
+  --red-dim: #6b1a1a;
+  --bg: #060907;
+  --bg2: #0c110d;
+  --bg3: #121a14;
+  --border: rgba(77,255,145,0.2);
+  --border-bright: rgba(77,255,145,0.5);
+  --text: #8ab898;
+  --text-bright: #c8e8d4;
+  --scanline: rgba(0,0,0,0.4);
+}
+
+html, body {
+  background: #030504;
+  min-height: 100vh;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--text);
+}
+
+/* ── GRID ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ── HEADER ── */
+.page-header {
+  text-align: center;
+  padding: 48px 40px 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.page-header .logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: var(--green-dim);
+  margin-bottom: 8px;
+}
+.page-header h1 {
+  font-family: 'Orbitron', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 4px;
+  margin-bottom: 6px;
+  text-shadow: 0 0 20px rgba(77,255,145,0.3);
+}
+.page-header .subtitle {
+  font-size: 12px;
+  color: var(--text);
+  letter-spacing: 3px;
+  margin-bottom: 32px;
+}
+.page-header .divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+  margin-bottom: 0;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  aspect-ratio: 0.75;
+  display: flex;
+  flex-direction: column;
+}
+.card:hover {
+  border-color: var(--border-bright);
+  box-shadow: 0 0 30px rgba(77,255,145,0.08), inset 0 0 30px rgba(77,255,145,0.02);
+}
+.card.corrupted {
+  border-color: rgba(255,68,68,0.3);
+}
+.card.corrupted:hover {
+  border-color: rgba(255,68,68,0.6);
+  box-shadow: 0 0 30px rgba(255,68,68,0.08);
+}
+.card.redacted {
+  border-color: rgba(255,184,48,0.25);
+  opacity: 0.7;
+}
+
+/* Scanlines */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.15) 2px,
+    rgba(0,0,0,0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Corner brackets */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid transparent;
+  border-top-color: var(--border);
+  border-left-color: var(--border);
+  pointer-events: none;
+  z-index: 11;
+}
+
+/* ── CARD HEADER ── */
+.card-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+.fragment-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green-dim);
+  letter-spacing: 3px;
+}
+.android-id {
+  font-family: 'Orbitron', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 2px;
+  margin-top: 2px;
+  text-shadow: 0 0 10px rgba(77,255,145,0.4);
+}
+.classification {
+  font-size: 9px;
+  letter-spacing: 3px;
+  padding: 3px 8px;
+  border: 1px solid;
+  text-align: right;
+}
+.classification.black-veil {
+  color: var(--green);
+  border-color: var(--green-dim);
+  background: rgba(77,255,145,0.05);
+}
+.classification.corrupted-class {
+  color: var(--red);
+  border-color: var(--red-dim);
+  background: rgba(255,68,68,0.05);
+  animation: blink-slow 3s ease-in-out infinite;
+}
+.classification.redacted-class {
+  color: var(--amber);
+  border-color: var(--amber-dim);
+  background: rgba(255,184,48,0.05);
+}
+
+/* ── CARD BODY ── */
+.card-body {
+  padding: 14px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Mission line */
+.mission-line {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text);
+  border-left: 2px solid var(--green-dim);
+  padding-left: 8px;
+}
+.mission-line span {
+  color: var(--text-bright);
+}
+
+/* Parameter block */
+.param-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--green-dim);
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+.param-value {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  color: var(--green);
+  line-height: 1.1;
+  text-shadow: 0 0 8px rgba(77,255,145,0.3);
+}
+.param-value.amber { color: var(--amber); text-shadow: 0 0 8px rgba(255,184,48,0.3); }
+.param-value.red   { color: var(--red);   text-shadow: 0 0 8px rgba(255,68,68,0.3); }
+
+/* Data bar */
+.data-bar-wrap {
+  margin-top: 2px;
+}
+.data-bar-label {
+  font-size: 9px;
+  color: var(--text);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+.data-bar-track {
+  height: 4px;
+  background: rgba(77,255,145,0.08);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.data-bar-fill {
+  height: 100%;
+  background: var(--green);
+  box-shadow: 0 0 6px rgba(77,255,145,0.5);
+  transition: width 1s ease;
+}
+.data-bar-fill.amber { background: var(--amber); box-shadow: 0 0 6px rgba(255,184,48,0.5); }
+.data-bar-fill.red   { background: var(--red);   box-shadow: 0 0 6px rgba(255,68,68,0.5); }
+
+/* Context rows */
+.context-block {
+  margin-top: 4px;
+  padding: 8px 10px;
+  background: rgba(77,255,145,0.03);
+  border: 1px solid rgba(77,255,145,0.08);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.context-block.amber-bg {
+  background: rgba(255,184,48,0.03);
+  border-color: rgba(255,184,48,0.1);
+}
+.context-block.red-bg {
+  background: rgba(255,68,68,0.03);
+  border-color: rgba(255,68,68,0.1);
+}
+.context-block .cx-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--green-dim);
+  margin-bottom: 4px;
+}
+.context-block.amber-bg .cx-label { color: var(--amber-dim); }
+.context-block.red-bg   .cx-label { color: var(--red-dim); }
+
+/* Status grid */
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 4px;
+}
+.status-item {
+  font-size: 10px;
+}
+.status-item .s-label {
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--green-dim);
+  display: block;
+  margin-bottom: 1px;
+}
+.status-item .s-value {
+  color: var(--text-bright);
+}
+.status-item .s-value.ok   { color: var(--green); }
+.status-item .s-value.warn { color: var(--amber); }
+.status-item .s-value.crit { color: var(--red);   }
+
+/* Corruption overlay bar */
+.corruption-bar {
+  margin-top: auto;
+}
+
+/* ── CARD FOOTER ── */
+.card-footer {
+  border-top: 1px solid var(--border);
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9px;
+  color: var(--green-dim);
+  letter-spacing: 2px;
+  flex-shrink: 0;
+}
+.card-footer .timestamp {
+  font-family: 'Share Tech Mono', monospace;
+}
+.card-footer .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 4px var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+.card-footer .status-dot.amber { background: var(--amber); box-shadow: 0 0 4px var(--amber); }
+.card-footer .status-dot.red   { background: var(--red);   box-shadow: 0 0 4px var(--red); animation: blink-fast 0.8s step-end infinite; }
+
+/* Glitch text effect */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+.glitch::before {
+  content: attr(data-text);
+  position: absolute;
+  left: 2px;
+  top: 0;
+  color: var(--red);
+  clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+  animation: glitch-anim 4s infinite;
+  opacity: 0;
+}
+
+/* Redacted blocks */
+.redacted-block {
+  background: var(--amber-dim);
+  color: var(--amber);
+  font-size: 11px;
+  letter-spacing: 4px;
+  padding: 6px 10px;
+  text-align: center;
+  border: 1px solid var(--amber-dim);
+  filter: blur(1.5px);
+  user-select: none;
+}
+
+/* Progress dots */
+.progress-dots {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+.progress-dots span {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+}
+.progress-dots span.filled {
+  background: var(--green);
+  border-color: var(--green);
+}
+.progress-dots span.partial {
+  background: var(--amber);
+  border-color: var(--amber);
+}
+
+/* ── FULLSCREEN OVERLAY ── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.overlay.active { display: flex; }
+.overlay-card {
+  width: min(480px, 90vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--bg2);
+  border: 1px solid var(--border-bright);
+  box-shadow: 0 0 60px rgba(77,255,145,0.1);
+  position: relative;
+}
+.overlay-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--green-dim);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  z-index: 10;
+}
+.overlay-close:hover { color: var(--green); }
+
+/* ── PRINT: individual cards ── */
+@media print {
+  body { background: #000; }
+  .page-header, .overlay { display: none !important; }
+  .grid { padding: 0; gap: 0; }
+  .card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #333;
+    margin: 0;
+    aspect-ratio: unset;
+    min-height: 440px;
+  }
+}
+
+/* ── ANIMATIONS ── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes blink-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes blink-fast {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+@keyframes glitch-anim {
+  0%, 90%, 100% { opacity: 0; }
+  92%, 95% { opacity: 0.8; }
+  94% { left: -2px; }
+}
+@keyframes scanline-move {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100vh); }
+}
+
+/* Moving scanline on hover */
+.card:hover .scanline-sweep {
+  animation: scanline-move 2s linear infinite;
+  opacity: 1;
+}
+.scanline-sweep {
+  position: absolute;
+  left: 0; right: 0;
+  height: 40px;
+  background: linear-gradient(180deg, transparent, rgba(77,255,145,0.04), transparent);
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo">WEYLAND-YUTANI CORPORATION — ASSET RECOVERY DIVISION</div>
+  <h1>PROJECT BLACK VEIL</h1>
+  <div class="subtitle">ANDROID MEMORY EXTRACT — ENVIRONMENTAL PARAMETER FRAGMENTS</div>
+  <div class="divider"></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="overlay" id="overlay" onclick="closeOverlay(event)">
+  <div class="overlay-card" id="overlay-content">
+    <button class="overlay-close" onclick="closeOverlay()">[ SCHLIESSEN ]</button>
+  </div>
+</div>
+
+<script>
+const fragments = [
+  {
+    num: '01 / 10',
+    android: 'AX-31',
+    name: '"KESTREL"',
+    mission: '111 TAURI — SUTTER\'S WORLD',
+    classification: 'BLACK VEIL',
+    classType: 'black-veil',
+    cardType: '',
+    paramLabel: 'PARAMETER: OBERFLÄCHENTEMPERATUR',
+    paramValue: '[ +58°C / −08°C ]',
+    paramColor: '',
+    barLabel: 'TAGESZYKLISCHE AMPLITUDE',
+    barValue: 88,
+    barColor: '',
+    context: 'Extremer Tagesgang bestätigt. Oberfläche steigt auf 58–62°C in Sonnenstunden. Nacht: −8 bis −12°C. Delta: 66–74K. Biologische Aktivität konzentriert auf unterirdische Schichten.',
+    cx: 'UMWELT-KONTEXT',
+    cxType: '',
+    status: {
+      'CORRUPTION': ['OK', 'ok'],
+      'GEOLOGIE': ['ARID', 'ok'],
+      'ATMO': ['ATEMBAR', 'ok'],
+      'ORBIT': ['0.87 AU', 'ok'],
+    },
+    ts: '2184.11.04 / 07:33:19',
+    dotColor: 'ok',
+    note: 'Datenfragment vollständig. KI-Fehler während Extraktion: Prioritätskonflikt Klasse 3.',
+  },
+  {
+    num: '02 / 10',
+    android: 'AX-44',
+    name: '"ATLAS"',
+    mission: 'GJ2092 — ATLAS STATION',
+    classification: 'BLACK VEIL',
+    classType: 'black-veil',
+    cardType: 'corrupted',
+    paramLabel: 'PARAMETER: ELEKTROMAGNETISCHES FELD',
+    paramValue: '[ INSTABIL / 0.3µT ]',
+    paramColor: 'red',
+    barLabel: 'EM-FELDSTABILITÄT',
+    barValue: 22,
+    barColor: 'red',
+    context: 'Schwaches, ungleichmäßiges EM-Feld. Sensorinterferenzen bei 60–80% aller Messungen. Kein stabiler Orbit möglich. Quelle: tektonische Schicht in 800m Tiefe. ANOMALIE: Feld zeigt biologisch wirkende Schwankungsfrequenz.',
+    cx: 'WARNUNG — SENSORFEHLER',
+    cxType: 'red-bg',
+    status: {
+      'CORRUPTION': ['34.7 %', 'warn'],
+      'EM-ANOMALIE': ['AKTIV', 'crit'],
+      'ORBIT': ['INSTABIL', 'warn'],
+      'ANDROID': ['KOMPROMITTIERT', 'crit'],
+    },
+    ts: '2184.12.17 / 14:02:57',
+    dotColor: 'red',
+    note: 'EXISTENZFEHLER KLASSE 1. Android AX-44 weigerte sich, Datenzugang freizugeben. Extraktion erzwungen.',
+  },
+  {
+    num: '03 / 10',
+    android: 'AX-47',
+    name: '"PEREGRINE"',
+    mission: 'GL259 — ARCEON STATION',
+    classification: 'BLACK VEIL',
+    classType: 'black-veil',
+    cardType: '',
+    paramLabel: 'PARAMETER: ATMOSPHÄRENZUSAMMENSETZUNG',
+    paramValue: '[ CO₂ 3.1% / O₂ 6.8% ]',
+    paramColor: 'amber',
+    barLabel: 'O₂-GEHALT (REFERENZ: 21%)',
+    barValue: 32,
+    barColor: 'amber',
+    context: 'Atmosphäre biologisch aggressiv. CO₂ überschreitet Toleranzschwelle um Faktor 6. Sauerstoff auf 6.8% — tödlich für Menschen ohne Filter ab 4 Minuten. Für Zielorganismus: optimal.',
+    cx: 'BIOHAZARD-WARNUNG',
+    cxType: 'amber-bg',
+    status: {
+      'CORRUPTION': ['12.3 %', 'ok'],
+      'ATMO': ['GIFTIG', 'warn'],
+      'FILTER': ['PFLICHT', 'warn'],
+      'ORBIT': ['STABIL', 'ok'],
+    },
+    ts: '2185.01.08 / 09:15:44',
+    dotColor: 'amber',
+    note: 'Datenfragment: vollständig. Atmosphärenprofil passt zu 89 bekannten Systemen. Filterläuft.',
+  },
+  {
+    num: '04 / 10',
+    android: 'AX-62',
+    name: '"BOYD"',
+    mission: '289 G. HYDRAE — JEREMIAH VI',
+    classification: 'BLACK VEIL',
+    classType: 'black-veil',
+    cardType: '',
+    paramLabel: 'PARAMETER: NESTTEMPERATUR-OPTIMUM',
+    paramValue: '[ 38–42°C KONSTANT ]',
+    paramColor: '',
+    barLabel: 'THERMISCHE STABILITÄT (BIOLOGISCH IDEAL)',
+    barValue: 95,
+    barColor: '',
+    context: 'Xenomorphe Aktivität nimmt signifikant zu bei lokalen Wärmequellen zwischen 38–42°C. Reproduktionsrate +340% gegenüber Kältezonen. Reaktorkerne, Geothermie, oder vulkanische Aktivität als Nestsubstrat bestätigt.',
+    cx: 'VERHALTENS-KORRELATION',
+    cxType: '',
+    status: {
+      'CORRUPTION': ['MINIMAL', 'ok'],
+      'NEST-DICHTE': ['HOCH', 'warn'],
+      'WÄRMEQUELLE': ['INTERN', 'ok'],
+      'ANDROID-STATUS': ['ENTFERNT', 'ok'],
+    },
+    ts: '2185.01.24 / 22:48:11',
+    dotColor: 'ok',
+    note: 'AX-62 "Boyd" zeigte ungewöhnlich hohe Empathie-Scores. Fragment trotzdem vollständig extrahiert.',
+  },
+  {
+    num: '05 / 10',
+    android: 'HALVERSON E.',
+    name: '"HERMES-7"',
+    mission: 'VAN MAANEN\'S STAR',
+    classification: 'BLACK VEIL',
+    classType: 'black-veil',
+    cardType: '',
+    paramLabel: 'PARAMETER: VAKUUMTOLERANZ',
+    paramValue: '[ ÜBERLEBEN: >90s ]',
+    paramColor: '',
+    barLabel: 'ÜBERLEBENSDAUER VAKUUM (SEKUNDEN)',
+    barValue: 75,
+    barColor: '',
+    context: 'Organismus überlebt kurzzeitige Vakuumexposition ohne Schutz. Dokumentiert: 90–120 Sekunden. Biologischer Mechanismus: unbekannt. Schlussfolgerung: Zielplanet benötigt KEINE stabile Atmosphäre als Grundvoraussetzung.',
+    cx: 'PHYSIOLOGISCHE ANOMALIE',
+    cxType: '',
+    status: {
+      'CORRUPTION': ['8.1 %', 'ok'],
+      'ATMO': ['FAKULTATIV', 'ok'],
+      'VAKUUM': ['ÜBERLEBT', 'warn'],
+      'STATION': ['OFFLINE', 'crit'],
+    },
+    ts: '2184.09.30 / 03:17:22',
+    dotColor: 'ok',
+    note: 'Quelle: Interface-Subjekt. Organischer Träger. Datenintegrität: 91.9%. Gültig.',
+  },
+  {
+    num: '06 / 10',
+    android: 'AX-80',
+    name: '"CINDER"',
+    mission: 'LAMBDA AURIGAE — KHEPRI-9',
+    classification: 'BLACK VEIL',
+    classType: 'black-veil',
+    cardType: 'corrupted',
+    paramLabel: 'PARAMETER: BIOELEKTRISCHES SIGNAL',
+    paramValue: '[ 0.3–8 Hz ]',
+    paramColor: 'amber',
+    barLabel: 'FREQUENZINTENSITÄT (NORMIERT)',
+    barValue: 61,
+    barColor: 'amber',
+    context: 'Niederfrequente bioelektrische Pulse, 0.3–8 Hz. Identisch mit bekannten xenomorphen Kommunikationsmustern (vgl. Queen-Spezifikation). Reichweite: 12–40 km unterirdisch. Wahrscheinlichste Funktion: Koloniekoordination / Fortpflanzungssignal.',
+    cx: 'KOMMUNIKATIONS-ANOMALIE',
+    cxType: 'amber-bg',
+    status: {
+      'CORRUPTION': ['29.4 %', 'warn'],
+      'FREQUENZ': ['0.3–8 Hz', 'warn'],
+      'REICHWEITE': ['12–40 km', 'ok'],
+      'ANDROID': ['UMFUNKTIONIERT', 'crit'],
+    },
+    ts: '2185.02.11 / 18:55:03',
+    dotColor: 'amber',
+    note: 'AX-80 hatte Direktkontakt mit Xenoformer-Matrix. Schwere KI-Destabilisierung. Fragmentintegrität: 70.6%.',
+  },
+  {
+    num: '07 / 10',
+    android: 'AX-92',
+    name: '"VALIANT"',
+    mission: '███████████ — [GESCHWÄRZT]',
+    classification: 'GESPERRT',
+    classType: 'redacted-class',
+    cardType: 'redacted',
+    paramLabel: 'PARAMETER: GRAVITATION',
+    paramValue: '[ 0.7–1.1 G ]',
+    paramColor: 'amber',
+    barLabel: 'GRAVITATIONSINDEX (ERD-ÄQUIVALENT = 1.0G)',
+    barValue: 80,
+    barColor: 'amber',
+    context: 'Queen bevorzugt erdnahe Gravitation für Reproduktionsprozesse. Unter 0.6G: Ei-Morphologie instabil. Über 1.2G: Mobilität der Drohnen eingeschränkt. Optimum: 0.85–0.95G.',
+    cx: 'MORPHOLOGISCHE KORRELATION',
+    cxType: 'amber-bg',
+    status: {
+      'CORRUPTION': ['41.2 %', 'warn'],
+      'ZUGANG': ['BESCHRÄNKT', 'warn'],
+      'GRAVITATION': ['0.89G (TYP)', 'ok'],
+      'MISSION': ['KLASSIFIZIERT', 'crit'],
+    },
+    ts: '2185.03.██ / ██:██:██',
+    dotColor: 'amber',
+    note: 'Datenzugang: eingeschränkt. Freigabe durch Sektion 9 erforderlich. Fragment gesperrt bis Autorisierung.',
+  },
+  {
+    num: '08 / 10',
+    android: 'AX-101',
+    name: '"ALCYONE"',
+    mission: '███████████ — [GESCHWÄRZT]',
+    classification: 'GESPERRT',
+    classType: 'redacted-class',
+    cardType: 'redacted',
+    paramLabel: 'PARAMETER: STRAHLUNGSINDEX',
+    paramValue: '[ UV-ERHÖHT / STERN TYP K ]',
+    paramColor: 'amber',
+    barLabel: 'UV-BELASTUNG (SOL-ÄQUIVALENT = 1.0)',
+    barValue: 58,
+    barColor: 'amber',
+    context: 'Zielplanet orbitet einen K-Typ-Stern. UV-Strahlung: 1.4–1.8x Sol-Standard. Vegetation minimal bis null. Oberflächenmaterial: Basalt, Regolith, Mineralgestein. Xeno-Melanin absorbiert UV ohne Schaden — diese Bedingung begünstigt Dominanz.',
+    cx: 'STRAHLUNGSTOLERANZ-KORRELATION',
+    cxType: 'amber-bg',
+    status: {
+      'CORRUPTION': ['38.7 %', 'warn'],
+      'STERN-TYP': ['K / ORANGE', 'ok'],
+      'UV-INDEX': ['1.4–1.8×', 'warn'],
+      'MISSION': ['KLASSIFIZIERT', 'crit'],
+    },
+    ts: '2185.04.██ / ██:██:██',
+    dotColor: 'amber',
+    note: 'Datenfragment teilweise verfügbar. Vollständige Freigabe ausstehend.',
+  },
+  {
+    num: '09 / 10',
+    android: 'AX-117',
+    name: '"MERIDIAN"',
+    mission: '███████████ — [GESCHWÄRZT]',
+    classification: 'GESPERRT',
+    classType: 'redacted-class',
+    cardType: 'redacted',
+    paramLabel: 'PARAMETER: HYDROLOGISCHE TIEFENSTRUKTUR',
+    paramValue: '[ UNTERIRDISCH / KEINE OBERFLÄCHE ]',
+    paramColor: 'amber',
+    barLabel: 'TIEFENWASSER-WAHRSCHEINLICHKEIT',
+    barValue: 92,
+    barColor: 'amber',
+    context: 'Wasserspeicher ausschließlich in Tiefen >200m. Oberfläche: scheinbar trocken, arid, kein sichtbares Fließgewässer. Unterirdische Hohlraumsysteme mit Kondensation und mineralreichen Thermalbächen bestätigt. Biologisch: ideale Brutbedingungen im Verborgenen.',
+    cx: 'HYDROLOGISCHER BEFUND',
+    cxType: 'amber-bg',
+    status: {
+      'CORRUPTION': ['55.1 %', 'crit'],
+      'OBERFLÄCHE': ['ARID', 'ok'],
+      'TIEFE': ['>200m', 'ok'],
+      'MISSION': ['KLASSIFIZIERT', 'crit'],
+    },
+    ts: '2185.05.██ / ██:██:██',
+    dotColor: 'amber',
+    note: 'Datenfragment stark korrumpiert. Zuverlässigkeit: 44.9%. Extraktion riskant.',
+  },
+  {
+    num: '10 / 10',
+    android: 'AX-133',
+    name: '"OMEGA"',
+    mission: 'BLACKSITE THETA — [KLASSIFIZIERT]',
+    classification: '⚠ KRITISCH',
+    classType: 'corrupted-class',
+    cardType: 'corrupted',
+    paramLabel: 'PARAMETER: SEISMISCHE STABILITÄT',
+    paramValue: '[ RUHEZONE / <0.2 RICHTER ]',
+    paramColor: 'red',
+    barLabel: 'TEKTONISCHE AKTIVITÄT (0=RUHIG, 10=AKTIV)',
+    barValue: 12,
+    barColor: 'red',
+    context: 'Zielplanet geologisch inaktiv. Seismik: <0.2 Richter (Mittelwert). Basalthöhlensysteme stabil seit >10 Millionen Jahren. Strukturelle Integrität: maximal. Einzige bekannte Planetenklasse mit optimaler Kombination aller 10 Parameter.',
+    cx: '⚠ FINALES DATENFRAGMENT',
+    cxType: 'red-bg',
+    status: {
+      'CORRUPTION': ['67.3 %', 'crit'],
+      'SEISMIK': ['0.18 RICHTER', 'ok'],
+      'HÖHLEN': ['STABIL >10Ma', 'ok'],
+      'STATUS': ['LETZTES FRAGMENT', 'crit'],
+    },
+    ts: '████.██.██ / ██:██:██',
+    dotColor: 'red',
+    note: '⚠ ALLE 10 PARAMETER KOMBINIERT ERGEBEN EINE EINZIGE SYSTEMÜBEREINSTIMMUNG. KOORDINATEN BEREIT.',
+  },
+];
+
+function buildCard(f, compact = false) {
+  const statusRows = Object.entries(f.status).map(([k, [v, cls]]) => `
+    <div class="status-item">
+      <span class="s-label">${k}</span>
+      <span class="s-value ${cls}">${v}</span>
+    </div>`).join('');
+
+  const noteStyle = f.cardType === 'corrupted'
+    ? 'color:var(--red);font-size:10px;line-height:1.5;padding:8px 10px;background:rgba(255,68,68,0.03);border:1px solid rgba(255,68,68,0.1);'
+    : f.cardType === 'redacted'
+    ? 'color:var(--amber);font-size:10px;line-height:1.5;padding:8px 10px;background:rgba(255,184,48,0.03);border:1px solid rgba(255,184,48,0.1);'
+    : 'color:var(--text);font-size:10px;line-height:1.5;padding:8px 10px;background:rgba(77,255,145,0.02);border:1px solid rgba(77,255,145,0.06);';
+
+  // Progress dots (first N filled)
+  const fNum = parseInt(f.num.split(' / ')[0]);
+  const dots = Array.from({length: 10}, (_, i) => {
+    if (i < fNum - 1) return '<span class="filled"></span>';
+    if (i === fNum - 1) return '<span class="partial"></span>';
+    return '<span></span>';
+  }).join('');
+
+  return `
+<div class="card-header">
+  <div>
+    <div class="fragment-num">FRAGMENT ${f.num}</div>
+    <div class="android-id">${f.android} <span style="font-size:11px;color:var(--text);font-family:'Share Tech Mono',monospace;">${f.name}</span></div>
+  </div>
+  <div>
+    <div class="classification ${f.classType}">${f.classification}</div>
+  </div>
+</div>
+
+<div class="card-body">
+  <div>
+    <div class="mission-line">MISSION: <span>${f.mission}</span></div>
+  </div>
+
+  <div>
+    <div class="param-label">${f.paramLabel}</div>
+    <div class="param-value ${f.paramColor}">${f.paramValue}</div>
+  </div>
+
+  <div class="data-bar-wrap">
+    <div class="data-bar-label">
+      <span>${f.barLabel}</span>
+      <span>${f.barValue}%</span>
+    </div>
+    <div class="data-bar-track">
+      <div class="data-bar-fill ${f.barColor}" style="width:${f.barValue}%"></div>
+    </div>
+  </div>
+
+  <div class="context-block ${f.cxType}">
+    <div class="cx-label">${f.cx}</div>
+    ${f.context}
+  </div>
+
+  <div class="status-grid">${statusRows}</div>
+
+  <div style="${noteStyle}">
+    <div class="cx-label" style="margin-bottom:3px">ANDROID-LOG</div>
+    ${f.note}
+  </div>
+
+  <div class="progress-dots">${dots}</div>
+</div>
+
+<div class="card-footer">
+  <span class="timestamp">${f.ts}</span>
+  <span>HELIOS / ARD</span>
+  <div class="status-dot ${f.dotColor === 'ok' ? '' : f.dotColor}"></div>
+</div>`;
+}
+
+const grid = document.getElementById('grid');
+
+fragments.forEach((f, idx) => {
+  const card = document.createElement('div');
+  card.className = `card ${f.cardType}`;
+  card.innerHTML = `<div class="scanline-sweep"></div>` + buildCard(f);
+  card.addEventListener('click', () => openOverlay(f));
+  grid.appendChild(card);
+});
+
+function openOverlay(f) {
+  const oc = document.getElementById('overlay-content');
+  oc.innerHTML = `<button class="overlay-close" onclick="closeOverlay()">[ SCHLIESSEN ]</button>` + buildCard(f, true);
+  document.getElementById('overlay').classList.add('active');
+}
+
+function closeOverlay(e) {
+  if (!e || e.target === document.getElementById('overlay')) {
+    document.getElementById('overlay').classList.remove('active');
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeOverlay({target: document.getElementById('overlay')});
+});
+</script>
+
+</body>
+</html>
