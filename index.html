@@ -1157,12 +1157,13 @@
   font-family: 'Share Tech Mono', monospace;
   font-size: 10px;
   padding: 5px 14px;
-  cursor: not-allowed;
+  cursor: pointer;
   letter-spacing: 2px;
   transition: all 0.2s;
   margin-right: 6px;
-  opacity: 0.4;
+  opacity: 0.5;
 }
+#bvBtn:hover { opacity: 0.8; border-color: #2a6640; }
 #bvBtn.unlocked {
   border-color: #1a6635;
   color: #4dff91;
@@ -4704,7 +4705,6 @@ function bvUpdateBtnState(unlocked) {
 
 window.openBVPanel = function() {
   bvGetUnlocked(unlocked => {
-    if (unlocked.length === 0 && !bvGMAuthed) return;
     document.getElementById('bvOverlay').classList.add('active');
     bvRenderCards(unlocked);
     if (bvGMAuthed) bvRenderToggles(unlocked);
