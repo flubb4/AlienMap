@@ -5156,21 +5156,37 @@ _authReadyPromise.then(() => {
     else if (isGM) wdMyRole = 'gm';
     else wdMyRole = 'spectator';
 
-    // Handle dismissed flag — don't reopen for same game
-    if (window._wdLastTs && d.ts === window._wdLastTs && window._wdDismissed && wdMyRole === 'spectator') return;
+    // Reset dismissed flag when new game starts
     if (d.ts !== window._wdLastTs) { window._wdDismissed = false; }
 
-    // Auto-open for participants
-    if ((wdMyRole === 'p1' || wdMyRole === 'p2' || wdMyRole === 'gm') && !window._wdDismissed) {
+    const isParticipant = wdMyRole === 'p1' || wdMyRole === 'p2' || wdMyRole === 'gm';
+    const gameActive = d.phase && d.phase !== 'lobby' && d.phase !== 'gameover';
+
+    // Auto-open for participants (not if they dismissed)
+    if (isParticipant && !window._wdDismissed) {
       overlay.classList.add('open');
     }
-    if (wdMyRole === 'spectator' && !overlay.classList.contains('open')) return;
+    // Spectators don't auto-open — they get a watch button
+    if (wdMyRole === 'spectator' && !overlay.classList.contains('open')) {
+      const rejoinBar = document.getElementById('wdRejoinBar');
+      if (rejoinBar) rejoinBar.style.display = gameActive ? '' : 'none';
+      return;
+    }
 
-    // Show/hide rejoin bar for participants who closed the overlay
+    // Show/hide rejoin bar
     const rejoinBar = document.getElementById('wdRejoinBar');
     if (rejoinBar) {
-      const isParticipant = wdMyRole === 'p1' || wdMyRole === 'p2' || wdMyRole === 'gm';
-      rejoinBar.style.display = (isParticipant && window._wdDismissed && d.phase !== 'gameover') ? '' : 'none';
+      if (isParticipant && window._wdDismissed && gameActive) {
+        rejoinBar.dataset.label = 'REJOIN';
+        rejoinBar.style.display = '';
+      } else if (wdMyRole === 'spectator' && gameActive) {
+        rejoinBar.dataset.label = 'WATCH';
+        rejoinBar.style.display = '';
+      } else {
+        rejoinBar.style.display = 'none';
+      }
+      const btn = rejoinBar.querySelector('button');
+      if (btn) btn.textContent = `🎲 WÜRFEL DÜRFEL — ${rejoinBar.dataset.label||'WATCH'}`;
     }
 
     const el = document.getElementById('wdContent');
@@ -5282,8 +5298,7 @@ window.wdSelectDepletionBet = function(n) {
   if (!wdState) return;
   const d = wdState;
   const used = (d.usedBets && d.usedBets[myName]) || [];
-  const myDice = d.dice[myName] || 1;
-  if (used.includes(n) || n > myDice) return;
+  if (used.includes(n)) return;
   window._wdCurrentBet = n;
   // Re-render to reflect selection
   const el = document.getElementById('wdContent');
@@ -5392,30 +5407,44 @@ window.wdNextRound = function() {
   let scores = { ...(d.scores || {}) };
   let usedBets = { [p1]: [...((d.usedBets||{})[p1]||[])], [p2]: [...((d.usedBets||{})[p2]||[])] };
   const round = d.round || 1;
+  const rolls = d.rolls || {};
+  const sixes = (rolls.sixes) || {};
 
-  // Record used bets (depletion)
+  // Record used bets
+  const b1 = (d.bets||{})[p1], b2 = (d.bets||{})[p2];
+  if (b1 && !usedBets[p1].includes(b1)) usedBets[p1].push(b1);
+  if (b2 && !usedBets[p2].includes(b2)) usedBets[p2].push(b2);
+
   if (d.mode === 'depletion') {
-    const b1 = (d.bets||{})[p1], b2 = (d.bets||{})[p2];
-    if (b1 && !usedBets[p1].includes(b1)) usedBets[p1].push(b1);
-    if (b2 && !usedBets[p2].includes(b2)) usedBets[p2].push(b2);
-  }
-
-  if (isTie) {
-    dice[p1] = Math.max(0, dice[p1] - 1);
-    dice[p2] = Math.max(0, dice[p2] - 1);
-    newTiePot += 2;
-  } else if (winner && loser) {
-    const totalTransfer = transfer + riskBonus + bluffBonus + (newTiePot > 0 ? newTiePot : 0);
-    dice[loser] = Math.max(0, dice[loser] - totalTransfer);
-    dice[winner] = dice[winner] + totalTransfer;
-    newTiePot = 0;
-    scores[winner] = (scores[winner] || 0) + 1;
+    // Point-based: score += sixes rolled this round (+ bluff bonus for correct call)
+    const s1 = sixes[p1]||0, s2 = sixes[p2]||0;
+    let bonus1 = 0, bonus2 = 0;
+    if (d.bluffCalls) {
+      if (d.bluffCalls[p1] !== undefined && d.bluffCalls[p1] !== null && d.bluffCalls[p1] === s1) bonus1 = b1||0;
+      if (d.bluffCalls[p2] !== undefined && d.bluffCalls[p2] !== null && d.bluffCalls[p2] === s2) bonus2 = b2||0;
+    }
+    scores[p1] = (scores[p1]||0) + s1 + bonus1;
+    scores[p2] = (scores[p2]||0) + s2 + bonus2;
+  } else {
+    if (isTie) {
+      dice[p1] = Math.max(0, dice[p1] - 1);
+      dice[p2] = Math.max(0, dice[p2] - 1);
+      newTiePot += 2;
+    } else if (winner && loser) {
+      const totalTransfer = transfer + riskBonus + bluffBonus + (newTiePot > 0 ? newTiePot : 0);
+      dice[loser] = Math.max(0, dice[loser] - totalTransfer);
+      dice[winner] = dice[winner] + totalTransfer;
+      newTiePot = 0;
+      scores[winner] = (scores[winner] || 0) + 1;
+    }
   }
 
   // History entry
   const hist = [...(d.history || [])];
-  const t = wdCalcTransfer(d);
-  hist.unshift({ round, result: isTie ? 'TIE' : `${winner} WINS`, dice: { ...dice } });
+  const histResult = d.mode === 'depletion'
+    ? `${p1}:${scores[p1]} / ${p2}:${scores[p2]}`
+    : (isTie ? 'TIE' : `${winner} WINS`);
+  hist.unshift({ round, result: histResult, dice: { ...dice } });
   if (hist.length > 8) hist.pop();
 
   // Check game-over conditions
@@ -5425,20 +5454,21 @@ window.wdNextRound = function() {
   let roundCapHit = false;
   let depletionOver = false;
 
-  if (dice[p1] <= 0 || dice[p2] <= 0) {
-    phase = 'gameover';
-    champion = dice[p1] > dice[p2] ? p1 : p2;
-  } else if (d.mode === 'depletion') {
-    if (round >= 10) { phase = 'gameover'; champion = dice[p1] >= dice[p2] ? p1 : p2; roundCapHit = true; }
-    else {
-      // Check if either player has no valid bets left
+  if (d.mode === 'depletion') {
+    if (round >= 10) {
+      phase = 'gameover'; roundCapHit = true;
+      champion = scores[p1] >= scores[p2] ? p1 : p2;
+    } else {
+      // No valid bets left for either player?
       for (const pn of [p1, p2]) {
         const used = usedBets[pn];
-        const myDice = dice[pn];
-        let hasValid = false;
-        for (let i = 1; i <= myDice; i++) { if (!used.includes(i)) { hasValid = true; break; } }
-        if (!hasValid) { phase = 'gameover'; depletionOver = true; champion = dice[p1] >= dice[p2] ? p1 : p2; break; }
+        if (used.length >= 10) { phase = 'gameover'; depletionOver = true; champion = scores[p1] >= scores[p2] ? p1 : p2; break; }
       }
+    }
+  } else {
+    if (dice[p1] <= 0 || dice[p2] <= 0) {
+      phase = 'gameover';
+      champion = dice[p1] > dice[p2] ? p1 : p2;
     }
   }
 
@@ -5586,8 +5616,12 @@ function renderWDBetting(d) {
   function boardHTML(pname, isMe) {
     const myDice = dice[pname] || 0;
     const locked = !!bets[pname];
-    const wins = scores[pname] || 0;
-    const pips = Array.from({length: Math.max(wins,0)}, () => `<div class="wd-score-pip win"></div>`).join('');
+    const pts = scores[pname] || 0;
+    // In depletion mode show numeric point total; classic shows win-pip dots
+    const scoreDisplay = mode === 'depletion'
+      ? `<div style="font-size:11px;letter-spacing:2px;color:#cc6633;margin-top:4px;">${pts} PTS</div>`
+      : `<div class="wd-score-row">${Array.from({length:Math.max(pts,0)},()=>`<div class="wd-score-pip win"></div>`).join('')}</div>`;
+
     let betUI = '';
     if (isMe && !locked) {
       if (mode === 'classic') {
@@ -5601,35 +5635,35 @@ function renderWDBetting(d) {
               <button class="wd-step-btn" onclick="wdChangeBet(1)">+</button>
             </div>
           </div>`;
+        betUI += `<button class="wd-lock-btn" onclick="wdLockBet()" ${window._wdCurrentBet<1||window._wdCurrentBet>myDice?'disabled':''}>🔒 LOCK BET</button>`;
       } else {
-        // Depletion grid
+        // Depletion: all 1–10 always available; used ones crossed out
         const used = (d.usedBets||{})[pname] || [];
-        const oppUsed = (d.usedBets||{})[pname===p1?p2:p1] || [];
         const selBet = window._wdCurrentBet || 1;
         const btns = Array.from({length:10},(_,i)=>i+1).map(n => {
           const isUsed = used.includes(n);
-          const outOfRange = n > myDice;
-          const cls = isUsed ? 'used' : (outOfRange ? 'out-of-range' : (n===selBet ? 'selected' : ''));
+          const cls = isUsed ? 'used' : (n===selBet ? 'selected' : '');
           return `<button class="wd-dep-btn ${cls}" onclick="wdSelectDepletionBet(${n})">${n}</button>`;
         }).join('');
         const bluffVal = window._wdBluffCall === null ? '—' : window._wdBluffCall;
+        const selUsed = used.includes(window._wdCurrentBet||1);
         betUI = `
           <div class="wd-bet-input">
-            <div class="wd-bet-label">// SELECT BET (ONCE PER GAME)</div>
+            <div class="wd-bet-label">// DICE TO ROLL (ONCE PER GAME)</div>
             <div class="wd-dep-grid">${btns}</div>
             <div class="wd-bluff-row">
-              <div class="wd-bluff-label">// PREDICT SIXES (OPTIONAL)</div>
+              <div class="wd-bluff-label">// PREDICT SIXES (OPTIONAL BONUS)</div>
               <button class="wd-step-btn" style="width:28px;height:28px;font-size:14px" onclick="wdChangeBluff(-1)">−</button>
               <div class="wd-bluff-val" id="wdBluffVal">${bluffVal}</div>
               <button class="wd-step-btn" style="width:28px;height:28px;font-size:14px" onclick="wdChangeBluff(1)">+</button>
             </div>
-          </div>`;
+          </div>
+          <button class="wd-lock-btn" onclick="wdLockBet()" ${selUsed?'disabled':''}>🔒 LOCK BET</button>`;
       }
-      betUI += `<button class="wd-lock-btn" onclick="wdLockBet()" ${window._wdCurrentBet<1||window._wdCurrentBet>myDice?'disabled':''}>🔒 LOCK BET</button>`;
     } else if (locked && isMe) {
       betUI = `<div style="margin-top:12px;color:#44aa44;font-size:11px;letter-spacing:2px;">✓ BET LOCKED</div>`;
-    } else if (!isMe && isPlayer) {
-      // opponent board — hidden info
+    } else if (!isMe && (isPlayer || wdMyRole === 'spectator')) {
+      // opponent / spectator board — hidden bet info
       betUI = locked ? `<div style="margin-top:12px;color:#44aa44;font-size:11px;letter-spacing:2px;">✓ LOCKED</div>` :
                        `<div style="margin-top:12px;color:#885522;font-size:11px;letter-spacing:2px;">BETTING...</div>`;
       if (mode === 'depletion') {
@@ -5640,17 +5674,26 @@ function renderWDBetting(d) {
         }).join('');
         betUI += `<div class="wd-dep-grid" style="margin-top:8px">${btns}</div>`;
       }
-    } else if (isGM) {
-      // GM sees actual bets
+    } else if (isGM && !isMe) {
+      // GM spectating a board they're not playing — sees actual bets
       betUI = `<div style="margin-top:10px;font-size:11px;color:#cc6633;letter-spacing:2px;">BET: ${bets[pname]||'—'}</div>`;
+      if (mode === 'depletion') {
+        const oppUsed = (d.usedBets||{})[pname] || [];
+        const btns = Array.from({length:10},(_,i)=>i+1).map(n => {
+          const isUsed = oppUsed.includes(n);
+          return `<div class="wd-dep-btn ${isUsed?'used':''}">${n}</div>`;
+        }).join('');
+        betUI += `<div class="wd-dep-grid" style="margin-top:8px">${btns}</div>`;
+      }
     }
 
+    const diceLabel = mode === 'depletion' ? 'DICE IN POOL' : 'DICE REMAINING';
     return `
       <div class="wd-board ${isMe?'my-board':''} ${locked?'locked':''}">
         <div class="wd-board-name">${pname}${isMe?' (YOU)':''}</div>
-        <div class="wd-board-dice">${myDice}</div>
-        <div class="wd-board-dice-label">DICE REMAINING</div>
-        <div class="wd-score-row">${pips}</div>
+        <div class="wd-board-dice">${mode==='depletion' ? pts : myDice}</div>
+        <div class="wd-board-dice-label">${mode==='depletion' ? 'POINTS' : diceLabel}</div>
+        ${scoreDisplay}
         ${betUI}
       </div>`;
   }
@@ -5667,7 +5710,8 @@ function renderWDBetting(d) {
 
 // ── ROLLING ───────────────────────────────────────────────
 function renderWDRolling(d) {
-  const n1 = d.dice[d.p1]||0, n2 = d.dice[d.p2]||0;
+  const n1 = (d.bets&&d.bets[d.p1]) || d.dice[d.p1]||0;
+  const n2 = (d.bets&&d.bets[d.p2]) || d.dice[d.p2]||0;
   const dice1 = Array.from({length:n1},()=>`<div class="wd-die-anim">⚀</div>`).join('');
   const dice2 = Array.from({length:n2},()=>`<div class="wd-die-anim">⚀</div>`).join('');
   return `
@@ -5682,56 +5726,77 @@ function renderWDRolling(d) {
 
 // ── REVEAL ────────────────────────────────────────────────
 function renderWDReveal(d) {
-  const { winner, loser, transfer, isTie, riskBonus, bluffBonus, tiePot } = wdCalcTransfer(d);
+  const mode = d.mode || 'classic';
+  const calc = wdCalcTransfer(d);
+  const { winner, loser, isTie, transfer, riskBonus, bluffBonus, tiePot } = calc;
   const p1 = d.p1, p2 = d.p2;
   const rolls = d.rolls || {};
   const r1 = rolls[p1] || [], r2 = rolls[p2] || [];
   const s1 = (rolls.sixes||{})[p1]||0, s2 = (rolls.sixes||{})[p2]||0;
 
-  function boardReveal(pname, rolls, sixes) {
-    const wl = !isTie && (winner === pname ? 'winner' : 'loser');
-    const dice = rolls.map((v,i) =>
-      `<div class="wd-die" id="wd-die-${pname}-${i}" data-val="${v}" data-six="${v===6}">${v===6?'⚅':'⚀'}</div>`
+  function boardReveal(pname, rollArr) {
+    const wl = winner === pname ? 'winner' : (loser === pname ? 'loser' : '');
+    const dice = rollArr.map((v,i) =>
+      `<div class="wd-die" id="wd-die-${pname}-${i}" data-val="${v}">${v===6?'⚅':'⚀'}</div>`
     ).join('');
-    const transferDir = isTie ? `−1 (TIE TAX)` : (winner===pname ? `+${transfer+(winner===pname?tiePot+bluffBonus:0)}` : `−${transfer+riskBonus}`);
-    const transferCls = isTie ? 'lose' : (winner===pname?'gain':'lose');
     return `
       <div class="wd-reveal-board ${wl}" id="wdBoard-${pname}">
         <div class="wd-reveal-name">${pname}</div>
         <div class="wd-dice-row" id="wdDice-${pname}">${dice}</div>
         <div class="wd-sixes-count" id="wdSixes-${pname}"></div>
-        <div class="wd-transfer-label ${transferCls}" id="wdXfer-${pname}" style="opacity:0"></div>
+        <div class="wd-transfer-label" id="wdXfer-${pname}" style="opacity:0"></div>
       </div>`;
   }
 
-  let myResult = '';
-  if (wdMyRole === 'p1' || wdMyRole === 'p2') {
-    const me = wdMyRole === 'p1' ? p1 : p2;
-    const outcome = isTie ? 'TIE' : (winner===me ? 'YOU WIN!' : 'YOU LOSE!');
-    const cls = isTie ? 'tie' : (winner===me ? 'win' : 'lose');
-    myResult = `<div class="wd-result-banner ${cls}" id="wdResultBanner" style="opacity:0">${outcome}</div>`;
-  } else if (isGM) {
-    myResult = `<div class="wd-result-banner ${isTie?'tie':(winner?'win':'')}" id="wdResultBanner" style="opacity:0">${isTie?'TIE':(winner?winner+' WINS':'')}</div>`;
+  // Result label
+  const isViewer = wdMyRole === 'p1' || wdMyRole === 'p2';
+  let resultText, resultCls;
+  if (mode === 'depletion') {
+    // No win/lose in depletion — just round result
+    resultText = isTie ? 'DRAW' : (winner + ' LEADS');
+    resultCls = isTie ? 'tie' : 'win';
+  } else {
+    if (isViewer) {
+      const me = wdMyRole === 'p1' ? p1 : p2;
+      resultText = isTie ? 'TIE' : (winner===me ? 'YOU WIN!' : 'YOU LOSE!');
+      resultCls = isTie ? 'tie' : (winner===me ? 'win' : 'lose');
+    } else {
+      resultText = isTie ? 'TIE' : (winner ? winner + ' WINS' : '');
+      resultCls = isTie ? 'tie' : 'win';
+    }
   }
+  let myResult = `<div class="wd-result-banner ${resultCls}" id="wdResultBanner" style="opacity:0">${resultText}</div>`;
 
   let gmMath = '';
   if (isGM) {
     const b1 = (d.bets||{})[p1]||0, b2 = (d.bets||{})[p2]||0;
-    const totalXfer = transfer + riskBonus + bluffBonus + (winner?tiePot:0);
-    gmMath = `
-      <div class="wd-gm-math" id="wdGMmath" style="opacity:0">
-        <div>BETS: <span class="hi">${p1}=${b1}</span> vs <span class="hi">${p2}=${b2}</span> → diff=<span class="hi">${Math.abs(b1-b2)}</span></div>
-        <div>SIXES: <span class="hi">${p1}=${s1}</span> vs <span class="hi">${p2}=${s2}</span></div>
-        ${isTie ? `<div>TIE — each loses 1 die to pot (pot now <span class="hi">${(d.tiePot||0)+2}</span>)</div>` :
-          `<div>TRANSFER: base=<span class="hi">${transfer}</span>${riskBonus?` +risk=<span class="hi">${riskBonus}</span>`:''}${bluffBonus?` +bluff=<span class="hi">${bluffBonus}</span>`:''}${tiePot>0?` +pot=<span class="hi">${tiePot}</span>`:''}  → TOTAL=<span class="hi">${totalXfer}</span></div>`}
-      </div>`;
+    if (mode === 'depletion') {
+      const pts1 = s1 + (bluffBonus && winner===p1 ? bluffBonus : 0);
+      const pts2 = s2 + (bluffBonus && winner===p2 ? bluffBonus : 0);
+      gmMath = `
+        <div class="wd-gm-math" id="wdGMmath" style="opacity:0">
+          <div>DICE ROLLED: <span class="hi">${p1}=${b1}</span> vs <span class="hi">${p2}=${b2}</span></div>
+          <div>SIXES: <span class="hi">${p1}=${s1}</span> vs <span class="hi">${p2}=${s2}</span></div>
+          <div>POINTS THIS ROUND: <span class="hi">${p1}+${pts1}</span> / <span class="hi">${p2}+${pts2}</span></div>
+          ${bluffBonus ? `<div>BLUFF BONUS: <span class="hi">+${bluffBonus}</span> pts to <span class="hi">${winner}</span></div>` : ''}
+        </div>`;
+    } else {
+      const totalXfer = transfer + riskBonus + bluffBonus + (winner?tiePot:0);
+      gmMath = `
+        <div class="wd-gm-math" id="wdGMmath" style="opacity:0">
+          <div>BETS: <span class="hi">${p1}=${b1}</span> vs <span class="hi">${p2}=${b2}</span> → diff=<span class="hi">${Math.abs(b1-b2)}</span></div>
+          <div>SIXES: <span class="hi">${p1}=${s1}</span> vs <span class="hi">${p2}=${s2}</span></div>
+          ${isTie ? `<div>TIE — each loses 1 die to pot (pot now <span class="hi">${(d.tiePot||0)+2}</span>)</div>` :
+            `<div>TRANSFER: base=<span class="hi">${transfer}</span>${riskBonus?` +risk=<span class="hi">${riskBonus}</span>`:''}${bluffBonus?` +bluff=<span class="hi">${bluffBonus}</span>`:''}${tiePot>0?` +pot=<span class="hi">${tiePot}</span>`:''}  → TOTAL=<span class="hi">${totalXfer}</span></div>`}
+        </div>`;
+    }
     myResult += gmMath + `<button class="wd-next-btn" id="wdNextBtn" style="opacity:0" onclick="wdNextRound()">→ NEXT ROUND</button>`;
   }
 
   return `
     <div class="wd-reveal-layout">
-      ${boardReveal(p1,r1,s1)}
-      ${boardReveal(p2,r2,s2)}
+      ${boardReveal(p1,r1)}
+      ${boardReveal(p2,r2)}
     </div>
     ${myResult}
     ${wdHistoryHTML(d)}`;
@@ -5796,21 +5861,25 @@ function wdAnimateReveal(d) {
   t += 500;
 
   // Step 6: winner glow / loser dim (already CSS via .winner/.loser)
-  // Step 7: transfer labels
+  // Step 7: transfer / points labels
   setTimeout(() => {
-    const b1 = (d.bets||{})[p1]||0, b2 = (d.bets||{})[p2]||0;
     const xf1 = document.getElementById(`wdXfer-${p1}`);
     const xf2 = document.getElementById(`wdXfer-${p2}`);
     if (xf1 && xf2) {
-      if (isTie) {
-        xf1.textContent = '−1 DIE (TIE TAX)'; xf1.style.opacity='1';
-        xf2.textContent = '−1 DIE (TIE TAX)'; xf2.style.opacity='1';
+      if (d.mode === 'depletion') {
+        const pts1 = s1 + (bluffBonus && winner===p1 ? bluffBonus : 0);
+        const pts2 = s2 + (bluffBonus && winner===p2 ? bluffBonus : 0);
+        xf1.textContent = `+${pts1} PTS`; xf1.className = 'wd-transfer-label gain'; xf1.style.opacity='1';
+        xf2.textContent = `+${pts2} PTS`; xf2.className = 'wd-transfer-label gain'; xf2.style.opacity='1';
+      } else if (isTie) {
+        xf1.textContent = '−1 DIE (TIE TAX)'; xf1.className='wd-transfer-label lose'; xf1.style.opacity='1';
+        xf2.textContent = '−1 DIE (TIE TAX)'; xf2.className='wd-transfer-label lose'; xf2.style.opacity='1';
       } else if (winner) {
         const totalWin = transfer + bluffBonus + tiePot;
         const totalLose = transfer + riskBonus;
         const wx = winner===p1?xf1:xf2, lx = winner===p1?xf2:xf1;
-        wx.textContent = `+${totalWin} DICE`; wx.style.opacity='1';
-        lx.textContent = `−${totalLose} DICE`; lx.style.opacity='1';
+        wx.textContent = `+${totalWin} DICE`; wx.className='wd-transfer-label gain'; wx.style.opacity='1';
+        lx.textContent = `−${totalLose} DICE`; lx.className='wd-transfer-label lose'; lx.style.opacity='1';
       }
     }
   }, t);
@@ -5836,13 +5905,16 @@ function wdAnimateReveal(d) {
 function renderWDGameover(d) {
   const champ = d.champion || '';
   const dice = d.dice || {};
+  const scores = d.scores || {};
   const p1 = d.p1, p2 = d.p2;
+  const isDepletion = d.mode === 'depletion';
   let sub = '';
-  if (d.roundCapHit) {
+  if (isDepletion) {
+    const reason = d.roundCapHit ? '10 ROUNDS — MOST POINTS WINS' : 'ALL BETS EXHAUSTED';
+    sub = `<div class="wd-champion-sub">${reason}</div>
+           <div style="color:#885522;font-size:11px;letter-spacing:2px">${p1}: ${scores[p1]||0} PTS &nbsp;|&nbsp; ${p2}: ${scores[p2]||0} PTS</div>`;
+  } else if (d.roundCapHit) {
     sub = `<div class="wd-champion-sub">10 ROUNDS PLAYED — MOST DICE WINS</div>
-           <div style="color:#885522;font-size:11px;letter-spacing:2px">${p1}: ${dice[p1]||0} DICE &nbsp;|&nbsp; ${p2}: ${dice[p2]||0} DICE</div>`;
-  } else if (d.depletionOver) {
-    sub = `<div class="wd-champion-sub">NO VALID BETS REMAINING</div>
            <div style="color:#885522;font-size:11px;letter-spacing:2px">${p1}: ${dice[p1]||0} DICE &nbsp;|&nbsp; ${p2}: ${dice[p2]||0} DICE</div>`;
   } else {
     const total = (dice[p1]||0)+(dice[p2]||0);
