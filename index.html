@@ -5990,9 +5990,16 @@ window.wdOpenLeaderboard = async function() {
   const header = `<div class="wd-title">WÜRFEL DÜRFEL</div><div class="wd-subtitle">// HALL OF CHAMPIONS //</div><button class="wd-close-btn" onclick="closeWD()">✕ CLOSE</button>`;
   el.innerHTML = header + `<div style="text-align:center;color:#885522;font-size:11px;letter-spacing:2px;padding:40px">LOADING RECORDS...</div>`;
   document.getElementById('wdOverlay').classList.add('open');
-  const snap = await get(ref(db, 'wuerfelduerfel_stats'));
-  if (window._wdLeaderboard) {
-    el.innerHTML = header + renderWDLeaderboard(snap.val() || {});
+  try {
+    await _authReadyPromise;
+    const snap = await get(ref(db, 'wuerfelduerfel_stats'));
+    if (window._wdLeaderboard) {
+      el.innerHTML = header + renderWDLeaderboard(snap.val() || {});
+    }
+  } catch(e) {
+    if (window._wdLeaderboard) {
+      el.innerHTML = header + `<div style="text-align:center;color:#cc4444;font-size:11px;letter-spacing:2px;padding:40px">ERROR LOADING RECORDS</div>`;
+    }
   }
 };
 
