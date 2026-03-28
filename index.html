@@ -1772,6 +1772,29 @@
   transition:all 0.2s;
 }
 .wd-again-btn:hover { background:rgba(204,102,51,0.12);box-shadow:0 0 12px rgba(204,102,51,0.3); }
+.wd-lb-btn {
+  display:inline-block;padding:10px 22px;background:transparent;
+  border:1px solid #554433;color:#885522;font-family:inherit;
+  font-size:10px;letter-spacing:2px;cursor:pointer;margin-left:8px;
+  transition:all 0.2s;
+}
+.wd-lb-btn:hover { border-color:#cc6633;color:#cc6633; }
+.wd-lb-header-btn {
+  position:absolute;top:12px;left:14px;background:transparent;
+  border:1px solid #554433;color:#885522;font-family:inherit;
+  font-size:10px;padding:5px 12px;cursor:pointer;letter-spacing:2px;
+  transition:all 0.2s;
+}
+.wd-lb-header-btn:hover { border-color:#cc6633;color:#cc6633; }
+.wd-leaderboard { padding:10px 0 20px; }
+.wd-lb-table {
+  width:100%;border-collapse:collapse;font-size:12px;letter-spacing:1px;
+}
+.wd-lb-table th {
+  color:#554422;font-size:9px;letter-spacing:3px;padding:8px 10px;
+  border-bottom:1px solid #221100;text-align:center;
+}
+.wd-lb-table td { padding:9px 10px;border-bottom:1px solid #110800;text-align:center; }
 /* HISTORY */
 .wd-history { margin-top:18px;border-top:1px solid #1a0800;padding-top:12px; }
 .wd-history-title { font-size:8px;letter-spacing:3px;color:#885522;margin-bottom:8px; }
@@ -1923,6 +1946,9 @@
     </div>
     <div id="wdRejoinBar" style="display:none;padding:8px 10px;border-bottom:1px solid #441100;background:#0d0500;">
       <button onclick="wdRejoin()" style="width:100%;background:transparent;border:1px solid #cc6633;color:#cc6633;font-family:'Share Tech Mono',monospace;font-size:9px;padding:6px;cursor:pointer;letter-spacing:2px;animation:travelPulse 1.2s infinite;">🎲 WÜRFEL DÜRFEL — REJOIN</button>
+    </div>
+    <div style="padding:4px 10px 8px;border-bottom:1px solid #1a0800;">
+      <button onclick="wdOpenLeaderboard()" style="width:100%;background:transparent;border:1px solid #885522;color:#cc8844;font-family:'Share Tech Mono',monospace;font-size:9px;padding:5px;cursor:pointer;letter-spacing:2px;transition:all 0.15s" onmouseover="this.style.borderColor='#ff9944';this.style.color='#ff9944'" onmouseout="this.style.borderColor='#885522';this.style.color='#cc8844'">📊 WD STANDINGS</button>
     </div>
     <div class="travel-section">
       <div class="sidebar-title">// Navigation</div>
@@ -5145,11 +5171,12 @@ _authReadyPromise.then(() => {
     wdState = d;
     const overlay = document.getElementById('wdOverlay');
     if (!d) {
-      if (overlay.classList.contains('open') && !isGM) overlay.classList.remove('open');
+      if (overlay.classList.contains('open') && !isGM && !window._wdLeaderboard) overlay.classList.remove('open');
       const rb = document.getElementById('wdRejoinBar');
       if (rb) rb.style.display = 'none';
       return;
     }
+    if (window._wdLeaderboard) return; // Don't overwrite leaderboard view
     // Determine role — player-name check takes priority so GM can fight
     if (d.p1 === myName) wdMyRole = 'p1';
     else if (d.p2 === myName) wdMyRole = 'p2';
@@ -5225,6 +5252,7 @@ window.openWuerfelLobby = function() {
 
 window.closeWD = function() {
   window._wdDismissed = true;
+  window._wdLeaderboard = false;
   if (wdState) window._wdLastTs = wdState.ts;
   document.getElementById('wdOverlay').classList.remove('open');
 };
@@ -5233,9 +5261,31 @@ window.wdGMClose = function() {
   if (!isGM) return;
   _authReadyPromise.then(() => {
     remove(ref(db, 'wuerfelduerfel'));
+    window._wdLeaderboard = false;
     document.getElementById('wdOverlay').classList.remove('open');
   });
 };
+
+async function wdSaveStats(d) {
+  if (!d.champion || !d.p1 || !d.p2) return;
+  const winner = d.champion;
+  const loser = d.p1 === winner ? d.p2 : d.p1;
+  const isDepletion = d.mode === 'depletion';
+  for (const [player, won] of [[winner, true], [loser, false]]) {
+    const key = player.replace(/[.#$/[\]\s]/g, '_');
+    const sRef = ref(db, `wuerfelduerfel_stats/${key}`);
+    const snap = await get(sRef);
+    const s = snap.val() || {};
+    await set(sRef, {
+      name: player,
+      wins:          (s.wins          || 0) + (won ? 1 : 0),
+      losses:        (s.losses        || 0) + (won ? 0 : 1),
+      classicWins:   (s.classicWins   || 0) + (!isDepletion && won ? 1 : 0),
+      depletionWins: (s.depletionWins || 0) + (isDepletion  && won ? 1 : 0),
+      lastGame: Date.now()
+    });
+  }
+}
 
 window.wdSetMode = function(mode) {
   if (!isGM) return;
@@ -5480,6 +5530,7 @@ window.wdNextRound = function() {
     p1: d.p1, p2: d.p2, hostGM: d.hostGM,
     mode: d.mode, ts: d.ts
   };
+  if (phase === 'gameover') wdSaveStats(update);
   window._wdCurrentBet = 1;
   window._wdBluffCall = null;
   _wdRollFired = false;
@@ -5495,6 +5546,7 @@ function renderWD(el, d) {
   } else {
     inner += `<button class="wd-close-btn" onclick="closeWD()">✕ CLOSE</button>`;
   }
+  inner += `<button class="wd-lb-header-btn" onclick="wdOpenLeaderboard()">📊 STANDINGS</button>`;
 
   if (!d.phase || d.phase === 'lobby') { inner += renderWDLobby(d); }
   else if (d.phase === 'betting')  { inner += renderWDBetting(d); }
@@ -5926,9 +5978,56 @@ function renderWDGameover(d) {
       <div style="font-size:10px;letter-spacing:4px;color:#885522;margin-bottom:12px">// GAME OVER //</div>
       <div class="wd-champion-name">${champ}</div>
       ${sub}
-      <div style="margin-top:20px">${againBtn}</div>
+      <div style="margin-top:20px">${againBtn}<button class="wd-lb-btn" onclick="wdOpenLeaderboard()">📊 STANDINGS</button></div>
     </div>
     ${wdHistoryHTML(d)}`;
+}
+
+// ── Leaderboard ───────────────────────────────────────────
+window.wdOpenLeaderboard = async function() {
+  window._wdLeaderboard = true;
+  const el = document.getElementById('wdContent');
+  const header = `<div class="wd-title">WÜRFEL DÜRFEL</div><div class="wd-subtitle">// HALL OF CHAMPIONS //</div><button class="wd-close-btn" onclick="closeWD()">✕ CLOSE</button>`;
+  el.innerHTML = header + `<div style="text-align:center;color:#885522;font-size:11px;letter-spacing:2px;padding:40px">LOADING RECORDS...</div>`;
+  document.getElementById('wdOverlay').classList.add('open');
+  const snap = await get(ref(db, 'wuerfelduerfel_stats'));
+  if (window._wdLeaderboard) {
+    el.innerHTML = header + renderWDLeaderboard(snap.val() || {});
+  }
+};
+
+function renderWDLeaderboard(stats) {
+  const players = Object.values(stats)
+    .filter(p => p && p.name)
+    .sort((a, b) => (b.wins||0)-(a.wins||0) || (a.losses||0)-(b.losses||0));
+  if (!players.length) {
+    return `<div style="text-align:center;color:#885522;padding:50px 20px;font-size:11px;letter-spacing:3px">// NO RECORDS YET //</div>`;
+  }
+  const rows = players.map((p, i) => {
+    const total = (p.wins||0)+(p.losses||0);
+    const rate  = total > 0 ? Math.round((p.wins/total)*100) : 0;
+    const rankColor = i===0 ? '#ff9944' : i===1 ? '#aaaaaa' : i===2 ? '#cc6633' : '#554422';
+    const nameColor = i===0 ? '#ff9944' : '#cc8844';
+    return `<tr>
+      <td style="color:${rankColor};font-size:10px;width:36px">#${i+1}</td>
+      <td style="text-align:left;padding-left:12px;color:${nameColor}">${p.name}</td>
+      <td style="color:#44cc44">${p.wins||0}</td>
+      <td style="color:#cc4444">${p.losses||0}</td>
+      <td style="color:#885522">${total}</td>
+      <td style="color:#ffaa44">${rate}%</td>
+      <td style="color:#554422;font-size:9px;letter-spacing:0">${p.classicWins||0}C&nbsp;/&nbsp;${p.depletionWins||0}D</td>
+    </tr>`;
+  }).join('');
+  return `<div class="wd-leaderboard">
+    <table class="wd-lb-table">
+      <thead><tr>
+        <th style="text-align:left">&nbsp;</th>
+        <th style="text-align:left;padding-left:12px">FIGHTER</th>
+        <th>W</th><th>L</th><th>G</th><th>WIN%</th><th>C/D</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
 }
 
 // ── History strip ─────────────────────────────────────────
