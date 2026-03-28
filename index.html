@@ -2465,6 +2465,8 @@ function shuffleDeck(count) {
 }
 
 let currentInitStyle = 'transmission';
+let gmPickingForNpc = null;    // NPC entry the GM is currently picking a card for
+let lastPickTableData = null;  // cached data for NPC-selection re-renders
 
 window.selectInitStyle = function(btn) {
   document.querySelectorAll('.init-style-btn').forEach(b => b.classList.remove('active'));
@@ -2673,6 +2675,18 @@ function renderPickTable(area, data, now) {
   const pickedCount = playerList.filter(p => p.cardIndex >= 0).length;
   const allPicked  = pickedCount >= playerList.length;
 
+  // GM NPC-picking support: track which NPC the GM is assigning a card to next
+  lastPickTableData = data;
+  const unpickedNpcs = isGM ? playerList.filter(p => p.type === 'npc' && p.cardIndex < 0) : [];
+  if (gmPickingForNpc) {
+    // If the currently selected NPC has already been assigned a card, advance to the next unpicked one
+    if (!unpickedNpcs.find(p => p.id === gmPickingForNpc.id)) gmPickingForNpc = unpickedNpcs[0] || null;
+  } else if (isGM) {
+    gmPickingForNpc = unpickedNpcs[0] || null;
+  }
+  // GM can pick for NPCs only after their own card is chosen (or if the GM has no player entry)
+  const gmCanPickForNpc = isGM && !!gmPickingForNpc && !allRev && (myPicked || !myEntry);
+
   // Status
   const status = document.createElement('div');
   status.className = 'pick-status';
@@ -2688,11 +2702,23 @@ function renderPickTable(area, data, now) {
   playerList.sort((a,b)=>a.name.localeCompare(b.name)).forEach(p => {
     const hasPicked = p.cardIndex >= 0;
     const cardObj   = hasPicked ? deckCards.find(c=>c.index===p.cardIndex) : null;
+    const isTarget  = gmCanPickForNpc && gmPickingForNpc && gmPickingForNpc.id === p.id;
     const chip = document.createElement('div');
     chip.className = 'pick-player-chip' + (hasPicked?' picked-chip':' waiting') + (p.name===myName&&!myPicked?' my-turn':'');
-    chip.style.cssText = 'border-color:'+p.color+';color:'+p.color;
+    chip.style.cssText = 'border-color:'+p.color+';color:'+p.color
+      + (isTarget ? ';outline:2px solid '+p.color+';box-shadow:0 0 6px '+p.color : '');
     chip.innerHTML = '<div class="pick-player-dot" style="background:'+p.color+'"></div><span>'+p.name+'</span>'
-      + (hasPicked ? (allRev&&cardObj ? '<span class="pick-player-card-num" style="color:'+p.color+'">'+cardObj.value+'</span>' : '<span style="margin-left:4px">✓</span>') : '');
+      + (hasPicked ? (allRev&&cardObj ? '<span class="pick-player-card-num" style="color:'+p.color+'">'+cardObj.value+'</span>' : '<span style="margin-left:4px">✓</span>') : '')
+      + (isTarget ? '<span style="margin-left:4px;font-size:9px;opacity:.8"> ◄ NEXT</span>' : '');
+    if (isGM && !allRev && p.type === 'npc' && !hasPicked) {
+      chip.style.cursor = 'pointer';
+      chip.title = 'Click to pick card for this NPC next';
+      chip.addEventListener('click', () => {
+        gmPickingForNpc = {id: p.id, name: p.name};
+        const a2 = document.getElementById('initCardsArea');
+        if (a2 && lastPickTableData) { a2.innerHTML = ''; renderPickTable(a2, lastPickTableData, Date.now()); }
+      });
+    }
     chipsRow.appendChild(chip);
   });
   area.appendChild(chipsRow);
@@ -2700,7 +2726,7 @@ function renderPickTable(area, data, now) {
   // Deck label
   const deckLabel = document.createElement('div');
   deckLabel.className = 'init-section-label';
-  deckLabel.textContent = allRev ? '// FINAL DRAW' : myPicked ? '// WAITING FOR OTHERS' : '// PICK A CARD';
+  deckLabel.textContent = allRev ? '// FINAL DRAW' : gmCanPickForNpc ? '// PICK FOR: ' + gmPickingForNpc.name : myPicked ? '// WAITING FOR OTHERS' : '// PICK A CARD';
   area.appendChild(deckLabel);
 
   // Card grid
@@ -2716,7 +2742,7 @@ function renderPickTable(area, data, now) {
 
     const wrap = document.createElement('div');
     wrap.className = 'pick-card' + (takenByMe?' picked':'');
-    if (!taken && !myPicked) wrap.style.cursor = 'pointer';
+    if (!taken && (!myPicked || gmCanPickForNpc)) wrap.style.cursor = 'pointer';
 
     const inner = document.createElement('div');
     inner.className = 'pick-card-inner';
@@ -2734,15 +2760,21 @@ function renderPickTable(area, data, now) {
     inner.appendChild(front); inner.appendChild(back); wrap.appendChild(inner);
     grid.appendChild(wrap);
 
-    if (!taken && !myPicked) {
+    if (!taken && (!myPicked || gmCanPickForNpc)) {
       wrap.addEventListener('mouseenter', ()=>wrap.classList.add('hovering'));
       wrap.addEventListener('mouseleave', ()=>wrap.classList.remove('hovering'));
       wrap.addEventListener('click', ()=>{
-        if (!myEntry) return;
         wrap.classList.remove('hovering');
-        wrap.classList.add('picked');
-        set(ref(db,'session/initiative/players/'+myEntry.id+'/cardIndex'), card.index);
-        set(ref(db,'session/initiative/deck/card_'+card.index+'/takenBy'), myName);
+        if (gmCanPickForNpc) {
+          const npc = gmPickingForNpc;
+          set(ref(db,'session/initiative/players/'+npc.id+'/cardIndex'), card.index);
+          set(ref(db,'session/initiative/deck/card_'+card.index+'/takenBy'), npc.name);
+        } else {
+          if (!myEntry) return;
+          wrap.classList.add('picked');
+          set(ref(db,'session/initiative/players/'+myEntry.id+'/cardIndex'), card.index);
+          set(ref(db,'session/initiative/deck/card_'+card.index+'/takenBy'), myName);
+        }
       });
     }
   });
