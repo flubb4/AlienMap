@@ -6003,12 +6003,21 @@ window.wdOpenLeaderboard = async function() {
   }
 };
 
+window.wdResetLeaderboard = async function() {
+  if (!isGM) return;
+  if (!confirm('Reset the entire WD leaderboard? This cannot be undone.')) return;
+  await _authReadyPromise;
+  await remove(ref(db, 'wuerfelduerfel_stats'));
+  wdOpenLeaderboard();
+};
+
 function renderWDLeaderboard(stats) {
   const players = Object.values(stats)
     .filter(p => p && p.name)
     .sort((a, b) => (b.wins||0)-(a.wins||0) || (a.losses||0)-(b.losses||0));
   if (!players.length) {
-    return `<div style="text-align:center;color:#885522;padding:50px 20px;font-size:11px;letter-spacing:3px">// NO RECORDS YET //</div>`;
+    const resetBtn = isGM ? `<div style="margin-top:16px"><button onclick="wdResetLeaderboard()" style="background:transparent;border:1px solid #441111;color:#883333;font-family:'Share Tech Mono',monospace;font-size:9px;padding:6px 16px;cursor:pointer;letter-spacing:2px" onmouseover="this.style.borderColor='#cc3333';this.style.color='#cc3333'" onmouseout="this.style.borderColor='#441111';this.style.color='#883333'">⚠ RESET LEADERBOARD</button></div>` : '';
+    return `<div style="text-align:center;color:#885522;padding:50px 20px;font-size:11px;letter-spacing:3px">// NO RECORDS YET //${resetBtn}</div>`;
   }
   const rows = players.map((p, i) => {
     const total = (p.wins||0)+(p.losses||0);
@@ -6025,6 +6034,9 @@ function renderWDLeaderboard(stats) {
       <td style="color:#554422;font-size:9px;letter-spacing:0">${p.classicWins||0}C&nbsp;/&nbsp;${p.depletionWins||0}D</td>
     </tr>`;
   }).join('');
+  const resetBtn = isGM ? `<div style="text-align:center;margin-top:20px">
+    <button onclick="wdResetLeaderboard()" style="background:transparent;border:1px solid #441111;color:#883333;font-family:'Share Tech Mono',monospace;font-size:9px;padding:6px 16px;cursor:pointer;letter-spacing:2px;transition:all 0.2s" onmouseover="this.style.borderColor='#cc3333';this.style.color='#cc3333'" onmouseout="this.style.borderColor='#441111';this.style.color='#883333'">⚠ RESET LEADERBOARD</button>
+  </div>` : '';
   return `<div class="wd-leaderboard">
     <table class="wd-lb-table">
       <thead><tr>
