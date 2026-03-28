@@ -5677,7 +5677,8 @@ function renderWDBetting(d) {
     let betUI = '';
     if (isMe && !locked) {
       if (mode === 'classic') {
-        const val = window._wdCurrentBet || 1;
+        window._wdCurrentBet = Math.max(1, Math.min(myDice, window._wdCurrentBet || 1));
+        const val = window._wdCurrentBet;
         betUI = `
           <div class="wd-bet-input">
             <div class="wd-bet-label">// BET (DICE TO RISK)</div>
@@ -5927,11 +5928,10 @@ function wdAnimateReveal(d) {
         xf1.textContent = '−1 DIE (TIE TAX)'; xf1.className='wd-transfer-label lose'; xf1.style.opacity='1';
         xf2.textContent = '−1 DIE (TIE TAX)'; xf2.className='wd-transfer-label lose'; xf2.style.opacity='1';
       } else if (winner) {
-        const totalWin = transfer + bluffBonus + tiePot;
-        const totalLose = transfer + riskBonus;
+        const totalXfer = transfer + riskBonus + bluffBonus + (tiePot > 0 ? tiePot : 0);
         const wx = winner===p1?xf1:xf2, lx = winner===p1?xf2:xf1;
-        wx.textContent = `+${totalWin} DICE`; wx.className='wd-transfer-label gain'; wx.style.opacity='1';
-        lx.textContent = `−${totalLose} DICE`; lx.className='wd-transfer-label lose'; lx.style.opacity='1';
+        wx.textContent = `+${totalXfer} DICE`; wx.className='wd-transfer-label gain'; wx.style.opacity='1';
+        lx.textContent = `−${totalXfer} DICE`; lx.className='wd-transfer-label lose'; lx.style.opacity='1';
       }
     }
   }, t);
