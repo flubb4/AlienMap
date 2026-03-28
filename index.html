@@ -1726,8 +1726,8 @@
 .wd-reveal-name { font-size:12px;letter-spacing:3px;color:#ff9944;margin-bottom:10px; }
 .wd-dice-row { display:flex;flex-wrap:wrap;gap:6px;min-height:50px; }
 .wd-die {
-  width:40px;height:40px;border:2px solid #441100;background:#1a0800;
-  display:flex;align-items:center;justify-content:center;font-size:18px;
+  width:56px;height:56px;border:2px solid #441100;background:#1a0800;
+  display:flex;align-items:center;justify-content:center;font-size:28px;
   color:#885522;opacity:0;
 }
 .wd-die.dropped { opacity:1;animation:wdDropIn 0.4s ease-out both; }
@@ -1739,8 +1739,8 @@
 .wd-transfer-label.lose { color:#ff4444; }
 .wd-result-banner {
   text-align:center;margin-top:18px;font-size:32px;letter-spacing:8px;
-  animation:wdCallSlam 0.5s ease-out both;
 }
+.wd-result-banner.animate { animation:wdCallSlam 0.5s ease-out both; }
 .wd-result-banner.win { color:#ff9944;text-shadow:0 0 24px rgba(255,153,68,0.8); }
 .wd-result-banner.lose { color:#ff4444;text-shadow:0 0 16px rgba(255,68,68,0.5); }
 .wd-result-banner.tie { color:#cc6633;text-shadow:0 0 16px rgba(204,102,51,0.5); }
@@ -1920,6 +1920,9 @@
     <div class="players-section">
       <div class="sidebar-title">// Online Operatives (<span id="playerCount">1</span>)</div>
       <div id="playersList"></div>
+    </div>
+    <div id="wdRejoinBar" style="display:none;padding:8px 10px;border-bottom:1px solid #441100;background:#0d0500;">
+      <button onclick="wdRejoin()" style="width:100%;background:transparent;border:1px solid #cc6633;color:#cc6633;font-family:'Share Tech Mono',monospace;font-size:9px;padding:6px;cursor:pointer;letter-spacing:2px;animation:travelPulse 1.2s infinite;">🎲 WÜRFEL DÜRFEL — REJOIN</button>
     </div>
     <div class="travel-section">
       <div class="sidebar-title">// Navigation</div>
@@ -5143,10 +5146,15 @@ _authReadyPromise.then(() => {
     const overlay = document.getElementById('wdOverlay');
     if (!d) {
       if (overlay.classList.contains('open') && !isGM) overlay.classList.remove('open');
+      const rb = document.getElementById('wdRejoinBar');
+      if (rb) rb.style.display = 'none';
       return;
     }
-    // Determine role
-    wdMyRole = isGM ? 'gm' : (d.p1 === myName ? 'p1' : (d.p2 === myName ? 'p2' : 'spectator'));
+    // Determine role — player-name check takes priority so GM can fight
+    if (d.p1 === myName) wdMyRole = 'p1';
+    else if (d.p2 === myName) wdMyRole = 'p2';
+    else if (isGM) wdMyRole = 'gm';
+    else wdMyRole = 'spectator';
 
     // Handle dismissed flag — don't reopen for same game
     if (window._wdLastTs && d.ts === window._wdLastTs && window._wdDismissed && wdMyRole === 'spectator') return;
@@ -5158,10 +5166,25 @@ _authReadyPromise.then(() => {
     }
     if (wdMyRole === 'spectator' && !overlay.classList.contains('open')) return;
 
+    // Show/hide rejoin bar for participants who closed the overlay
+    const rejoinBar = document.getElementById('wdRejoinBar');
+    if (rejoinBar) {
+      const isParticipant = wdMyRole === 'p1' || wdMyRole === 'p2' || wdMyRole === 'gm';
+      rejoinBar.style.display = (isParticipant && window._wdDismissed && d.phase !== 'gameover') ? '' : 'none';
+    }
+
     const el = document.getElementById('wdContent');
     renderWD(el, d);
   });
 });
+
+window.wdRejoin = function() {
+  window._wdDismissed = false;
+  document.getElementById('wdOverlay').classList.add('open');
+  const rejoinBar = document.getElementById('wdRejoinBar');
+  if (rejoinBar) rejoinBar.style.display = 'none';
+  if (wdState) { const el = document.getElementById('wdContent'); renderWD(el, wdState); }
+};
 
 // ── Public entry points ───────────────────────────────────
 window.openWuerfelLobby = function() {
@@ -5306,8 +5329,8 @@ function wdDoRoll(d) {
   if (_wdRollFired) return;
   _wdRollFired = true;
   const p1 = d.p1, p2 = d.p2;
-  const dice1 = d.dice[p1] || 10;
-  const dice2 = d.dice[p2] || 10;
+  const dice1 = d.bets[p1] || d.dice[p1] || 10;
+  const dice2 = d.bets[p2] || d.dice[p2] || 10;
 
   function roll(n) { return Array.from({length:n}, () => Math.ceil(Math.random()*6)); }
 
@@ -5485,7 +5508,7 @@ function renderWDLobby(d) {
   if (!isGM) {
     return `<div class="wd-waiting">// WAITING FOR GM //<br><br>🎲</div>`;
   }
-  const users = (window._wdActiveUsers || []).filter(u => u.name !== myName);
+  const users = (window._wdActiveUsers || []);
   const p1 = d.p1 || '', p2 = d.p2 || '';
   const mode = d.mode || 'classic';
 
@@ -5796,7 +5819,7 @@ function wdAnimateReveal(d) {
   // Step 8: result banner
   setTimeout(() => {
     const banner = document.getElementById('wdResultBanner');
-    if (banner) banner.style.opacity = '1';
+    if (banner) { banner.classList.add('animate'); banner.style.opacity = '1'; }
     const math = document.getElementById('wdGMmath');
     if (math) math.style.opacity = '1';
   }, t);
