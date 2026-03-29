@@ -761,6 +761,130 @@
 
   .pick-status { font-size:9px; color:#553388; letter-spacing:2px; text-align:center; padding:6px 0; }
 
+  /* ═══════════════ STYLE 6: ALIEN HUNT (DUCK HUNT) ═══════════════ */
+  .alien-hunt-field {
+    position:relative; width:100%;
+    height:clamp(260px,40vh,360px);
+    background:radial-gradient(ellipse at 40% 40%, #020012 0%, #000008 55%, #000003 100%);
+    border:1px solid #1a0028; border-radius:3px;
+    overflow:hidden; cursor:crosshair; margin-bottom:10px;
+  }
+  .hunt-scan-line {
+    position:absolute; inset:0; pointer-events:none; z-index:10;
+    background:repeating-linear-gradient(to bottom,transparent,transparent 3px,rgba(0,0,0,0.13) 3px,rgba(0,0,0,0.13) 4px);
+  }
+  .hunt-field-label {
+    position:absolute; top:8px; left:50%; transform:translateX(-50%);
+    font-size:8px; letter-spacing:3px; color:#330044; font-family:'Share Tech Mono',monospace;
+    white-space:nowrap; z-index:5; pointer-events:none; text-transform:uppercase;
+  }
+  .hunt-star {
+    position:absolute; border-radius:50%;
+    animation:huntStarTwinkle 1.5s ease-in-out infinite alternate;
+  }
+  @keyframes huntStarTwinkle { from{opacity:.12} to{opacity:.95} }
+
+  .hunt-alien {
+    position:absolute; display:flex; flex-direction:column; align-items:center; gap:3px;
+    cursor:crosshair; user-select:none; z-index:3; transform:translate(-50%,-50%);
+  }
+  .hunt-alien:hover .hunt-alien-emoji { filter:brightness(1.5) drop-shadow(0 0 10px rgba(255,200,80,.9)); transform:scale(1.12); }
+
+  .hunt-alien-inner {
+    position:relative; display:inline-flex; align-items:center; justify-content:center;
+    animation:alienHover 3s ease-in-out infinite alternate;
+  }
+  @keyframes alienHover {
+    0%   { transform:translate(0,0) rotate(-3deg) scale(1); }
+    25%  { transform:translate(5px,-9px) rotate(2deg) scale(1.03); }
+    50%  { transform:translate(-6px,7px) rotate(-5deg) scale(.97); }
+    75%  { transform:translate(8px,2px) rotate(3deg) scale(1.04); }
+    100% { transform:translate(-4px,-6px) rotate(-2deg) scale(1); }
+  }
+  .hunt-alien-emoji {
+    font-size:28px; line-height:1; display:block;
+    transition:filter .2s, transform .2s;
+  }
+  .hunt-alien-badge {
+    position:absolute; top:-8px; right:-16px;
+    min-width:22px; height:22px; border-radius:50%; border:2px solid;
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; font-weight:bold; font-family:'Orbitron',monospace;
+    line-height:1; background:#020008; transition:all .3s;
+  }
+  .hunt-alien-name {
+    font-size:8px; letter-spacing:1px; text-align:center;
+    font-family:'Share Tech Mono',monospace; white-space:nowrap;
+    padding:2px 5px; border-radius:2px; max-width:90px;
+    overflow:hidden; text-overflow:ellipsis;
+    text-shadow:0 0 6px currentColor; background:rgba(0,0,0,.65);
+  }
+
+  /* Hit flash */
+  .hunt-alien.being-hit .hunt-alien-inner { animation:alienHitFlash .28s ease-out forwards !important; }
+  @keyframes alienHitFlash {
+    0%   { transform:scale(1); filter:brightness(1); }
+    35%  { transform:scale(1.6) rotate(-12deg); filter:brightness(6) drop-shadow(0 0 18px #ff4400) drop-shadow(0 0 35px #ff8800); }
+    70%  { transform:scale(.85) rotate(8deg); filter:brightness(.6); }
+    100% { transform:scale(1) rotate(0deg); filter:brightness(1); }
+  }
+
+  /* Death spin (applied inline via JS) */
+  @keyframes alienDeathSpin {
+    0%   { transform:scale(1) rotate(0deg) translateY(0); opacity:1; }
+    18%  { transform:scale(1.5) rotate(130deg) translateY(-10px); opacity:1; filter:brightness(4) drop-shadow(0 0 16px #ff4400); }
+    42%  { transform:scale(.65) rotate(320deg) translateY(-18px); opacity:.9; filter:brightness(2); }
+    68%  { transform:scale(1.25) rotate(460deg) translateY(-4px); opacity:1; filter:brightness(1.5) drop-shadow(0 0 8px currentColor); }
+    100% { transform:scale(1) rotate(540deg) translateY(0); opacity:1; filter:brightness(1); }
+  }
+  /* Badge number pop-in */
+  @keyframes huntBadgePop {
+    from { transform:scale(0) rotate(-180deg); opacity:0; }
+    to   { transform:scale(1.25) rotate(0deg); opacity:1; }
+  }
+
+  /* Explosion particle */
+  .hunt-explosion {
+    position:absolute; font-size:26px; pointer-events:none;
+    animation:huntExplode .65s ease-out forwards; z-index:8;
+    transform:translate(-50%,-50%);
+  }
+  @keyframes huntExplode {
+    0%   { transform:translate(-50%,-50%) scale(.4); opacity:1; }
+    40%  { transform:translate(-50%,-50%) scale(2.2); opacity:.9; }
+    100% { transform:translate(-50%,-50%) scale(3.2); opacity:0; }
+  }
+
+  /* Crosshair ping */
+  .hunt-crosshair {
+    position:absolute; width:28px; height:28px; pointer-events:none; z-index:9;
+    transform:translate(-50%,-50%); border:1.5px solid rgba(255,68,0,.7);
+    border-radius:50%; animation:crosshairPing .45s ease-out forwards;
+  }
+  .hunt-crosshair::before,.hunt-crosshair::after { content:''; position:absolute; background:rgba(255,68,0,.7); }
+  .hunt-crosshair::before { width:1px; height:9px; left:50%; top:50%; transform:translate(-50%,-50%); }
+  .hunt-crosshair::after  { width:9px; height:1px; left:50%; top:50%; transform:translate(-50%,-50%); }
+  @keyframes crosshairPing {
+    0%   { transform:translate(-50%,-50%) scale(.3); opacity:1; }
+    100% { transform:translate(-50%,-50%) scale(2.2); opacity:0; }
+  }
+
+  /* Final order rows */
+  .hunt-order-reveal { display:flex; flex-direction:column; gap:3px; padding:6px 0; }
+  .hunt-order-row {
+    display:flex; align-items:center; gap:12px;
+    padding:6px 12px; border-left:2px solid;
+    background:rgba(0,0,0,.3); animation:huntOrderIn .4s ease-out both;
+  }
+  @keyframes huntOrderIn {
+    from { opacity:0; transform:translateX(-14px); }
+    to   { opacity:1; transform:translateX(0); }
+  }
+  .hunt-order-rank { font-family:'Orbitron',monospace; font-size:9px; color:#440066; width:18px; text-align:right; }
+  .hunt-order-card-num { font-family:'Orbitron',monospace; font-size:18px; font-weight:900; text-shadow:0 0 12px currentColor; min-width:28px; text-align:center; }
+  .hunt-order-name  { font-size:10px; letter-spacing:2px; text-transform:uppercase; flex:1; }
+  .hunt-order-type  { font-size:8px; letter-spacing:1px; opacity:.5; }
+
   /* USERNAME INPUT on login */
   .pw-input-wrap { width:100%; display:flex; flex-direction:column; gap:8px; }
   .pw-label { font-size:8px; color:var(--dim); letter-spacing:3px; text-transform:uppercase; }
@@ -2811,6 +2935,7 @@ function renderInitiative(data) {
   else if (style === 'cardflip')     renderCardFlip(area, sorted, now);
   else if (style === 'slotmachine')  renderSlotMachine(area, sorted, now);
   else if (style === 'redalert')     renderRedAlert(area, sorted, now);
+  else if (style === 'alienhunt')    renderAlienHunt(area, sorted, now);
 
   const nextBtn = document.getElementById('initNextRoundBtn');
   if (nextBtn) nextBtn.style.display = isGM ? '' : 'none';
@@ -2960,6 +3085,165 @@ function renderRedAlert(area, sorted, now) {
       }
     }, delay);
   });
+}
+
+// ── STYLE 6: ALIEN HUNT ──────────────────────────────────────────────────────
+function renderAlienHunt(area, sorted, now) {
+  const field = document.createElement('div');
+  field.className = 'alien-hunt-field';
+
+  // Scanlines
+  const scan = document.createElement('div');
+  scan.className = 'hunt-scan-line';
+  field.appendChild(scan);
+
+  // Top status label
+  const lbl = document.createElement('div');
+  lbl.className = 'hunt-field-label';
+  lbl.id = 'huntFieldLabel';
+  lbl.textContent = '// XENOMORPH TARGETS DETECTED — ENGAGE ON SIGHT';
+  field.appendChild(lbl);
+
+  // Starfield
+  const starColors = ['#ffffff','#aaddff','#ffddaa','#ffaabb','#aaffdd'];
+  for (let i = 0; i < 55; i++) {
+    const s = document.createElement('div');
+    s.className = 'hunt-star';
+    const sz = Math.random() < 0.12 ? 3 : Math.random() < 0.35 ? 2 : 1;
+    s.style.cssText = `left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%;width:${sz}px;height:${sz}px;animation-delay:${(Math.random()*3).toFixed(2)}s;animation-duration:${(1+Math.random()*2.5).toFixed(1)}s;background:${starColors[Math.floor(Math.random()*starColors.length)]}`;
+    field.appendChild(s);
+  }
+
+  // Alien emoji variety
+  const emojiTypes = ['👾','👾','👽','👾','👾','🛸','👾','👽','👾','🤖'];
+  const positions = [];
+
+  sorted.forEach((entry, idx) => {
+    // Non-overlapping placement
+    let x, y, tries = 0;
+    do {
+      x = 10 + Math.random() * 76;
+      y = 18 + Math.random() * 65;
+      tries++;
+    } while (tries < 30 && positions.some(p => Math.abs(p.x - x) < 17 && Math.abs(p.y - y) < 17));
+    positions.push({ x, y });
+
+    const emoji = emojiTypes[idx % emojiTypes.length];
+    const driftDelay  = (Math.random() * 3).toFixed(2);
+    const driftDur    = (2.5 + Math.random() * 2.5).toFixed(1);
+
+    const alien = document.createElement('div');
+    alien.className = 'hunt-alien';
+    alien.id = 'huntalien_' + entry.id;
+    alien.style.cssText = `left:${x.toFixed(1)}%;top:${y.toFixed(1)}%`;
+
+    alien.innerHTML = `
+      <div class="hunt-alien-inner" style="animation-delay:${driftDelay}s;animation-duration:${driftDur}s">
+        <span class="hunt-alien-emoji">${emoji}</span>
+        <span class="hunt-alien-badge" style="background:#020008;border-color:${entry.color}44;color:${entry.color}55">?</span>
+      </div>
+      <div class="hunt-alien-name" style="color:${entry.color}">${entry.name}</div>
+    `;
+
+    // Click = early shoot
+    alien.addEventListener('click', () => {
+      const el = document.getElementById('huntalien_' + entry.id);
+      if (!el || el.classList.contains('dead') || el.classList.contains('being-hit')) return;
+      doAlienShot(el, entry, field);
+    });
+
+    field.appendChild(alien);
+
+    // Auto-shoot staggered
+    setTimeout(() => {
+      const el = document.getElementById('huntalien_' + entry.id);
+      if (el && !el.classList.contains('dead') && !el.classList.contains('being-hit')) {
+        doAlienShot(el, entry, field);
+      }
+    }, 1200 + idx * 1100);
+  });
+
+  area.appendChild(field);
+
+  // Final order after all aliens shot
+  const finalDelay = 1200 + sorted.length * 1100 + 1500;
+  setTimeout(() => {
+    const fl = document.getElementById('huntFieldLabel');
+    if (fl) fl.textContent = '// ALL TARGETS NEUTRALIZED';
+
+    const orderLabel = document.createElement('div');
+    orderLabel.className = 'init-section-label';
+    orderLabel.style.marginTop = '14px';
+    orderLabel.textContent = '// INITIATIVE ORDER — LOWEST ACTS FIRST';
+    area.appendChild(orderLabel);
+
+    const orderWrap = document.createElement('div');
+    orderWrap.className = 'hunt-order-reveal';
+    sorted.forEach((entry, i) => {
+      const row = document.createElement('div');
+      row.className = 'hunt-order-row';
+      row.style.cssText = `border-color:${entry.color};animation-delay:${i * 120}ms`;
+      row.innerHTML = `
+        <span class="hunt-order-rank">${i + 1}.</span>
+        <span class="hunt-order-card-num" style="color:${entry.color}">${entry.card}</span>
+        <span class="hunt-order-name" style="color:${entry.color}">${entry.name}</span>
+        <span class="hunt-order-type">${entry.type === 'npc' ? '// NPC' : '// OPERATIVE'}</span>
+      `;
+      orderWrap.appendChild(row);
+    });
+    area.appendChild(orderWrap);
+  }, finalDelay);
+}
+
+function doAlienShot(el, entry, field) {
+  el.classList.add('being-hit');
+
+  // Crosshair ping at alien position
+  const xhair = document.createElement('div');
+  xhair.className = 'hunt-crosshair';
+  xhair.style.cssText = `left:${el.style.left};top:${el.style.top}`;
+  field.appendChild(xhair);
+  setTimeout(() => xhair.remove(), 500);
+
+  // Explosion emoji burst
+  const boomEmojis = ['💥','💥','🔥'];
+  const boom = document.createElement('div');
+  boom.className = 'hunt-explosion';
+  boom.textContent = boomEmojis[Math.floor(Math.random() * boomEmojis.length)];
+  boom.style.cssText = `left:${el.style.left};top:${el.style.top}`;
+  field.appendChild(boom);
+  setTimeout(() => boom.remove(), 750);
+
+  // After flash: death spin + number reveal
+  setTimeout(() => {
+    el.classList.remove('being-hit');
+    el.classList.add('dead');
+
+    // Override hover float with death spin via inline style
+    const inner = el.querySelector('.hunt-alien-inner');
+    if (inner) inner.style.animation = 'alienDeathSpin .9s cubic-bezier(.36,.07,.19,.97) forwards';
+
+    // Reveal number in badge
+    const badge = el.querySelector('.hunt-alien-badge');
+    if (badge) {
+      badge.textContent = entry.card;
+      badge.style.background   = entry.color + '25';
+      badge.style.borderColor  = entry.color;
+      badge.style.color        = entry.color;
+      badge.style.fontSize     = '12px';
+      badge.style.boxShadow    = `0 0 10px ${entry.color}55`;
+      badge.style.animation    = 'huntBadgePop .5s cubic-bezier(.34,1.56,.64,1) .5s both';
+    }
+
+    // Swap emoji to skull after spin
+    setTimeout(() => {
+      const emojiEl = el.querySelector('.hunt-alien-emoji');
+      if (emojiEl) {
+        emojiEl.textContent = '💀';
+        emojiEl.style.filter = `drop-shadow(0 0 8px ${entry.color})`;
+      }
+    }, 450);
+  }, 260);
 }
 
 // ── STYLE 5: PICK FROM TABLE ─────────────────────────────────────────────────
@@ -6136,6 +6420,7 @@ function bvInit() {
       <button class="init-style-btn" data-style="slotmachine" onclick="selectInitStyle(this)">🎰 Slot Machine</button>
       <button class="init-style-btn" data-style="redalert" onclick="selectInitStyle(this)">🔴 Red Alert</button>
       <button class="init-style-btn" data-style="picktable" onclick="selectInitStyle(this)">🖐 Pick from Table</button>
+      <button class="init-style-btn" data-style="alienhunt" onclick="selectInitStyle(this)">👾 Alien Hunt</button>
     </div>
     <div class="init-setup-title">// GM Configuration</div>
     <div class="init-setup-row">
