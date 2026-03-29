@@ -3218,8 +3218,8 @@ function renderAlienHunt(area, data, now) {
       index: ad.index,
       x:     saved ? saved.x  : 8 + Math.random() * 80,
       y:     saved ? saved.y  : 12 + Math.random() * 72,
-      vx:    saved ? saved.vx : (Math.random()>.5?1:-1) * (0.04+Math.random()*0.08),
-      vy:    saved ? saved.vy : (Math.random()>.5?1:-1) * (0.03+Math.random()*0.06),
+      vx:    saved ? saved.vx : (Math.random()>.5?1:-1) * (0.012+Math.random()*0.02),
+      vy:    saved ? saved.vy : (Math.random()>.5?1:-1) * (0.008+Math.random()*0.015),
       dead:  taken,
       takenBy: ad.takenBy || '',
       value: ad.value
