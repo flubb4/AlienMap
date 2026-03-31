@@ -884,6 +884,15 @@
   .hunt-order-card-num { font-family:'Orbitron',monospace; font-size:18px; font-weight:900; text-shadow:0 0 12px currentColor; min-width:28px; text-align:center; }
   .hunt-order-name  { font-size:10px; letter-spacing:2px; text-transform:uppercase; flex:1; }
   .hunt-order-type  { font-size:8px; letter-spacing:1px; opacity:.5; }
+  /* INITIATIVE SWAP */
+  .init-swap-btn {
+    background:none; border:1px solid #cc88ff55; color:#cc88ff; margin-left:auto;
+    font-size:10px; padding:2px 8px; border-radius:3px; cursor:pointer;
+    letter-spacing:1px; font-family:'Orbitron',monospace; transition:all .15s; flex-shrink:0;
+  }
+  .init-swap-btn:hover { border-color:#cc88ff; background:rgba(200,100,255,.15); }
+  .init-swap-btn.cancel { border-color:#ff445599; color:#ff4455; }
+  .init-swap-btn.cancel:hover { background:rgba(255,50,80,.15); border-color:#ff4455; }
 
   /* USERNAME INPUT on login */
   .pw-input-wrap { width:100%; display:flex; flex-direction:column; gap:8px; }
@@ -2800,6 +2809,7 @@ window.closeInitiative = function() {
 
 window.dealInitiative = function() {
   if (!isGM) return;
+  pendingSwapName = null;
 
   // Get online players
   const now = Date.now();
@@ -2880,6 +2890,7 @@ window.dealInitiative = function() {
 
 window.clearInitiative = function() {
   if (!isGM) return;
+  pendingSwapName = null;
   stopAlienHunt();
   alienHuntSavedPos = {};
   remove(initiativeRef);
@@ -2910,6 +2921,8 @@ let currentInitStyle = 'transmission';
 let gmPickingForNpc = null;    // NPC entry the GM is currently picking a card for
 let lastPickTableData = null;  // cached data for NPC-selection re-renders
 let lastAlienHuntData = null;  // cached data for alien hunt NPC re-renders
+let lastInitiativeData = null; // cached data for swap re-renders
+let pendingSwapName = null;    // player name currently in swap-selection mode
 
 // Alien Hunt movement state (persists across Firebase re-renders)
 let alienHuntAnimFrame  = null;
@@ -2943,6 +2956,7 @@ function renderInitiative(data) {
     initRound = data.round;
   }
 
+  lastInitiativeData = data;
   const style  = data.style || currentInitStyle;
   const now    = Date.now();
 
@@ -2972,6 +2986,8 @@ function renderInitiative(data) {
   else if (style === 'cardflip')     renderCardFlip(area, sorted, now);
   else if (style === 'slotmachine')  renderSlotMachine(area, sorted, now);
   else if (style === 'redalert')     renderRedAlert(area, sorted, now);
+
+  renderSwapSection(area, sorted.map(e => ({...e, val: e.card})), data, style);
 
   const nextBtn = document.getElementById('initNextRoundBtn');
   if (nextBtn) nextBtn.style.display = isGM ? '' : 'none';
@@ -3334,6 +3350,11 @@ function renderAlienHunt(area, data, now) {
       orderWrap.appendChild(row);
     });
     area.appendChild(orderWrap);
+    const swapPartsH = playerList.map(p => ({
+      ...p,
+      val: p.alienIndex>=0 ? (alienList.find(a=>a.index===p.alienIndex)||{value:99}).value : 99
+    })).sort((a,b) => a.val-b.val);
+    renderSwapSection(area, swapPartsH, data, 'alienhunt');
   }
 }
 
@@ -3379,6 +3400,119 @@ function doAlienShot(el, entry, field) {
       if (emojiEl) { emojiEl.textContent='💀'; emojiEl.style.filter=`drop-shadow(0 0 8px ${entry.color})`; }
     }, 450);
   }, 260);
+}
+
+// ── INITIATIVE SWAP ───────────────────────────────────────────────────────────
+function renderSwapSection(area, participants, data, style) {
+  const swaps = data.swaps || {};
+  if (!participants.length) return;
+
+  const secLabel = document.createElement('div');
+  secLabel.className = 'init-section-label';
+  secLabel.style.marginTop = '14px';
+  secLabel.textContent = '// INITIATIVE SWAP — ONCE PER ROUND';
+  area.appendChild(secLabel);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'hunt-order-reveal';
+
+  participants.forEach((p, i) => {
+    const isMe       = p.name === myName;
+    const isNpcForGM = isGM && p.type === 'npc';
+    const hasSwapped = swaps[p.name] === true;
+    const canAct     = (isMe || isNpcForGM) && !hasSwapped;
+    const isPending  = pendingSwapName === p.name;
+    const isTarget   = !!pendingSwapName && pendingSwapName !== p.name;
+
+    const row = document.createElement('div');
+    row.className = 'hunt-order-row';
+    if (isPending)
+      row.style.cssText = `border-color:${p.color};background:rgba(255,200,0,0.07);animation-delay:${i*60}ms`;
+    else if (isTarget)
+      row.style.cssText = `border-color:#cc88ff66;background:rgba(200,100,255,0.1);cursor:pointer;animation-delay:${i*60}ms`;
+    else
+      row.style.cssText = `border-color:${p.color}33;animation-delay:${i*60}ms`;
+
+    row.innerHTML = `
+      <span class="hunt-order-rank">${i+1}.</span>
+      <span class="hunt-order-card-num" style="color:${p.color}">${p.val}</span>
+      <span class="hunt-order-name" style="color:${p.color}">${p.name}</span>
+      <span class="hunt-order-type">${p.type==='npc'?'// NPC':'// OPERATIVE'}</span>
+    `;
+
+    if (isTarget) {
+      const hint = document.createElement('span');
+      hint.style.cssText = 'font-size:9px;color:#cc88ff;letter-spacing:1px;margin-left:auto;flex-shrink:0';
+      hint.textContent = '⇄ SWAP HERE';
+      row.appendChild(hint);
+      row.addEventListener('click', () => executeInitiativeSwap(pendingSwapName, p.name, data, style));
+    }
+
+    if (canAct) {
+      const btn = document.createElement('button');
+      btn.className = 'init-swap-btn' + (isPending ? ' cancel' : '');
+      btn.textContent = isPending ? '✕ CANCEL' : '⇄';
+      btn.title = isPending ? 'Cancel swap' : 'Swap your initiative with another player or NPC';
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        pendingSwapName = isPending ? null : p.name;
+        const a = document.getElementById('initCardsArea');
+        if (a && lastInitiativeData) { a.innerHTML = ''; renderInitiative(lastInitiativeData); }
+      });
+      row.appendChild(btn);
+    } else if (hasSwapped && (isMe || isNpcForGM)) {
+      const used = document.createElement('span');
+      used.style.cssText = 'font-size:8px;color:#cc88ff33;letter-spacing:1px;margin-left:auto';
+      used.textContent = 'SWAP USED';
+      row.appendChild(used);
+    }
+
+    wrap.appendChild(row);
+  });
+  area.appendChild(wrap);
+}
+
+function executeInitiativeSwap(nameA, nameB, data, style) {
+  const updates = {};
+
+  if (style === 'alienhunt') {
+    const players = data.players || {};
+    const entA = Object.entries(players).find(([,p]) => p.name === nameA);
+    const entB = Object.entries(players).find(([,p]) => p.name === nameB);
+    if (!entA || !entB) return;
+    const [keyA, pA] = entA; const [keyB, pB] = entB;
+    updates['players/'+keyA+'/alienIndex'] = pB.alienIndex;
+    updates['players/'+keyB+'/alienIndex'] = pA.alienIndex;
+    const aliens = data.aliens || {};
+    const akA = Object.keys(aliens).find(k => aliens[k].index === pA.alienIndex);
+    const akB = Object.keys(aliens).find(k => aliens[k].index === pB.alienIndex);
+    if (akA) updates['aliens/'+akA+'/takenBy'] = pB.name;
+    if (akB) updates['aliens/'+akB+'/takenBy'] = pA.name;
+  } else if (style === 'picktable') {
+    const players = data.players || {};
+    const entA = Object.entries(players).find(([,p]) => p.name === nameA);
+    const entB = Object.entries(players).find(([,p]) => p.name === nameB);
+    if (!entA || !entB) return;
+    const [keyA, pA] = entA; const [keyB, pB] = entB;
+    const deck = data.deck || {};
+    updates['players/'+keyA+'/cardIndex'] = pB.cardIndex;
+    updates['players/'+keyB+'/cardIndex'] = pA.cardIndex;
+    const ckA = Object.keys(deck).find(k => deck[k].index === pA.cardIndex);
+    const ckB = Object.keys(deck).find(k => deck[k].index === pB.cardIndex);
+    if (ckA) updates['deck/'+ckA+'/takenBy'] = pB.name;
+    if (ckB) updates['deck/'+ckB+'/takenBy'] = pA.name;
+  } else {
+    const entries = data.entries || {};
+    const entA = Object.entries(entries).find(([,e]) => e.name === nameA);
+    const entB = Object.entries(entries).find(([,e]) => e.name === nameB);
+    if (!entA || !entB) return;
+    const [keyA, eA] = entA; const [keyB, eB] = entB;
+    updates['entries/'+keyA+'/card'] = eB.card;
+    updates['entries/'+keyB+'/card'] = eA.card;
+  }
+
+  updates['swaps/'+nameA] = true;
+  update(ref(db, 'session/initiative'), updates).then(() => { pendingSwapName = null; });
 }
 
 // ── STYLE 5: PICK FROM TABLE ─────────────────────────────────────────────────
@@ -3528,6 +3662,10 @@ function renderPickTable(area, data, now) {
         +'<div class="init-card-type">'+(p.type==='npc'?'// NPC / CREATURE':'// OPERATIVE')+'</div></div></div>';
       area.appendChild(row);
     });
+    const swapPartsP = playerList.map(p=>({
+      ...p, val: p.cardIndex>=0 ? (deckCards.find(c=>c.index===p.cardIndex)||{value:99}).value : 99
+    })).sort((a,b)=>a.val-b.val);
+    renderSwapSection(area, swapPartsP, data, 'picktable');
   }
 }
 
