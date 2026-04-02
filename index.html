@@ -6805,6 +6805,8 @@ function bvInit() {
     document.querySelectorAll('.ib-gm-only').forEach(el => {
       el.style.display = isGM ? '' : 'none';
     });
+    // Set each user's unique color based on their name
+    document.getElementById('ibColorPicker').value = colorFromName(myName);
     setTimeout(() => {
       resizeIbCanvas();
       setupIbDrawing();
@@ -6856,6 +6858,15 @@ function bvInit() {
       ibDrawStroke(snap.val());
     });
     ibListeners.push(unsubStrokes);
+
+    // Listen for strokes being cleared (GM clear wipes the strokes node)
+    const unsubStrokesClear = onValue(ibStrokesRef, snap => {
+      if (!snap.exists()) {
+        ibCtx().clearRect(0, 0, ibCanvasEl().width, ibCanvasEl().height);
+        ibLocalStrokes.clear();
+      }
+    });
+    ibListeners.push(unsubStrokesClear);
   }
 
   // Start a lightweight global listener so players auto-open when GM opens the board
@@ -6885,7 +6896,7 @@ function bvInit() {
 
   window.clearImageBoard = function() {
     if (!isGM) return;
-    remove(imageBoardRef);
+    remove(ibStrokesRef);
   };
 
   window.handleImageSelect = function(input) {
