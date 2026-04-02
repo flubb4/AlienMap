@@ -6820,14 +6820,6 @@ function bvInit() {
     ibListeners = [];
     ibLocalStrokes.clear();
 
-    // Listen for open/close state (GM triggers open for everyone)
-    const unsubOpen = onValue(ref(db, 'session/imageBoard/open'), snap => {
-      if (snap.val() === true) {
-        ibShowOverlay();
-      }
-    });
-    ibListeners.push(unsubOpen);
-
     // Listen for image data
     const unsubImg = onValue(ref(db, 'session/imageBoard/imageData'), snap => {
       const data = snap.val();
@@ -6869,19 +6861,25 @@ function bvInit() {
     ibListeners.push(unsubStrokesClear);
   }
 
-  // Start a lightweight global listener so players auto-open when GM opens the board
-  // (runs at page load, outside the overlay lifecycle)
-  window.startGlobalIbWatcher = function startGlobalIbWatcher() {
+  // Timestamp of the last open event we acted on — prevents re-open on watcher attach
+  let ibLastOpenTs = 0;
+
+  // Global watcher: auto-opens for all clients when GM triggers a new open.
+  // Uses a timestamp so closing locally doesn't cause an immediate reopen.
+  window.startGlobalIbWatcher = function() {
     onValue(ref(db, 'session/imageBoard/open'), snap => {
-      if (snap.val() === true && !ibOverlay().classList.contains('open')) {
+      const ts = snap.val();
+      if (ts && ts > ibLastOpenTs) {
+        ibLastOpenTs = ts;
         ibShowOverlay();
       }
     });
   };
 
   window.openImageBoard = function() {
-    // Set open flag in Firebase so all clients open the overlay
-    set(ref(db, 'session/imageBoard/open'), true);
+    const ts = Date.now();
+    ibLastOpenTs = ts;
+    set(ref(db, 'session/imageBoard/open'), ts);
     ibShowOverlay();
   };
 
@@ -6890,8 +6888,7 @@ function bvInit() {
     ibListeners.forEach(u => u());
     ibListeners = [];
     ibDrawing = false;
-    // Start global watcher again so re-open still works
-    window.startGlobalIbWatcher();
+    // Do NOT restart the global watcher here — the login-time watcher is still running
   };
 
   window.clearImageBoard = function() {
