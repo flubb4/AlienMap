@@ -6860,13 +6860,13 @@ function bvInit() {
 
   // Start a lightweight global listener so players auto-open when GM opens the board
   // (runs at page load, outside the overlay lifecycle)
-  function startGlobalIbWatcher() {
+  window.startGlobalIbWatcher = function startGlobalIbWatcher() {
     onValue(ref(db, 'session/imageBoard/open'), snap => {
       if (snap.val() === true && !ibOverlay().classList.contains('open')) {
         ibShowOverlay();
       }
     });
-  }
+  };
 
   window.openImageBoard = function() {
     // Set open flag in Firebase so all clients open the overlay
@@ -6897,14 +6897,17 @@ function bvInit() {
     reader.onload = e => {
       const srcImg = new Image();
       srcImg.onload = () => {
-        // Compress: max 1200px wide, JPEG 0.75
-        const MAX = 1200;
+        // Compress: max 1920px on longest side, JPEG 0.92 for high quality
+        const MAX = 1920;
         let w = srcImg.naturalWidth, h = srcImg.naturalHeight;
-        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        if (w > MAX || h > MAX) {
+          if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
         const off = document.createElement('canvas');
         off.width = w; off.height = h;
         off.getContext('2d').drawImage(srcImg, 0, 0, w, h);
-        const compressed = off.toDataURL('image/jpeg', 0.75);
+        const compressed = off.toDataURL('image/jpeg', 0.92);
         // Clear old strokes first, then set image
         remove(ibStrokesRef).then(() => {
           set(ref(db, 'session/imageBoard/imageData'), compressed);
