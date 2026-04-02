@@ -6888,6 +6888,8 @@ window.closeImageBoard = function() {
   ibStopListeners();
   ibDrawing = false;
   ibCurrentStroke = null;
+  // GM closing resets the open flag so late-joining players don't auto-open
+  if (isGM) set(ref(db, 'session/imageBoard/open'), 0);
 };
 
 window.clearImageBoard = function() {
