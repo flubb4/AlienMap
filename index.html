@@ -1715,6 +1715,79 @@
   font-size:10px;padding:5px 12px;cursor:pointer;letter-spacing:2px;
 }
 .wd-close-btn:hover{background:rgba(204,102,51,0.15)}
+
+  /* ── IMAGE BOARD OVERLAY ── */
+  #imageBoardOverlay {
+    position:fixed; inset:0; z-index:700;
+    background:#000;
+    display:none; flex-direction:column;
+    font-family:"Share Tech Mono",monospace;
+  }
+  #imageBoardOverlay.open { display:flex; }
+  .ib-header {
+    width:100%; background:var(--panel);
+    border-bottom:1px solid var(--border);
+    padding:10px 18px;
+    display:flex; align-items:center; justify-content:space-between;
+    flex-shrink:0; gap:12px;
+  }
+  .ib-title {
+    font-family:"Orbitron",sans-serif; font-size:13px; font-weight:900;
+    letter-spacing:4px; color:var(--accent);
+    text-shadow:0 0 16px var(--accent);
+    text-transform:uppercase; white-space:nowrap;
+  }
+  .ib-tools {
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  }
+  .ib-tool-btn {
+    background:transparent; border:1px solid var(--dim); color:var(--text);
+    font-family:"Share Tech Mono",monospace; font-size:10px;
+    padding:5px 10px; cursor:pointer; letter-spacing:1px; transition:all 0.2s;
+  }
+  .ib-tool-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .ib-tool-btn.active { border-color:var(--accent2); color:var(--accent2); background:rgba(255,68,0,0.08); }
+  .ib-close-btn {
+    background:transparent; border:1px solid #553388; color:#553388;
+    font-family:"Share Tech Mono",monospace; font-size:9px;
+    padding:6px 14px; cursor:pointer; letter-spacing:2px; transition:all 0.2s;
+  }
+  .ib-close-btn:hover { border-color:#cc88ff; color:#cc88ff; background:rgba(204,136,255,0.08); }
+  #ibColorPicker {
+    width:32px; height:28px; border:1px solid var(--dim); background:none;
+    cursor:pointer; padding:2px; border-radius:2px;
+  }
+  #ibSizeSlider { width:70px; accent-color:var(--accent); cursor:pointer; }
+  .ib-canvas-wrap {
+    flex:1; position:relative; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    background:#050505;
+  }
+  #ibImage {
+    position:absolute;
+    max-width:100%; max-height:100%;
+    object-fit:contain;
+    display:none;
+    user-select:none; pointer-events:none;
+  }
+  #ibCanvas {
+    position:absolute; inset:0;
+    cursor:crosshair;
+    touch-action:none;
+  }
+  .ib-placeholder {
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--dim); font-size:12px; letter-spacing:3px;
+    pointer-events:none;
+  }
+  .gm-ib-btn {
+    width:100%; margin-top:6px; padding:8px 12px;
+    background:transparent; border:1px solid #44aaff; color:#44aaff;
+    font-family:"Share Tech Mono",monospace; font-size:10px;
+    letter-spacing:2px; cursor:pointer; transition:all 0.2s;
+  }
+  .gm-ib-btn:hover { background:rgba(68,170,255,0.08); box-shadow:0 0 12px rgba(68,170,255,0.3); }
 .wd-title {
   text-align:center;font-size:22px;letter-spacing:8px;color:#ff9944;
   text-shadow:0 0 20px rgba(255,153,68,0.6);text-transform:uppercase;
@@ -2091,6 +2164,7 @@
         <div class="gm-title">// GM Controls</div>
         <button class="gm-init-btn" onclick="openInitiative()">⚡ Initiative Draw</button>
         <button class="gm-wd-btn" onclick="openWuerfelLobby()">🎲 Würfel Dürfel</button>
+        <button class="gm-ib-btn" onclick="openImageBoard()">🖼 Image Board</button>
         <button class="gm-session-btn" id="gmSessionBtn" onclick="toggleSession()">
           ✓ Session Active — Close Map
         </button>
@@ -2360,7 +2434,7 @@ document.getElementById('pwUsername').focus();
 // Firebase Realtime Database for live marker sync
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, get, onValue, remove, update, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // ⚠️  REPLACE these values with your own Firebase project config
@@ -2379,8 +2453,10 @@ const firebaseConfig = {
 const app  = initializeApp(firebaseConfig);
 const db   = getDatabase(app);
 const auth = getAuth(app);
-const markersRef = ref(db, 'markers');
-const usersRef   = ref(db, 'users');
+const markersRef     = ref(db, 'markers');
+const usersRef       = ref(db, 'users');
+const imageBoardRef  = ref(db, 'session/imageBoard');
+const ibStrokesRef   = ref(db, 'session/imageBoard/strokes');
 
 // ── Anonymous auth ─────────────────────────────────────────────
 // Firebase rules require auth != null for all writes.
@@ -6647,6 +6723,263 @@ function bvInit() {
   bvGetUnlocked(bvUpdateBtnState);
 }
 
+// ── IMAGE BOARD ────────────────────────────────────────────────────────────
+{
+  let ibListeners   = [];   // unsubscribe functions
+  let ibDrawing     = false;
+  let ibCurrentStroke = null;  // {color, size, points[]}
+  let ibErasing     = false;
+  let ibLocalStrokes = new Set(); // keys of strokes we pushed (to skip re-rendering them)
+
+  const ibOverlay   = () => document.getElementById('imageBoardOverlay');
+  const ibWrap      = () => document.getElementById('ibCanvasWrap');
+  const ibCanvasEl  = () => document.getElementById('ibCanvas');
+  const ibImageEl   = () => document.getElementById('ibImage');
+  const ibCtx       = () => ibCanvasEl().getContext('2d');
+  const ibPH        = () => document.getElementById('ibPlaceholder');
+
+  function resizeIbCanvas() {
+    const wrap = ibWrap();
+    const c = ibCanvasEl();
+    c.width  = wrap.clientWidth;
+    c.height = wrap.clientHeight;
+  }
+
+  function ibImageToCanvasRect() {
+    // Returns the actual rendered rect of the image within the canvas-wrap
+    const img = ibImageEl();
+    const wrap = ibWrap();
+    if (!img.naturalWidth) return null;
+    const wrapW = wrap.clientWidth, wrapH = wrap.clientHeight;
+    const imgAspect = img.naturalWidth / img.naturalHeight;
+    const wrapAspect = wrapW / wrapH;
+    let rendW, rendH;
+    if (imgAspect > wrapAspect) { rendW = wrapW; rendH = wrapW / imgAspect; }
+    else { rendH = wrapH; rendW = wrapH * imgAspect; }
+    return { x: (wrapW - rendW) / 2, y: (wrapH - rendH) / 2, w: rendW, h: rendH };
+  }
+
+  // Convert canvas pixel coords → normalised [0,1] relative to image rect
+  function ibPixToNorm(px, py) {
+    const r = ibImageToCanvasRect();
+    if (!r) return { nx: px / ibCanvasEl().width, ny: py / ibCanvasEl().height };
+    return { nx: (px - r.x) / r.w, ny: (py - r.y) / r.h };
+  }
+
+  // Convert normalised coords → canvas pixel coords
+  function ibNormToPix(nx, ny) {
+    const r = ibImageToCanvasRect();
+    if (!r) return { px: nx * ibCanvasEl().width, py: ny * ibCanvasEl().height };
+    return { px: r.x + nx * r.w, py: r.y + ny * r.h };
+  }
+
+  function ibDrawStroke(stroke) {
+    if (!stroke.points || stroke.points.length < 1) return;
+    const c = ibCanvasEl(), ctx = ibCtx();
+    ctx.save();
+    if (stroke.erase) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.strokeStyle = 'rgba(0,0,0,1)';
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = stroke.color || '#ff4444';
+    }
+    ctx.lineWidth   = stroke.size || 4;
+    ctx.lineCap     = 'round';
+    ctx.lineJoin    = 'round';
+    ctx.beginPath();
+    const first = ibNormToPix(stroke.points[0].nx, stroke.points[0].ny);
+    ctx.moveTo(first.px, first.py);
+    for (let i = 1; i < stroke.points.length; i++) {
+      const p = ibNormToPix(stroke.points[i].nx, stroke.points[i].ny);
+      ctx.lineTo(p.px, p.py);
+    }
+    if (stroke.points.length === 1) ctx.lineTo(first.px + 0.1, first.py); // dot
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function startImageBoardListeners() {
+    // Stop any previous listeners
+    ibListeners.forEach(u => u());
+    ibListeners = [];
+    ibLocalStrokes.clear();
+
+    // Listen for image data
+    const unsubImg = onValue(ref(db, 'session/imageBoard/imageData'), snap => {
+      const data = snap.val();
+      const img = ibImageEl();
+      const ph  = ibPH();
+      if (data) {
+        img.src = data;
+        img.style.display = '';
+        ph.style.display  = 'none';
+        // Clear canvas strokes whenever a new image is loaded
+        const c = ibCanvasEl();
+        ibCtx().clearRect(0, 0, c.width, c.height);
+        ibLocalStrokes.clear();
+      } else {
+        img.src = '';
+        img.style.display = 'none';
+        ph.style.display  = '';
+        ibCtx().clearRect(0, 0, ibCanvasEl().width, ibCanvasEl().height);
+        ibLocalStrokes.clear();
+      }
+    });
+    ibListeners.push(unsubImg);
+
+    // Listen for strokes (each child added independently)
+    const unsubStrokes = onChildAdded(ibStrokesRef, snap => {
+      const key = snap.key;
+      if (ibLocalStrokes.has(key)) return; // already drawn locally
+      ibDrawStroke(snap.val());
+    });
+    ibListeners.push(unsubStrokes);
+  }
+
+  window.openImageBoard = function() {
+    ibOverlay().classList.add('open');
+    // Show/hide GM-only controls
+    document.querySelectorAll('.ib-gm-only').forEach(el => {
+      el.style.display = isGM ? '' : 'none';
+    });
+    setTimeout(() => {
+      resizeIbCanvas();
+      setupIbDrawing();        // must run before listeners so clone happens first
+      startImageBoardListeners();
+    }, 50);
+  };
+
+  window.closeImageBoard = function() {
+    ibOverlay().classList.remove('open');
+    ibListeners.forEach(u => u());
+    ibListeners = [];
+    ibDrawing = false;
+  };
+
+  window.clearImageBoard = function() {
+    if (!isGM) return;
+    remove(imageBoardRef);
+  };
+
+  window.handleImageSelect = function(input) {
+    if (!isGM) return;
+    const file = input.files[0];
+    if (!file) return;
+    input.value = '';
+    const reader = new FileReader();
+    reader.onload = e => {
+      const srcImg = new Image();
+      srcImg.onload = () => {
+        // Compress: max 1200px wide, JPEG 0.75
+        const MAX = 1200;
+        let w = srcImg.naturalWidth, h = srcImg.naturalHeight;
+        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        const off = document.createElement('canvas');
+        off.width = w; off.height = h;
+        off.getContext('2d').drawImage(srcImg, 0, 0, w, h);
+        const compressed = off.toDataURL('image/jpeg', 0.75);
+        // Clear old strokes first, then set image
+        remove(ibStrokesRef).then(() => {
+          set(ref(db, 'session/imageBoard/imageData'), compressed);
+        });
+      };
+      srcImg.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.ibToggleEraser = function() {
+    ibErasing = !ibErasing;
+    const btn = document.getElementById('ibEraserBtn');
+    btn.classList.toggle('active', ibErasing);
+    btn.textContent = ibErasing ? '✏ Pen' : '⬜ Eraser';
+    ibCanvasEl().style.cursor = ibErasing ? 'cell' : 'crosshair';
+  };
+
+  function getIbEventPos(e) {
+    const c = ibCanvasEl();
+    const rect = c.getBoundingClientRect();
+    if (e.touches) {
+      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+    }
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+
+  function setupIbDrawing() {
+    const c = ibCanvasEl();
+    // Remove old listeners by cloning (simpler than tracking refs on a new canvas)
+    const fresh = c.cloneNode(true);
+    c.parentNode.replaceChild(fresh, c);
+
+    fresh.addEventListener('mousedown',  ibPointerDown);
+    fresh.addEventListener('mousemove',  ibPointerMove);
+    fresh.addEventListener('mouseup',    ibPointerUp);
+    fresh.addEventListener('mouseleave', ibPointerUp);
+    fresh.addEventListener('touchstart', e => { e.preventDefault(); ibPointerDown(e); }, { passive:false });
+    fresh.addEventListener('touchmove',  e => { e.preventDefault(); ibPointerMove(e); }, { passive:false });
+    fresh.addEventListener('touchend',   e => { e.preventDefault(); ibPointerUp(e);   }, { passive:false });
+  }
+
+  function ibPointerDown(e) {
+    // Only draw if an image is loaded
+    if (!ibImageEl().src || ibImageEl().style.display === 'none') return;
+    ibDrawing = true;
+    const pos = getIbEventPos(e);
+    const norm = ibPixToNorm(pos.x, pos.y);
+    const color = document.getElementById('ibColorPicker').value;
+    const size  = parseInt(document.getElementById('ibSizeSlider').value, 10);
+    ibCurrentStroke = { color, size, erase: ibErasing, points: [norm] };
+    // Start local render
+    const ctx = ibCanvasEl().getContext('2d');
+    ctx.save();
+    if (ibErasing) { ctx.globalCompositeOperation='destination-out'; ctx.strokeStyle='rgba(0,0,0,1)'; }
+    else { ctx.globalCompositeOperation='source-over'; ctx.strokeStyle=color; }
+    ctx.lineWidth=size; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    ctx._ibPrevX = pos.x; ctx._ibPrevY = pos.y;
+    ctx.restore();
+  }
+
+  function ibPointerMove(e) {
+    if (!ibDrawing || !ibCurrentStroke) return;
+    const pos  = getIbEventPos(e);
+    const norm = ibPixToNorm(pos.x, pos.y);
+    ibCurrentStroke.points.push(norm);
+
+    // Draw locally in real time
+    const ctx = ibCanvasEl().getContext('2d');
+    ctx.save();
+    if (ibCurrentStroke.erase) { ctx.globalCompositeOperation='destination-out'; ctx.strokeStyle='rgba(0,0,0,1)'; }
+    else { ctx.globalCompositeOperation='source-over'; ctx.strokeStyle=ibCurrentStroke.color; }
+    ctx.lineWidth=ibCurrentStroke.size; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath();
+    const prev = ibNormToPix(ibCurrentStroke.points[ibCurrentStroke.points.length-2].nx, ibCurrentStroke.points[ibCurrentStroke.points.length-2].ny);
+    ctx.moveTo(prev.px, prev.py);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function ibPointerUp() {
+    if (!ibDrawing || !ibCurrentStroke) return;
+    ibDrawing = false;
+    const stroke = ibCurrentStroke;
+    ibCurrentStroke = null;
+    if (stroke.points.length === 0) return;
+    // Push to Firebase; mark as local so we don't re-render
+    const newRef = push(ibStrokesRef, stroke);
+    ibLocalStrokes.add(newRef.key);
+  }
+
+  // Resize canvas on window resize while overlay is open
+  window.addEventListener('resize', () => {
+    if (ibOverlay().classList.contains('open')) resizeIbCanvas();
+  });
+}
+// ── END IMAGE BOARD ─────────────────────────────────────────────────────────
+
 </script>
 <!-- INTERCEPTION ALERT -->
 <div id="interceptAlert">
@@ -6871,6 +7204,27 @@ function bvInit() {
     <div class="cs-body" id="csBody">
       <!-- Rendered dynamically -->
     </div>
+  </div>
+</div>
+
+<!-- IMAGE BOARD OVERLAY -->
+<input type="file" id="imageBoardFileInput" accept="image/*" style="display:none" onchange="handleImageSelect(this)">
+<div id="imageBoardOverlay">
+  <div class="ib-header">
+    <span class="ib-title">// Image Board</span>
+    <div class="ib-tools">
+      <input type="color" id="ibColorPicker" value="#ff4444" title="Pen color">
+      <input type="range" id="ibSizeSlider" min="2" max="20" value="4" title="Pen size">
+      <button class="ib-tool-btn" id="ibEraserBtn" onclick="ibToggleEraser()">⬜ Eraser</button>
+      <button class="ib-tool-btn ib-gm-only" onclick="document.getElementById('imageBoardFileInput').click()">📁 Load Image</button>
+      <button class="ib-tool-btn ib-gm-only" onclick="clearImageBoard()">🗑 Clear</button>
+      <button class="ib-close-btn" onclick="closeImageBoard()">✕ Close</button>
+    </div>
+  </div>
+  <div class="ib-canvas-wrap" id="ibCanvasWrap">
+    <img id="ibImage" alt="">
+    <canvas id="ibCanvas"></canvas>
+    <div class="ib-placeholder" id="ibPlaceholder">Waiting for GM to load an image...</div>
   </div>
 </div>
 
