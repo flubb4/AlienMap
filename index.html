@@ -2417,7 +2417,7 @@ function _doLogin(nameUpper) {
   screen.style.transition = 'opacity 0.6s ease';
   screen.style.opacity = '0';
   _authReadyPromise.then(() => {
-    setTimeout(() => { screen.remove(); scans.remove(); _loggedIn = true; heartbeat(); renderDate(); applySessionGateAfterLogin(); updateSessionBtn(); bvInit(); }, 300);
+    setTimeout(() => { screen.remove(); scans.remove(); _loggedIn = true; heartbeat(); renderDate(); applySessionGateAfterLogin(); updateSessionBtn(); bvInit(); startGlobalIbWatcher(); }, 300);
   });
 }
 
@@ -6799,11 +6799,32 @@ function bvInit() {
     ctx.restore();
   }
 
+  function ibShowOverlay() {
+    if (ibOverlay().classList.contains('open')) return;
+    ibOverlay().classList.add('open');
+    document.querySelectorAll('.ib-gm-only').forEach(el => {
+      el.style.display = isGM ? '' : 'none';
+    });
+    setTimeout(() => {
+      resizeIbCanvas();
+      setupIbDrawing();
+      startImageBoardListeners();
+    }, 50);
+  }
+
   function startImageBoardListeners() {
     // Stop any previous listeners
     ibListeners.forEach(u => u());
     ibListeners = [];
     ibLocalStrokes.clear();
+
+    // Listen for open/close state (GM triggers open for everyone)
+    const unsubOpen = onValue(ref(db, 'session/imageBoard/open'), snap => {
+      if (snap.val() === true) {
+        ibShowOverlay();
+      }
+    });
+    ibListeners.push(unsubOpen);
 
     // Listen for image data
     const unsubImg = onValue(ref(db, 'session/imageBoard/imageData'), snap => {
@@ -6812,7 +6833,7 @@ function bvInit() {
       const ph  = ibPH();
       if (data) {
         img.src = data;
-        img.style.display = '';
+        img.style.display = 'block';   // must be 'block', not '' — CSS sets display:none
         ph.style.display  = 'none';
         // Clear canvas strokes whenever a new image is loaded
         const c = ibCanvasEl();
@@ -6821,7 +6842,7 @@ function bvInit() {
       } else {
         img.src = '';
         img.style.display = 'none';
-        ph.style.display  = '';
+        ph.style.display  = 'block';
         ibCtx().clearRect(0, 0, ibCanvasEl().width, ibCanvasEl().height);
         ibLocalStrokes.clear();
       }
@@ -6837,17 +6858,20 @@ function bvInit() {
     ibListeners.push(unsubStrokes);
   }
 
-  window.openImageBoard = function() {
-    ibOverlay().classList.add('open');
-    // Show/hide GM-only controls
-    document.querySelectorAll('.ib-gm-only').forEach(el => {
-      el.style.display = isGM ? '' : 'none';
+  // Start a lightweight global listener so players auto-open when GM opens the board
+  // (runs at page load, outside the overlay lifecycle)
+  function startGlobalIbWatcher() {
+    onValue(ref(db, 'session/imageBoard/open'), snap => {
+      if (snap.val() === true && !ibOverlay().classList.contains('open')) {
+        ibShowOverlay();
+      }
     });
-    setTimeout(() => {
-      resizeIbCanvas();
-      setupIbDrawing();        // must run before listeners so clone happens first
-      startImageBoardListeners();
-    }, 50);
+  }
+
+  window.openImageBoard = function() {
+    // Set open flag in Firebase so all clients open the overlay
+    set(ref(db, 'session/imageBoard/open'), true);
+    ibShowOverlay();
   };
 
   window.closeImageBoard = function() {
@@ -6855,6 +6879,8 @@ function bvInit() {
     ibListeners.forEach(u => u());
     ibListeners = [];
     ibDrawing = false;
+    // Start global watcher again so re-open still works
+    startGlobalIbWatcher();
   };
 
   window.clearImageBoard = function() {
