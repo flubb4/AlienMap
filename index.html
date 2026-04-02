@@ -6724,297 +6724,269 @@ function bvInit() {
 }
 
 // ── IMAGE BOARD ────────────────────────────────────────────────────────────
-{
-  let ibListeners   = [];   // unsubscribe functions
-  let ibDrawing     = false;
-  let ibCurrentStroke = null;  // {color, size, points[]}
-  let ibErasing     = false;
-  let ibLocalStrokes = new Set(); // keys of strokes we pushed (to skip re-rendering them)
+var ibListeners    = [];
+var ibDrawing      = false;
+var ibCurrentStroke = null;
+var ibErasing      = false;
+var ibLocalStrokes = new Set();
+var ibIsOpen       = false;   // tracks whether overlay is currently visible
+var ibLastOpenTs   = 0;       // timestamp of last GM-triggered open
 
-  const ibOverlay   = () => document.getElementById('imageBoardOverlay');
-  const ibWrap      = () => document.getElementById('ibCanvasWrap');
-  const ibCanvasEl  = () => document.getElementById('ibCanvas');
-  const ibImageEl   = () => document.getElementById('ibImage');
-  const ibCtx       = () => ibCanvasEl().getContext('2d');
-  const ibPH        = () => document.getElementById('ibPlaceholder');
+function ibGetOverlay()  { return document.getElementById('imageBoardOverlay'); }
+function ibGetCanvas()   { return document.getElementById('ibCanvas'); }
+function ibGetImage()    { return document.getElementById('ibImage'); }
+function ibGetCtx()      { return ibGetCanvas().getContext('2d'); }
+function ibGetWrap()     { return document.getElementById('ibCanvasWrap'); }
+function ibGetPH()       { return document.getElementById('ibPlaceholder'); }
 
-  function resizeIbCanvas() {
-    const wrap = ibWrap();
-    const c = ibCanvasEl();
-    c.width  = wrap.clientWidth;
-    c.height = wrap.clientHeight;
-  }
-
-  function ibImageToCanvasRect() {
-    // Returns the actual rendered rect of the image within the canvas-wrap
-    const img = ibImageEl();
-    const wrap = ibWrap();
-    if (!img.naturalWidth) return null;
-    const wrapW = wrap.clientWidth, wrapH = wrap.clientHeight;
-    const imgAspect = img.naturalWidth / img.naturalHeight;
-    const wrapAspect = wrapW / wrapH;
-    let rendW, rendH;
-    if (imgAspect > wrapAspect) { rendW = wrapW; rendH = wrapW / imgAspect; }
-    else { rendH = wrapH; rendW = wrapH * imgAspect; }
-    return { x: (wrapW - rendW) / 2, y: (wrapH - rendH) / 2, w: rendW, h: rendH };
-  }
-
-  // Convert canvas pixel coords → normalised [0,1] relative to image rect
-  function ibPixToNorm(px, py) {
-    const r = ibImageToCanvasRect();
-    if (!r) return { nx: px / ibCanvasEl().width, ny: py / ibCanvasEl().height };
-    return { nx: (px - r.x) / r.w, ny: (py - r.y) / r.h };
-  }
-
-  // Convert normalised coords → canvas pixel coords
-  function ibNormToPix(nx, ny) {
-    const r = ibImageToCanvasRect();
-    if (!r) return { px: nx * ibCanvasEl().width, py: ny * ibCanvasEl().height };
-    return { px: r.x + nx * r.w, py: r.y + ny * r.h };
-  }
-
-  function ibDrawStroke(stroke) {
-    if (!stroke.points || stroke.points.length < 1) return;
-    const c = ibCanvasEl(), ctx = ibCtx();
-    ctx.save();
-    if (stroke.erase) {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.strokeStyle = 'rgba(0,0,0,1)';
-    } else {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = stroke.color || '#ff4444';
-    }
-    ctx.lineWidth   = stroke.size || 4;
-    ctx.lineCap     = 'round';
-    ctx.lineJoin    = 'round';
-    ctx.beginPath();
-    const first = ibNormToPix(stroke.points[0].nx, stroke.points[0].ny);
-    ctx.moveTo(first.px, first.py);
-    for (let i = 1; i < stroke.points.length; i++) {
-      const p = ibNormToPix(stroke.points[i].nx, stroke.points[i].ny);
-      ctx.lineTo(p.px, p.py);
-    }
-    if (stroke.points.length === 1) ctx.lineTo(first.px + 0.1, first.py); // dot
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function ibShowOverlay() {
-    if (ibOverlay().classList.contains('open')) return;
-    ibOverlay().classList.add('open');
-    document.querySelectorAll('.ib-gm-only').forEach(el => {
-      el.style.display = isGM ? '' : 'none';
-    });
-    // Set each user's unique color based on their name
-    document.getElementById('ibColorPicker').value = colorFromName(myName);
-    setTimeout(() => {
-      resizeIbCanvas();
-      setupIbDrawing();
-      startImageBoardListeners();
-    }, 50);
-  }
-
-  function startImageBoardListeners() {
-    // Stop any previous listeners
-    ibListeners.forEach(u => u());
-    ibListeners = [];
-    ibLocalStrokes.clear();
-
-    // Listen for image data
-    const unsubImg = onValue(ref(db, 'session/imageBoard/imageData'), snap => {
-      const data = snap.val();
-      const img = ibImageEl();
-      const ph  = ibPH();
-      if (data) {
-        img.src = data;
-        img.style.display = 'block';   // must be 'block', not '' — CSS sets display:none
-        ph.style.display  = 'none';
-        // Clear canvas strokes whenever a new image is loaded
-        const c = ibCanvasEl();
-        ibCtx().clearRect(0, 0, c.width, c.height);
-        ibLocalStrokes.clear();
-      } else {
-        img.src = '';
-        img.style.display = 'none';
-        ph.style.display  = 'block';
-        ibCtx().clearRect(0, 0, ibCanvasEl().width, ibCanvasEl().height);
-        ibLocalStrokes.clear();
-      }
-    });
-    ibListeners.push(unsubImg);
-
-    // Listen for strokes (each child added independently)
-    const unsubStrokes = onChildAdded(ibStrokesRef, snap => {
-      const key = snap.key;
-      if (ibLocalStrokes.has(key)) return; // already drawn locally
-      ibDrawStroke(snap.val());
-    });
-    ibListeners.push(unsubStrokes);
-
-    // Listen for strokes being cleared (GM clear wipes the strokes node)
-    const unsubStrokesClear = onValue(ibStrokesRef, snap => {
-      if (!snap.exists()) {
-        ibCtx().clearRect(0, 0, ibCanvasEl().width, ibCanvasEl().height);
-        ibLocalStrokes.clear();
-      }
-    });
-    ibListeners.push(unsubStrokesClear);
-  }
-
-  // Timestamp of the last open event we acted on — prevents re-open on watcher attach
-  let ibLastOpenTs = 0;
-
-  // Global watcher: auto-opens for all clients when GM triggers a new open.
-  // Uses a timestamp so closing locally doesn't cause an immediate reopen.
-  window.startGlobalIbWatcher = function() {
-    onValue(ref(db, 'session/imageBoard/open'), snap => {
-      const ts = snap.val();
-      if (ts && ts > ibLastOpenTs) {
-        ibLastOpenTs = ts;
-        ibShowOverlay();
-      }
-    });
-  };
-
-  window.openImageBoard = function() {
-    const ts = Date.now();
-    ibLastOpenTs = ts;
-    set(ref(db, 'session/imageBoard/open'), ts);
-    ibShowOverlay();
-  };
-
-  window.closeImageBoard = function() {
-    ibOverlay().classList.remove('open');
-    ibListeners.forEach(u => u());
-    ibListeners = [];
-    ibDrawing = false;
-    // Do NOT restart the global watcher here — the login-time watcher is still running
-  };
-
-  window.clearImageBoard = function() {
-    if (!isGM) return;
-    remove(ibStrokesRef);
-  };
-
-  window.handleImageSelect = function(input) {
-    if (!isGM) return;
-    const file = input.files[0];
-    if (!file) return;
-    input.value = '';
-    const reader = new FileReader();
-    reader.onload = e => {
-      const srcImg = new Image();
-      srcImg.onload = () => {
-        // Compress: max 1920px on longest side, JPEG 0.92 for high quality
-        const MAX = 1920;
-        let w = srcImg.naturalWidth, h = srcImg.naturalHeight;
-        if (w > MAX || h > MAX) {
-          if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
-          else { w = Math.round(w * MAX / h); h = MAX; }
-        }
-        const off = document.createElement('canvas');
-        off.width = w; off.height = h;
-        off.getContext('2d').drawImage(srcImg, 0, 0, w, h);
-        const compressed = off.toDataURL('image/jpeg', 0.92);
-        // Clear old strokes first, then set image
-        remove(ibStrokesRef).then(() => {
-          set(ref(db, 'session/imageBoard/imageData'), compressed);
-        });
-      };
-      srcImg.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  window.ibToggleEraser = function() {
-    ibErasing = !ibErasing;
-    const btn = document.getElementById('ibEraserBtn');
-    btn.classList.toggle('active', ibErasing);
-    btn.textContent = ibErasing ? '✏ Pen' : '⬜ Eraser';
-    ibCanvasEl().style.cursor = ibErasing ? 'cell' : 'crosshair';
-  };
-
-  function getIbEventPos(e) {
-    const c = ibCanvasEl();
-    const rect = c.getBoundingClientRect();
-    if (e.touches) {
-      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
-    }
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  }
-
-  function setupIbDrawing() {
-    const c = ibCanvasEl();
-    // Remove old listeners by cloning (simpler than tracking refs on a new canvas)
-    const fresh = c.cloneNode(true);
-    c.parentNode.replaceChild(fresh, c);
-
-    fresh.addEventListener('mousedown',  ibPointerDown);
-    fresh.addEventListener('mousemove',  ibPointerMove);
-    fresh.addEventListener('mouseup',    ibPointerUp);
-    fresh.addEventListener('mouseleave', ibPointerUp);
-    fresh.addEventListener('touchstart', e => { e.preventDefault(); ibPointerDown(e); }, { passive:false });
-    fresh.addEventListener('touchmove',  e => { e.preventDefault(); ibPointerMove(e); }, { passive:false });
-    fresh.addEventListener('touchend',   e => { e.preventDefault(); ibPointerUp(e);   }, { passive:false });
-  }
-
-  function ibPointerDown(e) {
-    // Only draw if an image is loaded
-    if (!ibImageEl().src || ibImageEl().style.display === 'none') return;
-    ibDrawing = true;
-    const pos = getIbEventPos(e);
-    const norm = ibPixToNorm(pos.x, pos.y);
-    const color = document.getElementById('ibColorPicker').value;
-    const size  = parseInt(document.getElementById('ibSizeSlider').value, 10);
-    ibCurrentStroke = { color, size, erase: ibErasing, points: [norm] };
-    // Start local render
-    const ctx = ibCanvasEl().getContext('2d');
-    ctx.save();
-    if (ibErasing) { ctx.globalCompositeOperation='destination-out'; ctx.strokeStyle='rgba(0,0,0,1)'; }
-    else { ctx.globalCompositeOperation='source-over'; ctx.strokeStyle=color; }
-    ctx.lineWidth=size; ctx.lineCap='round'; ctx.lineJoin='round';
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-    ctx._ibPrevX = pos.x; ctx._ibPrevY = pos.y;
-    ctx.restore();
-  }
-
-  function ibPointerMove(e) {
-    if (!ibDrawing || !ibCurrentStroke) return;
-    const pos  = getIbEventPos(e);
-    const norm = ibPixToNorm(pos.x, pos.y);
-    ibCurrentStroke.points.push(norm);
-
-    // Draw locally in real time
-    const ctx = ibCanvasEl().getContext('2d');
-    ctx.save();
-    if (ibCurrentStroke.erase) { ctx.globalCompositeOperation='destination-out'; ctx.strokeStyle='rgba(0,0,0,1)'; }
-    else { ctx.globalCompositeOperation='source-over'; ctx.strokeStyle=ibCurrentStroke.color; }
-    ctx.lineWidth=ibCurrentStroke.size; ctx.lineCap='round'; ctx.lineJoin='round';
-    ctx.beginPath();
-    const prev = ibNormToPix(ibCurrentStroke.points[ibCurrentStroke.points.length-2].nx, ibCurrentStroke.points[ibCurrentStroke.points.length-2].ny);
-    ctx.moveTo(prev.px, prev.py);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function ibPointerUp() {
-    if (!ibDrawing || !ibCurrentStroke) return;
-    ibDrawing = false;
-    const stroke = ibCurrentStroke;
-    ibCurrentStroke = null;
-    if (stroke.points.length === 0) return;
-    // Push to Firebase; mark as local so we don't re-render
-    const newRef = push(ibStrokesRef, stroke);
-    ibLocalStrokes.add(newRef.key);
-  }
-
-  // Resize canvas on window resize while overlay is open
-  window.addEventListener('resize', () => {
-    if (ibOverlay().classList.contains('open')) resizeIbCanvas();
-  });
+function ibResizeCanvas() {
+  var wrap = ibGetWrap();
+  var c = ibGetCanvas();
+  c.width  = wrap.clientWidth;
+  c.height = wrap.clientHeight;
 }
+
+function ibImageRect() {
+  var img = ibGetImage();
+  var wrap = ibGetWrap();
+  if (!img.naturalWidth) return null;
+  var wrapW = wrap.clientWidth, wrapH = wrap.clientHeight;
+  var ia = img.naturalWidth / img.naturalHeight, wa = wrapW / wrapH;
+  var rw, rh;
+  if (ia > wa) { rw = wrapW; rh = wrapW / ia; }
+  else { rh = wrapH; rw = wrapH * ia; }
+  return { x:(wrapW-rw)/2, y:(wrapH-rh)/2, w:rw, h:rh };
+}
+
+function ibToNorm(px, py) {
+  var r = ibImageRect();
+  if (!r) return { nx: px / ibGetCanvas().width, ny: py / ibGetCanvas().height };
+  return { nx: (px-r.x)/r.w, ny: (py-r.y)/r.h };
+}
+
+function ibToPix(nx, ny) {
+  var r = ibImageRect();
+  if (!r) return { px: nx * ibGetCanvas().width, py: ny * ibGetCanvas().height };
+  return { px: r.x + nx*r.w, py: r.y + ny*r.h };
+}
+
+function ibDrawStroke(stroke) {
+  if (!stroke || !stroke.points || stroke.points.length < 1) return;
+  var ctx = ibGetCtx();
+  ctx.save();
+  ctx.globalCompositeOperation = stroke.erase ? 'destination-out' : 'source-over';
+  ctx.strokeStyle = stroke.erase ? 'rgba(0,0,0,1)' : (stroke.color || '#ff4444');
+  ctx.lineWidth = stroke.size || 4;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  var first = ibToPix(stroke.points[0].nx, stroke.points[0].ny);
+  ctx.moveTo(first.px, first.py);
+  for (var i = 1; i < stroke.points.length; i++) {
+    var p = ibToPix(stroke.points[i].nx, stroke.points[i].ny);
+    ctx.lineTo(p.px, p.py);
+  }
+  if (stroke.points.length === 1) ctx.lineTo(first.px + 0.1, first.py);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function ibStopListeners() {
+  ibListeners.forEach(function(u) { try { u(); } catch(e) {} });
+  ibListeners = [];
+}
+
+function ibStartListeners() {
+  ibStopListeners();
+  ibLocalStrokes.clear();
+
+  // Image data
+  ibListeners.push(onValue(ref(db, 'session/imageBoard/imageData'), function(snap) {
+    if (!ibIsOpen) return;
+    var data = snap.val();
+    var img = ibGetImage();
+    var ph  = ibGetPH();
+    if (data) {
+      img.src = data;
+      img.style.display = 'block';
+      ph.style.display  = 'none';
+      var c = ibGetCanvas();
+      ibGetCtx().clearRect(0, 0, c.width, c.height);
+      ibLocalStrokes.clear();
+    } else {
+      img.src = '';
+      img.style.display = 'none';
+      ph.style.display  = 'block';
+      ibGetCtx().clearRect(0, 0, ibGetCanvas().width, ibGetCanvas().height);
+      ibLocalStrokes.clear();
+    }
+  }));
+
+  // Strokes added
+  ibListeners.push(onChildAdded(ibStrokesRef, function(snap) {
+    if (!ibIsOpen) return;
+    if (ibLocalStrokes.has(snap.key)) return;
+    ibDrawStroke(snap.val());
+  }));
+
+  // Strokes cleared by GM
+  ibListeners.push(onValue(ibStrokesRef, function(snap) {
+    if (!ibIsOpen) return;
+    if (!snap.exists()) {
+      ibGetCtx().clearRect(0, 0, ibGetCanvas().width, ibGetCanvas().height);
+      ibLocalStrokes.clear();
+    }
+  }));
+}
+
+function ibSetupDrawing() {
+  var c = ibGetCanvas();
+  c.onmousedown  = ibPointerDown;
+  c.onmousemove  = ibPointerMove;
+  c.onmouseup    = ibPointerUp;
+  c.onmouseleave = ibPointerUp;
+  c.ontouchstart = function(e) { e.preventDefault(); ibPointerDown(e); };
+  c.ontouchmove  = function(e) { e.preventDefault(); ibPointerMove(e); };
+  c.ontouchend   = function(e) { e.preventDefault(); ibPointerUp(e); };
+}
+
+function ibDoOpen() {
+  if (ibIsOpen) return;
+  ibIsOpen = true;
+  var ov = ibGetOverlay();
+  ov.style.display = 'flex';
+  document.querySelectorAll('.ib-gm-only').forEach(function(el) {
+    el.style.display = isGM ? '' : 'none';
+  });
+  document.getElementById('ibColorPicker').value = colorFromName(myName);
+  ibResizeCanvas();
+  ibSetupDrawing();
+  ibStartListeners();
+}
+
+window.startGlobalIbWatcher = function() {
+  onValue(ref(db, 'session/imageBoard/open'), function(snap) {
+    var ts = snap.val();
+    if (ts && typeof ts === 'number' && ts > ibLastOpenTs) {
+      ibLastOpenTs = ts;
+      ibDoOpen();
+    }
+  });
+};
+
+window.openImageBoard = function() {
+  var ts = Date.now();
+  ibLastOpenTs = ts;
+  set(ref(db, 'session/imageBoard/open'), ts);
+  ibDoOpen();
+};
+
+window.closeImageBoard = function() {
+  ibIsOpen = false;
+  var ov = ibGetOverlay();
+  ov.style.display = 'none';
+  ibStopListeners();
+  ibDrawing = false;
+  ibCurrentStroke = null;
+};
+
+window.clearImageBoard = function() {
+  if (!isGM) return;
+  remove(ibStrokesRef);
+};
+
+window.handleImageSelect = function(input) {
+  if (!isGM) return;
+  var file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var srcImg = new Image();
+    srcImg.onload = function() {
+      var MAX = 1920;
+      var w = srcImg.naturalWidth, h = srcImg.naturalHeight;
+      if (w > MAX || h > MAX) {
+        if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      var off = document.createElement('canvas');
+      off.width = w; off.height = h;
+      off.getContext('2d').drawImage(srcImg, 0, 0, w, h);
+      var compressed = off.toDataURL('image/jpeg', 0.92);
+      remove(ibStrokesRef).then(function() {
+        set(ref(db, 'session/imageBoard/imageData'), compressed);
+      });
+    };
+    srcImg.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+window.ibToggleEraser = function() {
+  ibErasing = !ibErasing;
+  var btn = document.getElementById('ibEraserBtn');
+  btn.classList.toggle('active', ibErasing);
+  btn.textContent = ibErasing ? '✏ Pen' : '⬜ Eraser';
+  ibGetCanvas().style.cursor = ibErasing ? 'cell' : 'crosshair';
+};
+
+function ibEventPos(e) {
+  var c = ibGetCanvas();
+  var rect = c.getBoundingClientRect();
+  if (e.touches && e.touches.length) {
+    return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+  }
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+function ibPointerDown(e) {
+  var img = ibGetImage();
+  if (!img.src || img.style.display === 'none') return;
+  ibDrawing = true;
+  var pos = ibEventPos(e);
+  var color = document.getElementById('ibColorPicker').value;
+  var size  = parseInt(document.getElementById('ibSizeSlider').value, 10);
+  ibCurrentStroke = { color: color, size: size, erase: ibErasing, points: [ibToNorm(pos.x, pos.y)] };
+  var ctx = ibGetCtx();
+  ctx.save();
+  ctx.globalCompositeOperation = ibErasing ? 'destination-out' : 'source-over';
+  ctx.strokeStyle = ibErasing ? 'rgba(0,0,0,1)' : color;
+  ctx.lineWidth = size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+  ctx.restore();
+}
+
+function ibPointerMove(e) {
+  if (!ibDrawing || !ibCurrentStroke) return;
+  var pos = ibEventPos(e);
+  var norm = ibToNorm(pos.x, pos.y);
+  ibCurrentStroke.points.push(norm);
+  var pts = ibCurrentStroke.points;
+  var prev = ibToPix(pts[pts.length-2].nx, pts[pts.length-2].ny);
+  var ctx = ibGetCtx();
+  ctx.save();
+  ctx.globalCompositeOperation = ibCurrentStroke.erase ? 'destination-out' : 'source-over';
+  ctx.strokeStyle = ibCurrentStroke.erase ? 'rgba(0,0,0,1)' : ibCurrentStroke.color;
+  ctx.lineWidth = ibCurrentStroke.size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(prev.px, prev.py); ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function ibPointerUp() {
+  if (!ibDrawing || !ibCurrentStroke) return;
+  ibDrawing = false;
+  var stroke = ibCurrentStroke;
+  ibCurrentStroke = null;
+  if (stroke.points.length === 0) return;
+  var newRef = push(ibStrokesRef, stroke);
+  ibLocalStrokes.add(newRef.key);
+}
+
+window.addEventListener('resize', function() {
+  if (ibIsOpen) ibResizeCanvas();
+});
 // ── END IMAGE BOARD ─────────────────────────────────────────────────────────
 
 </script>
