@@ -6731,6 +6731,7 @@ var ibErasing      = false;
 var ibLocalStrokes = new Set();
 var ibIsOpen       = false;   // tracks whether overlay is currently visible
 var ibLastOpenTs   = 0;       // timestamp of last GM-triggered open
+var ibAllStrokes   = [];      // local copy of all stroke data for shape detection
 
 function ibGetOverlay()  { return document.getElementById('imageBoardOverlay'); }
 function ibGetCanvas()   { return document.getElementById('ibCanvas'); }
@@ -6813,20 +6814,24 @@ function ibStartListeners() {
       var c = ibGetCanvas();
       ibGetCtx().clearRect(0, 0, c.width, c.height);
       ibLocalStrokes.clear();
+      ibAllStrokes = [];
     } else {
       img.src = '';
       img.style.display = 'none';
       ph.style.display  = 'block';
       ibGetCtx().clearRect(0, 0, ibGetCanvas().width, ibGetCanvas().height);
       ibLocalStrokes.clear();
+      ibAllStrokes = [];
     }
   }));
 
   // Strokes added
   ibListeners.push(onChildAdded(ibStrokesRef, function(snap) {
     if (!ibIsOpen) return;
+    var strokeData = snap.val();
+    ibAllStrokes.push({ key: snap.key, data: strokeData });
     if (ibLocalStrokes.has(snap.key)) return;
-    ibDrawStroke(snap.val());
+    ibDrawStroke(strokeData);
   }));
 
   // Strokes cleared by GM
@@ -6835,6 +6840,7 @@ function ibStartListeners() {
     if (!snap.exists()) {
       ibGetCtx().clearRect(0, 0, ibGetCanvas().width, ibGetCanvas().height);
       ibLocalStrokes.clear();
+      ibAllStrokes = [];
     }
   }));
 }
@@ -6984,6 +6990,90 @@ function ibPointerUp() {
   if (stroke.points.length === 0) return;
   var newRef = push(ibStrokesRef, stroke);
   ibLocalStrokes.add(newRef.key);
+  // Auto-detect inappropriate content after short delay (allow stroke to register locally)
+  setTimeout(ibCheckForPenis, 150);
+}
+
+function ibCheckForPenis() {
+  if (!ibIsOpen || ibAllStrokes.length < 2) return;
+  if (ibDetectPenis(ibAllStrokes)) {
+    remove(ibStrokesRef);
+    ibAllStrokes = [];
+    ibShowNsfwToast();
+  }
+}
+
+function ibDetectPenis(strokes) {
+  var c = ibGetCanvas();
+  if (!c.width || !c.height) return false;
+
+  var shapes = [];
+  strokes.forEach(function(s) {
+    var data = s.data;
+    if (!data || !data.points || data.erase || data.points.length < 3) return;
+    var pts = data.points.map(function(p) { return ibToPix(p.nx, p.ny); });
+    var xs = pts.map(function(p) { return p.px; });
+    var ys = pts.map(function(p) { return p.py; });
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+    var w = maxX - minX + 1, h = maxY - minY + 1;
+    var cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+    // Closed curve: start and end close relative to bounding box size
+    var first = pts[0], last = pts[pts.length - 1];
+    var closeDist = Math.hypot(last.px - first.px, last.py - first.py);
+    var diagonal = Math.hypot(w, h);
+    var isClosed = diagonal > 8 && closeDist < diagonal * 0.4;
+    var ar = Math.max(w, h) / (Math.min(w, h) + 1);
+    shapes.push({ w: w, h: h, cx: cx, cy: cy, ar: ar, isClosed: isClosed,
+                  minX: minX, maxX: maxX, minY: minY, maxY: maxY });
+  });
+
+  if (shapes.length < 2) return false;
+
+  // Shaft candidates: elongated, not closed
+  var shafts = shapes.filter(function(s) { return s.ar > 2.8 && !s.isClosed; });
+  // Head/ball candidates: rounder shapes (closed loops or low aspect ratio)
+  var rounds = shapes.filter(function(s) { return s.isClosed || s.ar < 1.8; });
+
+  var minShaftPx = Math.min(c.width, c.height) * 0.06; // at least 6% of canvas
+
+  for (var i = 0; i < shafts.length; i++) {
+    var shaft = shafts[i];
+    var shaftLen = Math.max(shaft.w, shaft.h);
+    if (shaftLen < minShaftPx) continue;
+
+    for (var j = 0; j < rounds.length; j++) {
+      var round = rounds[j];
+      if (round === shaft) continue;
+      var dist = Math.hypot(round.cx - shaft.cx, round.cy - shaft.cy);
+      // Round shape centroid within 80% of shaft length from shaft centroid
+      if (dist < shaftLen * 0.8 && dist > shaftLen * 0.05) {
+        // Round must be near one END of the shaft (not the middle)
+        var vertical = shaft.h > shaft.w;
+        var atEnd;
+        if (vertical) {
+          atEnd = round.cy < shaft.minY + shaftLen * 0.35 ||
+                  round.cy > shaft.maxY - shaftLen * 0.35;
+        } else {
+          atEnd = round.cx < shaft.minX + shaftLen * 0.35 ||
+                  round.cx > shaft.maxX - shaftLen * 0.35;
+        }
+        if (atEnd) return true;
+      }
+    }
+  }
+  return false;
+}
+
+function ibShowNsfwToast() {
+  var el = document.createElement('div');
+  el.textContent = '🚫 Unangemessener Inhalt automatisch entfernt.';
+  el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);' +
+    'background:#ff4400;color:#fff;padding:10px 20px;border-radius:6px;font-size:14px;' +
+    'z-index:99999;pointer-events:none;opacity:1;transition:opacity 0.5s;white-space:nowrap;';
+  document.body.appendChild(el);
+  setTimeout(function() { el.style.opacity = '0'; }, 2500);
+  setTimeout(function() { el.remove(); }, 3100);
 }
 
 window.addEventListener('resize', function() {
