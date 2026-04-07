@@ -6996,113 +6996,191 @@ function ibPointerUp() {
 
 function ibCheckForPenis() {
   if (!ibIsOpen || ibAllStrokes.length < 1) return;
-  if (ibDetectPenis()) {
+  var result = ibAnalyzeDrawing();
+  if (result.penis || result.swastika) {
     remove(ibStrokesRef);
     ibAllStrokes = [];
-    ibShowNsfwToast();
+    ibShowNsfwToast(result.swastika ? 'swastika' : 'penis');
   }
 }
 
-// Canvas-based penis detection using span-profile analysis.
-// Downsamples the canvas to a 56x56 grid, measures the horizontal (or
-// vertical) "span" (extent of drawn pixels) at each row/column, then
-// checks whether the profile has the characteristic shaft+head pattern:
-// a narrow middle region with a significantly wider bump at one end.
-function ibDetectPenis() {
+// Re-renders all current strokes into an S×S offscreen canvas using thick
+// lines (min 6 px) so that thin strokes don't vanish when downscaled.
+function ibRenderStrokesToGrid(S) {
   var c = ibGetCanvas();
-  if (!c.width || !c.height) return false;
-
-  var S = 56;
+  var cW = c.width || 1, cH = c.height || 1;
+  var scaleX = S / cW, scaleY = S / cH;
   var off = document.createElement('canvas');
   off.width = off.height = S;
-  off.getContext('2d').drawImage(c, 0, 0, S, S);
+  var octx = off.getContext('2d');
+  octx.clearRect(0, 0, S, S);
+  octx.strokeStyle = '#ffffff';
+  octx.lineCap = 'round';
+  octx.lineJoin = 'round';
+  ibAllStrokes.forEach(function(s) {
+    var data = s.data;
+    if (!data || !data.points || data.erase || data.points.length < 1) return;
+    var pts = data.points.map(function(p) {
+      var px = ibToPix(p.nx, p.ny);
+      return { x: px.px * scaleX, y: px.py * scaleY };
+    });
+    octx.lineWidth = Math.max(6, (data.size || 4) * Math.min(scaleX, scaleY));
+    octx.beginPath();
+    octx.moveTo(pts[0].x, pts[0].y);
+    for (var i = 1; i < pts.length; i++) octx.lineTo(pts[i].x, pts[i].y);
+    if (pts.length === 1) octx.lineTo(pts[0].x + 0.1, pts[0].y);
+    octx.stroke();
+  });
+  return off;
+}
+
+// Main entry: builds the analysis grid, then runs both detectors.
+function ibAnalyzeDrawing() {
+  var S = 96;
+  var off = ibRenderStrokesToGrid(S);
   var d = off.getContext('2d').getImageData(0, 0, S, S).data;
 
-  // For each row: span = rightmost drawn x − leftmost drawn x
-  // For each col: span = bottommost drawn y − topmost drawn y
+  // Binary grid + row/col span arrays
+  var grid = [];
   var rowSpans = new Array(S).fill(0);
   var colSpans = new Array(S).fill(0);
   var totalPx = 0;
-
   for (var y = 0; y < S; y++) {
+    grid[y] = new Uint8Array(S);
     var lx = -1, rx = -1;
     for (var x = 0; x < S; x++) {
-      if (d[(y * S + x) * 4 + 3] > 25) {
-        if (lx < 0) lx = x;
-        rx = x;
-        totalPx++;
+      if (d[(y * S + x) * 4 + 3] > 20) {
+        grid[y][x] = 1; totalPx++;
+        if (lx < 0) lx = x; rx = x;
       }
     }
-    rowSpans[y] = lx < 0 ? 0 : (rx - lx + 1);
+    rowSpans[y] = lx < 0 ? 0 : rx - lx + 1;
   }
   for (var x = 0; x < S; x++) {
     var ty = -1, by = -1;
     for (var y = 0; y < S; y++) {
-      if (d[(y * S + x) * 4 + 3] > 25) {
-        if (ty < 0) ty = y;
-        by = y;
-      }
+      if (grid[y][x]) { if (ty < 0) ty = y; by = y; }
     }
-    colSpans[x] = ty < 0 ? 0 : (by - ty + 1);
+    colSpans[x] = ty < 0 ? 0 : by - ty + 1;
   }
 
-  if (totalPx < 20) return false;
+  if (totalPx < 30) return { penis: false, swastika: false };
 
-  // Bounding box in downsampled space
-  var r0 = 0, r1 = S - 1, c0 = 0, c1 = S - 1;
-  while (r0 < S && rowSpans[r0] === 0) r0++;
-  while (r1 > r0 && rowSpans[r1] === 0) r1--;
-  while (c0 < S && colSpans[c0] === 0) c0++;
-  while (c1 > c0 && colSpans[c1] === 0) c1--;
-
+  // Bounding box
+  var r0=0, r1=S-1, c0=0, c1=S-1;
+  while (r0 < S   && rowSpans[r0] === 0) r0++;
+  while (r1 > r0  && rowSpans[r1] === 0) r1--;
+  while (c0 < S   && colSpans[c0] === 0) c0++;
+  while (c1 > c0  && colSpans[c1] === 0) c1--;
   var bH = r1 - r0, bW = c1 - c0;
-  if (bH < 8 || bW < 3) return false; // too small to evaluate
+  if (bH < 6 || bW < 6) return { penis: false, swastika: false };
 
-  // Analyse the longer axis
-  if (bH >= bW) {
-    return ibCheckPenisProfile(rowSpans, r0, r1);
-  } else {
-    return ibCheckPenisProfile(colSpans, c0, c1);
+  // ── Penis detection ──────────────────────────────────────────────
+  var penis = false;
+  // Analyse the longer axis; also try both if roughly square
+  if (bH >= bW * 0.75) penis = penis || ibPenisProfile(rowSpans, r0, r1);
+  if (bW >= bH * 0.75) penis = penis || ibPenisProfile(colSpans, c0, c1);
+
+  // ── Swastika detection ───────────────────────────────────────────
+  var swastika = false;
+  var ar = Math.max(bH, bW) / (Math.min(bH, bW) + 1);
+  if (ar < 1.9) { // roughly square overall shape
+    swastika = ibSwastikaCheck(grid, S, r0, r1, c0, c1, totalPx);
   }
+
+  return { penis: penis, swastika: swastika };
 }
 
-// Checks whether a 1-D span profile has a penis shape:
-// shaft (narrow, middle section) + head (wide bump at one end).
-function ibCheckPenisProfile(spans, start, end) {
+// ── Penis: span-profile with neck-constriction check ────────────────────────
+// For each orientation we look at the normalised width profile and check
+// whether one end is wide (head) and immediately constricts (neck) before
+// the shaft continues at a lower width.
+function ibPenisProfile(spans, start, end) {
   var len = end - start + 1;
-  if (len < 8) return false;
-
+  if (len < 10) return false;
   var seg = spans.slice(start, end + 1);
-  var maxSpan = Math.max.apply(null, seg);
-  if (maxSpan < 2) return false;
-
-  var norm = seg.map(function(v) { return v / maxSpan; });
-
-  // Averages for three thirds: top / middle / bottom
-  var t = Math.floor(len / 3);
-  var topSum = 0, midSum = 0, botSum = 0;
-  for (var i = 0; i < t; i++)         topSum += norm[i];
-  for (var i = t; i < 2 * t; i++)     midSum += norm[i];
-  for (var i = 2 * t; i < len; i++)   botSum += norm[i];
-  var topAvg = topSum / t;
-  var midAvg = midSum / t;
-  var botAvg = botSum / (len - 2 * t);
-
-  // Shaft must have some presence; head must be noticeably wider than shaft
-  var SHAFT_MIN = 0.12;   // shaft = at least 12 % of max width
-  var HEAD_RATIO = 1.45;  // head = at least 45 % wider than shaft
-  var HEAD_MIN  = 0.28;   // head section average must be at least 28 % of max
-
-  var shaftOk  = midAvg >= SHAFT_MIN;
-  var headTop  = topAvg > midAvg * HEAD_RATIO && topAvg >= HEAD_MIN;
-  var headBot  = botAvg > midAvg * HEAD_RATIO && botAvg >= HEAD_MIN;
-
-  return shaftOk && (headTop || headBot);
+  var maxS = Math.max.apply(null, seg);
+  if (maxS < 3) return false;
+  // 3-point moving-average smoothing, then normalise
+  var norm = seg.map(function(v, i, a) {
+    return (v + (a[i-1] || v) + (a[i+1] || v)) / (3 * maxS);
+  });
+  // Check head-at-top and head-at-bottom
+  return ibHeadShaft(norm) || ibHeadShaft(norm.slice().reverse());
 }
 
-function ibShowNsfwToast() {
+function ibHeadShaft(norm) {
+  var n = norm.length;
+  var h1 = Math.max(1,  Math.floor(n * 0.22)); // end of head zone
+  var h2 = Math.max(h1+1, Math.floor(n * 0.42)); // end of neck zone
+  var h3 = Math.max(h2+1, Math.floor(n * 0.85)); // end of shaft zone
+  var headAvg = 0, neckAvg = 0, shaftAvg = 0;
+  for (var i = 0; i < h1; i++)       headAvg  += norm[i];
+  for (var i = h1; i < h2; i++)      neckAvg  += norm[i];
+  for (var i = h2; i < h3; i++)      shaftAvg += norm[i];
+  headAvg  /= h1;
+  neckAvg  /= (h2 - h1);
+  shaftAvg /= (h3 - h2);
+  // Head wide, neck clearly constricts, shaft has content but narrower than head
+  return headAvg  > 0.38 &&
+         neckAvg  < headAvg  * 0.82 &&
+         shaftAvg > 0.15 &&
+         shaftAvg < headAvg  * 0.97;
+}
+
+// ── Swastika: cross structure + rotational quadrant offset ───────────────────
+// Detects the characteristic cross arms + rotational hook pattern.
+function ibSwastikaCheck(grid, S, r0, r1, c0, c1, totalPx) {
+  var cy = Math.round((r0 + r1) / 2);
+  var cx = Math.round((c0 + c1) / 2);
+  var band = Math.max(2, Math.floor(Math.min(r1-r0, c1-c0) * 0.17));
+
+  // What fraction of pixels fall in the horizontal and vertical center bands?
+  var hBand = 0, vBand = 0;
+  for (var y = r0; y <= r1; y++) for (var x = c0; x <= c1; x++) {
+    if (!grid[y][x]) continue;
+    if (Math.abs(y - cy) <= band) hBand++;
+    if (Math.abs(x - cx) <= band) vBand++;
+  }
+  // Both bands must carry a significant fraction of all pixels (cross structure)
+  if (hBand / (totalPx + 1) < 0.18 || vBand / (totalPx + 1) < 0.18) return false;
+
+  // Compute center-of-mass per quadrant, ignoring the central cross bands
+  var qN  = [0, 0, 0, 0];
+  var qSx = [0, 0, 0, 0];
+  var qSy = [0, 0, 0, 0];
+  for (var y = r0; y <= r1; y++) for (var x = c0; x <= c1; x++) {
+    if (!grid[y][x]) continue;
+    if (Math.abs(y - cy) <= band || Math.abs(x - cx) <= band) continue;
+    var qi = (y < cy ? 0 : 2) + (x < cx ? 0 : 1); // 0=TL 1=TR 2=BL 3=BR
+    qN[qi]++; qSx[qi] += x; qSy[qi] += y;
+  }
+
+  // Each quadrant must have at least 4 % of total pixels
+  var minQ = totalPx * 0.04;
+  for (var i = 0; i < 4; i++) if (qN[i] < minQ) return false;
+
+  // Midpoints of each quadrant rectangle
+  var qMx = [(c0+cx)/2, (cx+c1)/2, (c0+cx)/2, (cx+c1)/2];
+  var qMy = [(r0+cy)/2, (r0+cy)/2, (cy+r1)/2, (cy+r1)/2];
+
+  // Offset of quadrant CoM relative to quadrant midpoint
+  var odx = [0,1,2,3].map(function(i){ return qSx[i]/qN[i] - qMx[i]; });
+  var ody = [0,1,2,3].map(function(i){ return qSy[i]/qN[i] - qMy[i]; });
+
+  // Clockwise swastika hooks: TL→up, TR→right, BR→down, BL→left
+  var cw  = (ody[0]<0?1:0)+(odx[1]>0?1:0)+(ody[3]>0?1:0)+(odx[2]<0?1:0);
+  // Counter-clockwise (mirror): TL→left, TR→up, BR→right, BL→down
+  var ccw = (odx[0]<0?1:0)+(ody[1]<0?1:0)+(odx[3]>0?1:0)+(ody[2]>0?1:0);
+
+  return cw >= 3 || ccw >= 3;
+}
+
+function ibShowNsfwToast(type) {
   var el = document.createElement('div');
-  el.textContent = '🚫 Unangemessener Inhalt automatisch entfernt.';
+  el.textContent = type === 'swastika'
+    ? '🚫 Verbotenes Symbol automatisch entfernt.'
+    : '🚫 Unangemessener Inhalt automatisch entfernt.';
   el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);' +
     'background:#ff4400;color:#fff;padding:10px 20px;border-radius:6px;font-size:14px;' +
     'z-index:99999;pointer-events:none;opacity:1;transition:opacity 0.5s;white-space:nowrap;';
