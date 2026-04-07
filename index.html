@@ -6995,74 +6995,109 @@ function ibPointerUp() {
 }
 
 function ibCheckForPenis() {
-  if (!ibIsOpen || ibAllStrokes.length < 2) return;
-  if (ibDetectPenis(ibAllStrokes)) {
+  if (!ibIsOpen || ibAllStrokes.length < 1) return;
+  if (ibDetectPenis()) {
     remove(ibStrokesRef);
     ibAllStrokes = [];
     ibShowNsfwToast();
   }
 }
 
-function ibDetectPenis(strokes) {
+// Canvas-based penis detection using span-profile analysis.
+// Downsamples the canvas to a 56x56 grid, measures the horizontal (or
+// vertical) "span" (extent of drawn pixels) at each row/column, then
+// checks whether the profile has the characteristic shaft+head pattern:
+// a narrow middle region with a significantly wider bump at one end.
+function ibDetectPenis() {
   var c = ibGetCanvas();
   if (!c.width || !c.height) return false;
 
-  var shapes = [];
-  strokes.forEach(function(s) {
-    var data = s.data;
-    if (!data || !data.points || data.erase || data.points.length < 3) return;
-    var pts = data.points.map(function(p) { return ibToPix(p.nx, p.ny); });
-    var xs = pts.map(function(p) { return p.px; });
-    var ys = pts.map(function(p) { return p.py; });
-    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
-    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
-    var w = maxX - minX + 1, h = maxY - minY + 1;
-    var cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
-    // Closed curve: start and end close relative to bounding box size
-    var first = pts[0], last = pts[pts.length - 1];
-    var closeDist = Math.hypot(last.px - first.px, last.py - first.py);
-    var diagonal = Math.hypot(w, h);
-    var isClosed = diagonal > 8 && closeDist < diagonal * 0.4;
-    var ar = Math.max(w, h) / (Math.min(w, h) + 1);
-    shapes.push({ w: w, h: h, cx: cx, cy: cy, ar: ar, isClosed: isClosed,
-                  minX: minX, maxX: maxX, minY: minY, maxY: maxY });
-  });
+  var S = 56;
+  var off = document.createElement('canvas');
+  off.width = off.height = S;
+  off.getContext('2d').drawImage(c, 0, 0, S, S);
+  var d = off.getContext('2d').getImageData(0, 0, S, S).data;
 
-  if (shapes.length < 2) return false;
+  // For each row: span = rightmost drawn x − leftmost drawn x
+  // For each col: span = bottommost drawn y − topmost drawn y
+  var rowSpans = new Array(S).fill(0);
+  var colSpans = new Array(S).fill(0);
+  var totalPx = 0;
 
-  // Shaft candidates: elongated, not closed
-  var shafts = shapes.filter(function(s) { return s.ar > 2.8 && !s.isClosed; });
-  // Head/ball candidates: rounder shapes (closed loops or low aspect ratio)
-  var rounds = shapes.filter(function(s) { return s.isClosed || s.ar < 1.8; });
-
-  var minShaftPx = Math.min(c.width, c.height) * 0.06; // at least 6% of canvas
-
-  for (var i = 0; i < shafts.length; i++) {
-    var shaft = shafts[i];
-    var shaftLen = Math.max(shaft.w, shaft.h);
-    if (shaftLen < minShaftPx) continue;
-
-    for (var j = 0; j < rounds.length; j++) {
-      var round = rounds[j];
-      if (round === shaft) continue;
-      var dist = Math.hypot(round.cx - shaft.cx, round.cy - shaft.cy);
-      // Round shape centroid within 80% of shaft length from shaft centroid
-      if (dist < shaftLen * 0.8 && dist > shaftLen * 0.05) {
-        // Round must be near one END of the shaft (not the middle)
-        var vertical = shaft.h > shaft.w;
-        var atEnd;
-        if (vertical) {
-          atEnd = round.cy < shaft.minY + shaftLen * 0.35 ||
-                  round.cy > shaft.maxY - shaftLen * 0.35;
-        } else {
-          atEnd = round.cx < shaft.minX + shaftLen * 0.35 ||
-                  round.cx > shaft.maxX - shaftLen * 0.35;
-        }
-        if (atEnd) return true;
+  for (var y = 0; y < S; y++) {
+    var lx = -1, rx = -1;
+    for (var x = 0; x < S; x++) {
+      if (d[(y * S + x) * 4 + 3] > 25) {
+        if (lx < 0) lx = x;
+        rx = x;
+        totalPx++;
       }
     }
+    rowSpans[y] = lx < 0 ? 0 : (rx - lx + 1);
   }
-  return false;
+  for (var x = 0; x < S; x++) {
+    var ty = -1, by = -1;
+    for (var y = 0; y < S; y++) {
+      if (d[(y * S + x) * 4 + 3] > 25) {
+        if (ty < 0) ty = y;
+        by = y;
+      }
+    }
+    colSpans[x] = ty < 0 ? 0 : (by - ty + 1);
+  }
+
+  if (totalPx < 20) return false;
+
+  // Bounding box in downsampled space
+  var r0 = 0, r1 = S - 1, c0 = 0, c1 = S - 1;
+  while (r0 < S && rowSpans[r0] === 0) r0++;
+  while (r1 > r0 && rowSpans[r1] === 0) r1--;
+  while (c0 < S && colSpans[c0] === 0) c0++;
+  while (c1 > c0 && colSpans[c1] === 0) c1--;
+
+  var bH = r1 - r0, bW = c1 - c0;
+  if (bH < 8 || bW < 3) return false; // too small to evaluate
+
+  // Analyse the longer axis
+  if (bH >= bW) {
+    return ibCheckPenisProfile(rowSpans, r0, r1);
+  } else {
+    return ibCheckPenisProfile(colSpans, c0, c1);
+  }
+}
+
+// Checks whether a 1-D span profile has a penis shape:
+// shaft (narrow, middle section) + head (wide bump at one end).
+function ibCheckPenisProfile(spans, start, end) {
+  var len = end - start + 1;
+  if (len < 8) return false;
+
+  var seg = spans.slice(start, end + 1);
+  var maxSpan = Math.max.apply(null, seg);
+  if (maxSpan < 2) return false;
+
+  var norm = seg.map(function(v) { return v / maxSpan; });
+
+  // Averages for three thirds: top / middle / bottom
+  var t = Math.floor(len / 3);
+  var topSum = 0, midSum = 0, botSum = 0;
+  for (var i = 0; i < t; i++)         topSum += norm[i];
+  for (var i = t; i < 2 * t; i++)     midSum += norm[i];
+  for (var i = 2 * t; i < len; i++)   botSum += norm[i];
+  var topAvg = topSum / t;
+  var midAvg = midSum / t;
+  var botAvg = botSum / (len - 2 * t);
+
+  // Shaft must have some presence; head must be noticeably wider than shaft
+  var SHAFT_MIN = 0.12;   // shaft = at least 12 % of max width
+  var HEAD_RATIO = 1.45;  // head = at least 45 % wider than shaft
+  var HEAD_MIN  = 0.28;   // head section average must be at least 28 % of max
+
+  var shaftOk  = midAvg >= SHAFT_MIN;
+  var headTop  = topAvg > midAvg * HEAD_RATIO && topAvg >= HEAD_MIN;
+  var headBot  = botAvg > midAvg * HEAD_RATIO && botAvg >= HEAD_MIN;
+
+  return shaftOk && (headTop || headBot);
 }
 
 function ibShowNsfwToast() {
