@@ -6996,20 +6996,89 @@ function ibPointerUp() {
 
 function ibCheckForPenis() {
   if (!ibIsOpen || ibAllStrokes.length < 1) return;
-  var result = ibAnalyzeDrawing();
-  if (result.penis || result.swastika) {
-    remove(ibStrokesRef);
-    ibAllStrokes = [];
-    ibShowNsfwToast(result.swastika ? 'swastika' : 'penis');
+
+  // Group spatially close strokes, then check each group independently
+  // so we only delete the offending drawing and leave everything else intact.
+  var groups = ibGroupStrokes(ibAllStrokes);
+  var toDelete = [];
+  var toastType = null;
+
+  groups.forEach(function(group) {
+    var result = ibAnalyzeDrawing(group);
+    if (result.penis || result.swastika) {
+      group.forEach(function(s) { toDelete.push(s.key); });
+      if (!toastType) toastType = result.swastika ? 'swastika' : 'penis';
+    }
+  });
+
+  if (toDelete.length > 0) {
+    // Delete only the offending strokes from Firebase
+    toDelete.forEach(function(key) {
+      remove(ref(db, 'session/imageBoard/strokes/' + key));
+    });
+    // Remove from local cache
+    ibAllStrokes = ibAllStrokes.filter(function(s) {
+      return toDelete.indexOf(s.key) === -1;
+    });
+    ibShowNsfwToast(toastType);
   }
 }
 
-// Re-renders all current strokes into an S×S offscreen canvas using thick
-// lines (min 6 px) so that thin strokes don't vanish when downscaled.
-function ibRenderStrokesToGrid(S) {
-  var c = ibGetCanvas();
-  var cW = c.width || 1, cH = c.height || 1;
-  var scaleX = S / cW, scaleY = S / cH;
+// Groups strokes by spatial proximity using union-find on overlapping bounding
+// boxes (padded by 8 % of normalised canvas space).
+function ibGroupStrokes(strokes) {
+  var PAD = 0.08;
+  var items = strokes.map(function(s) {
+    if (!s.data || !s.data.points || s.data.points.length === 0) return null;
+    var xs = s.data.points.map(function(p) { return p.nx; });
+    var ys = s.data.points.map(function(p) { return p.ny; });
+    return {
+      s: s,
+      x0: Math.min.apply(null,xs)-PAD, x1: Math.max.apply(null,xs)+PAD,
+      y0: Math.min.apply(null,ys)-PAD, y1: Math.max.apply(null,ys)+PAD
+    };
+  }).filter(Boolean);
+
+  var parent = items.map(function(_,i){ return i; });
+  function find(i){ return parent[i]===i ? i : (parent[i]=find(parent[i])); }
+  function unite(a,b){ parent[find(a)]=find(b); }
+
+  for (var i=0; i<items.length; i++) {
+    for (var j=i+1; j<items.length; j++) {
+      var a=items[i], b=items[j];
+      if (a.x0<=b.x1 && a.x1>=b.x0 && a.y0<=b.y1 && a.y1>=b.y0) unite(i,j);
+    }
+  }
+  var map = {};
+  items.forEach(function(item,i){
+    var r = find(i);
+    if (!map[r]) map[r] = [];
+    map[r].push(item.s);
+  });
+  return Object.keys(map).map(function(k){ return map[k]; });
+}
+
+// Renders a stroke group into an S×S offscreen canvas, normalised to the
+// group's own bounding box (with margin) so small drawings fill the grid.
+// Aspect ratio is preserved; lineWidth is at least 5 px in grid space.
+function ibRenderStrokesToGrid(S, strokes) {
+  // Find tight bounding box in normalised coords
+  var mnx=1, mxx=0, mny=1, mxy=0, any=false;
+  strokes.forEach(function(s) {
+    if (!s.data || !s.data.points) return;
+    s.data.points.forEach(function(p) {
+      if (!any) { mnx=mxx=p.nx; mny=mxy=p.ny; any=true; }
+      if (p.nx<mnx) mnx=p.nx; if (p.nx>mxx) mxx=p.nx;
+      if (p.ny<mny) mny=p.ny; if (p.ny>mxy) mxy=p.ny;
+    });
+  });
+  if (!any) return document.createElement('canvas');
+
+  var rX = mxx-mnx || 0.001, rY = mxy-mny || 0.001;
+  var usable = S * 0.84;                          // 8% margin each side
+  var scale  = Math.min(usable/rX, usable/rY);   // preserve aspect ratio
+  var ox = (S - rX*scale)/2, oy = (S - rY*scale)/2;
+
   var off = document.createElement('canvas');
   off.width = off.height = S;
   var octx = off.getContext('2d');
@@ -7017,27 +7086,27 @@ function ibRenderStrokesToGrid(S) {
   octx.strokeStyle = '#ffffff';
   octx.lineCap = 'round';
   octx.lineJoin = 'round';
-  ibAllStrokes.forEach(function(s) {
+
+  strokes.forEach(function(s) {
     var data = s.data;
     if (!data || !data.points || data.erase || data.points.length < 1) return;
     var pts = data.points.map(function(p) {
-      var px = ibToPix(p.nx, p.ny);
-      return { x: px.px * scaleX, y: px.py * scaleY };
+      return { x: ox+(p.nx-mnx)*scale, y: oy+(p.ny-mny)*scale };
     });
-    octx.lineWidth = Math.max(6, (data.size || 4) * Math.min(scaleX, scaleY));
+    octx.lineWidth = Math.max(5, (data.size || 4) * scale * 0.006);
     octx.beginPath();
     octx.moveTo(pts[0].x, pts[0].y);
-    for (var i = 1; i < pts.length; i++) octx.lineTo(pts[i].x, pts[i].y);
-    if (pts.length === 1) octx.lineTo(pts[0].x + 0.1, pts[0].y);
+    for (var i=1; i<pts.length; i++) octx.lineTo(pts[i].x, pts[i].y);
+    if (pts.length===1) octx.lineTo(pts[0].x+0.1, pts[0].y);
     octx.stroke();
   });
   return off;
 }
 
-// Main entry: builds the analysis grid, then runs both detectors.
-function ibAnalyzeDrawing() {
+// Main entry: builds the analysis grid for a stroke group, then runs both detectors.
+function ibAnalyzeDrawing(strokes) {
   var S = 96;
-  var off = ibRenderStrokesToGrid(S);
+  var off = ibRenderStrokesToGrid(S, strokes);
   var d = off.getContext('2d').getImageData(0, 0, S, S).data;
 
   // Binary grid + row/col span arrays
