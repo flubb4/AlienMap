@@ -233,6 +233,40 @@
       <div id="history-list"></div>
     </div>
 
+    <!-- ── SETTINGS / DATA ── -->
+    <div id="page-settings" class="page">
+      <div class="section-hd"><h2>Daten &amp; Export</h2></div>
+
+      <div class="card">
+        <div class="card-title">Daten &uuml;bertragen (z.B. Browser → Home-Screen-App)</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">
+          iOS trennt Browser und Home-Screen-App. Exportiere deine Daten hier als Code,
+          kopiere ihn und importiere ihn dann in der anderen Umgebung.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-primary btn-full" onclick="exportData()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Exportieren &amp; in Zwischenablage kopieren
+          </button>
+          <button class="btn btn-ghost btn-full" onclick="openImport()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Importieren (Code einf&uuml;gen)
+          </button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:4px">
+        <div class="card-title">Alle Daten l&ouml;schen</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Setzt die App vollst&auml;ndig zur&uuml;ck. Nicht r&uuml;ckg&auml;ngig zu machen!</p>
+        <button class="btn btn-danger btn-full" onclick="clearAllData()">Alle Daten l&ouml;schen</button>
+      </div>
+
+      <div class="card" style="margin-top:4px">
+        <div class="card-title">Speicher</div>
+        <div id="storage-info" style="font-size:13px;color:var(--text2)"></div>
+      </div>
+    </div>
+
     <!-- ── EXERCISES ── -->
     <div id="page-exercises" class="page">
       <div class="section-hd">
@@ -274,6 +308,12 @@
       </svg>
       &Uuml;bungen
     </div>
+    <div class="tab" onclick="showPage('settings',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+      Daten
+    </div>
   </div>
 </div>
 
@@ -309,6 +349,7 @@ function showPage(name, tabEl) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'log') { initLogForm(); renderHistory(); }
   if (name === 'exercises') renderExercises();
+  if (name === 'settings') renderSettings();
 }
 
 // ════════════════════════════════
@@ -692,6 +733,79 @@ function showToast(msg) {
   t.style.opacity = '1';
   clearTimeout(t._to);
   t._to = setTimeout(() => t.style.opacity = '0', 2200);
+}
+
+// ════════════════════════════════
+//  SETTINGS / DATA TRANSFER
+// ════════════════════════════════
+function renderSettings() {
+  const exercises = DB.exercises;
+  const logs = DB.logs;
+  const bytes = JSON.stringify({exercises, logs}).length;
+  const kb = (bytes / 1024).toFixed(1);
+  document.getElementById('storage-info').innerHTML =
+    `${exercises.length} Übungen · ${logs.length} Log-Einträge · ~${kb} KB`;
+}
+
+function exportData() {
+  const payload = JSON.stringify({ exercises: DB.exercises, logs: DB.logs });
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(payload).then(() => {
+      showToast('📋 In Zwischenablage kopiert!');
+    }).catch(() => showExportFallback(payload));
+  } else {
+    showExportFallback(payload);
+  }
+}
+
+function showExportFallback(payload) {
+  document.getElementById('modal-title').textContent = 'Daten exportieren';
+  document.getElementById('modal-body').innerHTML = `
+    <p style="font-size:13px;color:var(--text2);margin-bottom:10px">Alles markieren, kopieren und in der anderen App unter "Importieren" einf&uuml;gen:</p>
+    <textarea id="export-ta" readonly style="width:100%;height:160px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid #33334a;border-radius:10px;padding:10px;font-family:monospace">${payload}</textarea>
+    <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="document.getElementById('export-ta').select();document.execCommand('copy');showToast('Kopiert!')">Kopieren</button>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openImport() {
+  document.getElementById('modal-title').textContent = 'Daten importieren';
+  document.getElementById('modal-body').innerHTML = `
+    <p style="font-size:13px;color:var(--text2);margin-bottom:10px">Exportierten Code hier einf&uuml;gen:</p>
+    <textarea id="import-ta" placeholder="Code hier einf&uuml;gen..." style="width:100%;height:160px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid #33334a;border-radius:10px;padding:10px;font-family:monospace"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal()">Abbrechen</button>
+      <button class="btn btn-success" style="flex:1" onclick="importData()">Importieren</button>
+    </div>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function importData() {
+  const raw = document.getElementById('import-ta').value.trim();
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    if (!data.exercises || !data.logs) throw new Error('Ungültiges Format');
+    if (!confirm(`${data.exercises.length} Übungen und ${data.logs.length} Einträge importieren?\nVorhandene Daten werden dabei ERSETZT.`)) return;
+    DB.exercises = data.exercises;
+    DB.logs = data.logs;
+    closeModal();
+    renderDashboard();
+    renderSettings();
+    showToast('✅ Daten importiert!');
+  } catch(e) {
+    alert('Fehler beim Importieren. Stelle sicher, dass du den vollständigen Export-Code eingefügt hast.');
+  }
+}
+
+function clearAllData() {
+  if (!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden!')) return;
+  DB.exercises = [];
+  DB.logs = [];
+  renderDashboard();
+  renderSettings();
+  showToast('Daten gelöscht.');
 }
 
 // ════════════════════════════════
