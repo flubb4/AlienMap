@@ -134,6 +134,27 @@
   /* ── Progress bar ── */
   .prog-bar-wrap { background: var(--surface2); border-radius: 4px; height: 6px; margin-top: 6px; }
   .prog-bar { height: 6px; border-radius: 4px; background: linear-gradient(90deg, var(--accent), #a29bfe); transition: width .4s; }
+
+  /* ── Lightbox ── */
+  #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.93); z-index: 200; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+  #lightbox.open { display: flex; }
+  #lightbox img { max-width: 95vw; max-height: 82vh; border-radius: 12px; object-fit: contain; }
+  #lightbox-close { color: #fff; font-size: 16px; font-weight: 600; padding: 8px 20px; background: rgba(255,255,255,.12); border-radius: 20px; cursor: pointer; }
+
+  /* ── Log exercise cards ── */
+  .log-ex-card { background: var(--surface); border-radius: var(--radius); padding: 14px; margin-bottom: 14px; }
+  .log-ex-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .log-ex-thumb { width: 42px; height: 42px; border-radius: 8px; background: var(--surface2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; }
+  .log-ex-thumb.has-img { cursor: pointer; }
+  .log-ex-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+  .log-ex-title { font-weight: 700; font-size: 15px; flex: 1; }
+  .log-ex-last { font-size: 12px; color: var(--text2); margin-bottom: 10px; padding: 7px 10px; background: var(--surface2); border-radius: 8px; line-height: 1.5; }
+  .log-ex-last strong { color: var(--text); }
+
+  /* ── Reorder buttons ── */
+  .reorder-btns { display: flex; flex-direction: column; gap: 3px; }
+  .reorder-btn { width: 28px; height: 24px; display: flex; align-items: center; justify-content: center; background: var(--surface2); border: none; border-radius: 6px; cursor: pointer; color: var(--text2); font-size: 12px; }
+  .reorder-btn:active { opacity: .6; }
 </style>
 </head>
 <body>
@@ -185,46 +206,13 @@
 
     <!-- ── LOG ── -->
     <div id="page-log" class="page">
-      <div class="section-hd">
-        <h2>Training loggen</h2>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <h2 style="font-size:16px;font-weight:700;flex:1">Training loggen</h2>
+        <input type="date" id="session-date" style="background:var(--surface2);color:var(--text);border:1px solid #33334a;border-radius:10px;padding:7px 10px;font-size:13px;outline:none;-webkit-appearance:none;">
       </div>
+      <div id="log-ex-list"></div>
 
-      <div class="card">
-        <div class="field">
-          <label>Datum</label>
-          <input type="date" id="log-date">
-        </div>
-        <div class="field">
-          <label>&Uuml;bung</label>
-          <select id="log-exercise">
-            <option value="">– Übung wählen –</option>
-          </select>
-        </div>
-        <div class="row3">
-          <div class="field">
-            <label>Gewicht (kg)</label>
-            <input type="number" id="log-weight" placeholder="0" min="0" step="0.5">
-          </div>
-          <div class="field">
-            <label>S&auml;tze</label>
-            <input type="number" id="log-sets" placeholder="3" min="1" max="20">
-          </div>
-          <div class="field">
-            <label>Wdh.</label>
-            <input type="number" id="log-reps" placeholder="10" min="1" max="100">
-          </div>
-        </div>
-        <div class="field">
-          <label>Notiz (optional)</label>
-          <textarea id="log-note" placeholder="z.B. Form war gut, nächstes Mal +2.5kg"></textarea>
-        </div>
-        <button class="btn btn-success btn-full" onclick="saveLog()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Eintrag speichern
-        </button>
-      </div>
-
-      <div class="section-hd" style="margin-top:16px">
+      <div class="section-hd" style="margin-top:8px">
         <h2>Verlauf</h2>
         <select id="history-filter" onchange="renderHistory()" style="background:var(--surface2);color:var(--text);border:none;border-radius:8px;padding:4px 8px;font-size:12px;">
           <option value="">Alle</option>
@@ -325,6 +313,12 @@
   </div>
 </div>
 
+<!-- ── LIGHTBOX ── -->
+<div id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-close">✕ Schließen</div>
+</div>
+
 <script>
 // ════════════════════════════════
 //  DATA LAYER
@@ -347,7 +341,7 @@ function showPage(name, tabEl) {
   document.getElementById('page-' + name).classList.add('active');
   tabEl.classList.add('active');
   if (name === 'dashboard') renderDashboard();
-  if (name === 'log') { initLogForm(); renderHistory(); }
+  if (name === 'log') { renderLogPage(); renderHistory(); }
   if (name === 'exercises') renderExercises();
   if (name === 'settings') renderSettings();
 }
@@ -366,8 +360,8 @@ function filterMuscle(el) {
 
 function renderExercises() {
   const list = document.getElementById('exercise-list');
-  let exs = DB.exercises;
-  if (muscleFilter !== 'all') exs = exs.filter(e => e.muscle === muscleFilter);
+  const allExs = DB.exercises;
+  let exs = muscleFilter === 'all' ? allExs : allExs.filter(e => e.muscle === muscleFilter);
 
   if (!exs.length) {
     list.innerHTML = `<div class="empty">
@@ -376,14 +370,21 @@ function renderExercises() {
     return;
   }
 
-  list.innerHTML = exs.map(ex => {
+  list.innerHTML = exs.map((ex, i) => {
+    const allIdx = allExs.findIndex(e => e.id === ex.id);
     const logs = DB.logs.filter(l => l.exId === ex.id);
     const maxW = logs.length ? Math.max(...logs.map(l => parseFloat(l.weight)||0)) : null;
     const imgHtml = ex.image
-      ? `<img src="${ex.image}" alt="${ex.name}">`
+      ? `<img src="${ex.image}" alt="${ex.name}" onclick="openLightbox('${ex.id}')">`
       : `<span>${ex.emoji || '🏋️'}</span>`;
+    const canUp = allIdx > 0;
+    const canDown = allIdx < allExs.length - 1;
     return `<div class="ex-card">
-      <div class="ex-img">${imgHtml}</div>
+      <div class="reorder-btns">
+        <button class="reorder-btn" onclick="moveExercise('${ex.id}',-1)" ${canUp?'':'disabled style="opacity:.25"'}>▲</button>
+        <button class="reorder-btn" onclick="moveExercise('${ex.id}',1)" ${canDown?'':'disabled style="opacity:.25"'}>▼</button>
+      </div>
+      <div class="ex-img" style="${ex.image?'cursor:pointer':''}" onclick="${ex.image?`openLightbox('${ex.id}')`:''}">${imgHtml}</div>
       <div class="ex-info">
         <div class="ex-name">${ex.name}</div>
         <div class="ex-meta">
@@ -398,6 +399,29 @@ function renderExercises() {
       </div>
     </div>`;
   }).join('');
+}
+
+function moveExercise(id, dir) {
+  const exs = DB.exercises;
+  const idx = exs.findIndex(e => e.id === id);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= exs.length) return;
+  const arr = [...exs];
+  [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
+  DB.exercises = arr;
+  renderExercises();
+}
+
+function openLightbox(exId) {
+  const ex = DB.exercises.find(e => e.id === exId);
+  if (!ex || !ex.image) return;
+  document.getElementById('lightbox-img').src = ex.image;
+  document.getElementById('lightbox').classList.add('open');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-img').src = '';
 }
 
 function openAddExercise() {
@@ -497,51 +521,94 @@ function deleteExercise(id) {
 // ════════════════════════════════
 //  LOG PAGE
 // ════════════════════════════════
-function initLogForm() {
-  const dateEl = document.getElementById('log-date');
+function renderLogPage() {
+  const dateEl = document.getElementById('session-date');
   if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0, 10);
 
-  const sel = document.getElementById('log-exercise');
+  // History filter
   const hf = document.getElementById('history-filter');
   const exs = DB.exercises;
   const opts = exs.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-  sel.innerHTML = '<option value="">– Übung wählen –</option>' + opts;
   hf.innerHTML = '<option value="">Alle</option>' + opts;
+
+  // Exercise cards
+  const container = document.getElementById('log-ex-list');
+  if (!exs.length) {
+    container.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v16m8-8H4"/></svg><p>Erst Übungen anlegen.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = exs.map(ex => {
+    const exLogs = DB.logs.filter(l => l.exId === ex.id).sort((a,b) => b.date.localeCompare(a.date) || b.ts - a.ts);
+    const last = exLogs[0];
+    const thumbHtml = ex.image
+      ? `<div class="log-ex-thumb has-img" onclick="openLightbox('${ex.id}')"><img src="${ex.image}" alt="${ex.name}"></div>`
+      : `<div class="log-ex-thumb"><span>${ex.emoji || '🏋️'}</span></div>`;
+    const lastHtml = last
+      ? `<div class="log-ex-last">Zuletzt <strong>${formatDate(last.date)}</strong>: <strong>${last.weight} kg</strong> · ${last.sets} Sätze × ${last.reps} Wdh.</div>`
+      : `<div class="log-ex-last" style="color:var(--text2);font-style:italic">Noch nicht geloggt</div>`;
+    return `<div class="log-ex-card">
+      <div class="log-ex-header">
+        ${thumbHtml}
+        <div class="log-ex-title">${ex.name}</div>
+        <span class="badge muscle">${ex.muscle}</span>
+      </div>
+      ${lastHtml}
+      <div class="row3" style="margin-bottom:8px">
+        <div class="field" style="margin-bottom:0">
+          <label>Gewicht (kg)</label>
+          <input type="number" id="lw-${ex.id}" placeholder="${last ? last.weight : '0'}" min="0" step="0.5">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Sätze</label>
+          <input type="number" id="ls-${ex.id}" placeholder="${last ? last.sets : '3'}" min="1" max="20">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Wdh.</label>
+          <input type="number" id="lr-${ex.id}" placeholder="${last ? last.reps : '10'}" min="1" max="100">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:8px">
+        <input type="text" id="ln-${ex.id}" placeholder="Notiz (optional)">
+      </div>
+      <button class="btn btn-success btn-full" onclick="saveLogEx('${ex.id}')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Speichern
+      </button>
+    </div>`;
+  }).join('');
 }
 
-function saveLog() {
-  const exId = document.getElementById('log-exercise').value;
-  const weight = document.getElementById('log-weight').value;
-  const sets = document.getElementById('log-sets').value;
-  const reps = document.getElementById('log-reps').value;
-  const date = document.getElementById('log-date').value;
-  if (!exId) { alert('Bitte eine Übung wählen.'); return; }
-  if (!weight) { alert('Bitte ein Gewicht eingeben.'); return; }
-  if (!date) { alert('Bitte ein Datum wählen.'); return; }
+function saveLogEx(exId) {
+  const date = document.getElementById('session-date').value;
+  if (!date) { alert('Bitte Datum wählen.'); return; }
+  const wEl = document.getElementById('lw-' + exId);
+  const weight = wEl.value || wEl.placeholder;
+  if (!weight || weight === '0') { alert('Bitte ein Gewicht eingeben.'); return; }
 
   const log = {
     id: uid(),
     exId,
     weight: parseFloat(weight),
-    sets: parseInt(sets) || 1,
-    reps: parseInt(reps) || 1,
+    sets: parseInt(document.getElementById('ls-' + exId).value || document.getElementById('ls-' + exId).placeholder) || 1,
+    reps: parseInt(document.getElementById('lr-' + exId).value || document.getElementById('lr-' + exId).placeholder) || 1,
     date,
-    note: document.getElementById('log-note').value.trim(),
+    note: document.getElementById('ln-' + exId).value.trim(),
     ts: Date.now(),
   };
 
   const logs = DB.logs;
-  // Check PR
-  const prevMax = logs.filter(l=>l.exId===exId).reduce((m,l)=>Math.max(m,l.weight||0),0);
+  const prevMax = logs.filter(l => l.exId === exId).reduce((m,l) => Math.max(m, l.weight||0), 0);
   DB.logs = [...logs, log];
 
-  // Reset form
-  document.getElementById('log-weight').value = '';
-  document.getElementById('log-sets').value = '';
-  document.getElementById('log-reps').value = '';
-  document.getElementById('log-note').value = '';
-  document.getElementById('log-exercise').value = '';
+  // Clear fields
+  document.getElementById('lw-' + exId).value = '';
+  document.getElementById('ls-' + exId).value = '';
+  document.getElementById('lr-' + exId).value = '';
+  document.getElementById('ln-' + exId).value = '';
 
+  // Update last entry display for this card only
+  renderLogPage();
   renderHistory();
 
   if (log.weight > prevMax && prevMax > 0) {
