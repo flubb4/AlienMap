@@ -900,6 +900,39 @@
 
   /* ONLINE PLAYERS PANEL */
   .players-section { padding:10px; border-bottom:1px solid var(--border); }
+
+  /* ── SUPPLY TRACKER ── */
+  .supply-section { padding:8px 10px; border-bottom:1px solid var(--border); }
+  .supply-title-row {
+    display:flex; align-items:center; justify-content:space-between;
+    cursor:pointer; user-select:none; margin-bottom:0;
+  }
+  .supply-title-row:hover .sidebar-title-text { color:var(--accent); }
+  .supply-toggle { font-size:7px; color:var(--dim); transition:transform 0.2s; }
+  .supply-section.collapsed .supply-toggle { transform:rotate(180deg); }
+  .supply-section.collapsed #supplyList { display:none; }
+  #supplyList { margin-top:7px; display:flex; flex-direction:column; gap:5px; }
+  .supply-row {
+    display:flex; align-items:center; gap:4px;
+    font-family:"Share Tech Mono",monospace;
+  }
+  .supply-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; transition:background 0.3s; }
+  .supply-name { flex:1; color:var(--dim); font-size:8px; letter-spacing:2px; }
+  .supply-btn {
+    width:17px; height:17px; padding:0;
+    background:transparent; border:1px solid var(--border);
+    color:var(--dim); font-family:"Share Tech Mono",monospace;
+    font-size:12px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; transition:all 0.15s;
+  }
+  .supply-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .supply-val { font-size:10px; min-width:20px; text-align:right; transition:color 0.3s; }
+  .supply-sep { font-size:8px; color:var(--border); }
+  .supply-max { font-size:8px; color:var(--border); min-width:16px; }
+  .supply-val.ok   { color:#44cc44; }
+  .supply-val.warn { color:#ff8800; }
+  .supply-val.crit { color:#ff4400; }
   .player-entry { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:10px; letter-spacing:1px; }
   .player-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
   .player-name { flex:1; }
@@ -2397,6 +2430,13 @@
       <div class="sidebar-title">// Online Operatives (<span id="playerCount">1</span>)</div>
       <div id="playersList"></div>
     </div>
+    <div class="supply-section" id="supplySection">
+      <div class="supply-title-row" onclick="toggleSupplySection()">
+        <span class="sidebar-title sidebar-title-text" style="margin-bottom:0">// Supplies</span>
+        <span class="supply-toggle" id="supplyToggleIcon">▲</span>
+      </div>
+      <div id="supplyList"></div>
+    </div>
     <div id="wdRejoinBar" style="display:none;padding:8px 10px;border-bottom:1px solid #441100;background:#0d0500;">
       <button onclick="wdRejoin()" style="width:100%;background:transparent;border:1px solid #cc6633;color:#cc6633;font-family:'Share Tech Mono',monospace;font-size:9px;padding:6px;cursor:pointer;letter-spacing:2px;animation:travelPulse 1.2s infinite;">🎲 WÜRFEL DÜRFEL — REJOIN</button>
     </div>
@@ -2665,7 +2705,7 @@ function _doLogin(nameUpper) {
   screen.style.transition = 'opacity 0.6s ease';
   screen.style.opacity = '0';
   _authReadyPromise.then(() => {
-    setTimeout(() => { screen.remove(); scans.remove(); _loggedIn = true; heartbeat(); renderDate(); applySessionGateAfterLogin(); updateSessionBtn(); bvInit(); startGlobalIbWatcher(); startHandoutWatcher(); }, 300);
+    setTimeout(() => { screen.remove(); scans.remove(); _loggedIn = true; heartbeat(); renderDate(); applySessionGateAfterLogin(); updateSessionBtn(); bvInit(); startGlobalIbWatcher(); startHandoutWatcher(); startSupplyTracker(); }, 300);
   });
 }
 
@@ -7676,6 +7716,84 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ── END HANDOUT SYSTEM ────────────────────────────────────────────────────────
+
+// ── SUPPLY TRACKER ────────────────────────────────────────────────────────────
+var suppliesRef = ref(db, 'session/supplies');
+var suppliesData = {};
+
+var SUPPLY_DEFS = [
+  { key:'air',    label:'AIR',    max:24 },
+  { key:'supply', label:'SUPPLY', max:20 },
+  { key:'ammo',   label:'AMMO',   max:60 },
+  { key:'power',  label:'POWER',  max:10 },
+];
+
+window.toggleSupplySection = function() {
+  document.getElementById('supplySection').classList.toggle('collapsed');
+};
+
+window.startSupplyTracker = function() {
+  onValue(suppliesRef, function(snap) {
+    var data = snap.val() || {};
+    SUPPLY_DEFS.forEach(function(d) {
+      if (!data[d.key]) data[d.key] = { cur: d.max, max: d.max };
+    });
+    suppliesData = data;
+    renderSupplies();
+  });
+};
+
+function renderSupplies() {
+  var list = document.getElementById('supplyList');
+  if (!list) return;
+  list.innerHTML = '';
+  SUPPLY_DEFS.forEach(function(def) {
+    var item = suppliesData[def.key] || { cur: def.max, max: def.max };
+    var cur = item.cur != null ? item.cur : def.max;
+    var max = item.max != null ? item.max : def.max;
+    var pct = max > 0 ? cur / max : 0;
+    var cls = pct > 0.3 ? 'ok' : pct > 0.1 ? 'warn' : 'crit';
+    var dot = pct > 0.3 ? '#44cc44' : pct > 0.1 ? '#ff8800' : '#ff4400';
+    if (max === 0) { cls = 'ok'; dot = '#333333'; }
+
+    var row = document.createElement('div');
+    row.className = 'supply-row';
+    row.innerHTML =
+      '<div class="supply-dot" style="background:' + dot + '"></div>' +
+      '<span class="supply-name">' + def.label + '</span>' +
+      '<button class="supply-btn" onclick="supplyChange(\'' + def.key + '\',-1)">−</button>' +
+      '<span class="supply-val ' + cls + '">' + cur + '</span>' +
+      '<span class="supply-sep">/</span>' +
+      '<span class="supply-max" id="supplyMax_' + def.key + '">' + max + '</span>' +
+      '<button class="supply-btn" onclick="supplyChange(\'' + def.key + '\',1)">+</button>';
+
+    if (isGM) {
+      var maxEl = row.querySelector('.supply-max');
+      maxEl.style.cursor = 'pointer';
+      maxEl.title = 'Max bearbeiten';
+      maxEl.onclick = (function(k, m) { return function() { supplySetMax(k, m); }; })(def.key, max);
+    }
+    list.appendChild(row);
+  });
+}
+
+window.supplyChange = function(key, delta) {
+  var item = suppliesData[key] || { cur: 0, max: 10 };
+  var max = item.max != null ? item.max : 10;
+  var cur = item.cur != null ? item.cur : 0;
+  var next = Math.max(0, Math.min(max, cur + delta));
+  set(ref(db, 'session/supplies/' + key + '/cur'), next);
+};
+
+function supplySetMax(key, currentMax) {
+  var val = prompt('Max für ' + key.toUpperCase() + ':', currentMax);
+  if (val === null || val.trim() === '') return;
+  var num = parseInt(val, 10);
+  if (isNaN(num) || num < 0) return;
+  var cur = (suppliesData[key] || {}).cur || 0;
+  set(ref(db, 'session/supplies/' + key), { cur: Math.min(cur, num), max: num });
+}
+// ── END SUPPLY TRACKER ────────────────────────────────────────────────────────
 
 </script>
 <!-- HANDOUT PANEL (GM) -->
