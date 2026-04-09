@@ -1716,6 +1716,153 @@
 }
 .wd-close-btn:hover{background:rgba(204,102,51,0.15)}
 
+  /* ── HANDOUT SYSTEM ── */
+  .gm-ho-btn {
+    width:100%; padding:7px 0; margin-bottom:4px;
+    background:transparent; border:1px solid #339966;
+    color:#44cc88; font-family:"Share Tech Mono",monospace;
+    font-size:10px; letter-spacing:2px; cursor:pointer;
+    transition:all 0.2s;
+  }
+  .gm-ho-btn:hover { background:rgba(68,204,136,0.08); box-shadow:0 0 12px rgba(68,204,136,0.3); }
+
+  #handoutPanel {
+    position:fixed; inset:0; z-index:850;
+    background:rgba(0,0,0,0.85); display:none;
+    align-items:center; justify-content:center;
+    font-family:"Share Tech Mono",monospace;
+  }
+  #handoutPanel.open { display:flex; }
+  .ho-box {
+    background:#0a0f0a; border:1px solid #339966;
+    box-shadow:0 0 30px rgba(68,204,136,0.2);
+    width:min(520px,90vw); padding:24px;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .ho-box-title {
+    color:#44cc88; font-size:12px; letter-spacing:3px;
+    border-bottom:1px solid #1a3322; padding-bottom:10px;
+  }
+  .ho-targets-label { color:#558866; font-size:10px; letter-spacing:2px; margin-bottom:6px; }
+  .ho-all-row {
+    display:flex; align-items:center; gap:8px;
+    color:#44cc88; font-size:11px; cursor:pointer; margin-bottom:8px;
+  }
+  .ho-all-row input { accent-color:#44cc88; width:14px; height:14px; cursor:pointer; }
+  #hoPlayerList {
+    display:flex; flex-wrap:wrap; gap:8px; min-height:28px;
+    padding:8px; border:1px solid #1a3322; background:#050a05;
+    max-height:100px; overflow-y:auto;
+  }
+  .ho-player-chip {
+    display:flex; align-items:center; gap:6px;
+    color:#aabbaa; font-size:10px; cursor:pointer; letter-spacing:1px;
+    padding:3px 8px; border:1px solid #1a3322;
+    transition:all 0.15s;
+  }
+  .ho-player-chip input { accent-color:#44cc88; cursor:pointer; }
+  .ho-player-chip.selected { border-color:#44cc88; color:#44cc88; }
+  #hoText {
+    width:100%; box-sizing:border-box;
+    background:#050a05; border:1px solid #1a3322;
+    color:#88cc99; font-family:"Share Tech Mono",monospace;
+    font-size:11px; padding:10px; resize:vertical;
+    min-height:140px; outline:none; line-height:1.6;
+  }
+  #hoText:focus { border-color:#339966; }
+  #hoText::placeholder { color:#2a4433; }
+  .ho-actions { display:flex; gap:10px; justify-content:flex-end; }
+  .ho-cancel-btn {
+    padding:8px 18px; background:transparent;
+    border:1px solid #333; color:#666;
+    font-family:"Share Tech Mono",monospace; font-size:10px;
+    letter-spacing:2px; cursor:pointer; transition:all 0.2s;
+  }
+  .ho-cancel-btn:hover { border-color:#666; color:#999; }
+  .ho-send-btn {
+    padding:8px 18px; background:transparent;
+    border:1px solid #44cc88; color:#44cc88;
+    font-family:"Share Tech Mono",monospace; font-size:10px;
+    letter-spacing:2px; cursor:pointer; transition:all 0.2s;
+  }
+  .ho-send-btn:hover { background:rgba(68,204,136,0.12); box-shadow:0 0 14px rgba(68,204,136,0.3); }
+
+  /* ── CRT HANDOUT OVERLAY (player-side) ── */
+  #crtOverlay {
+    position:fixed; inset:0; z-index:900;
+    background:#000; display:none;
+    align-items:center; justify-content:center;
+    font-family:"Share Tech Mono",monospace;
+  }
+  #crtOverlay.open { display:flex; }
+  /* Scanlines */
+  #crtOverlay::before {
+    content:''; position:absolute; inset:0;
+    background:repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px
+    );
+    pointer-events:none; z-index:1;
+  }
+  /* Screen flicker */
+  @keyframes crtFlicker {
+    0%,100%{opacity:1} 92%{opacity:1} 93%{opacity:0.97} 94%{opacity:1} 96%{opacity:0.98}
+  }
+  #crtOverlay.open { animation:crtFlicker 4s infinite; }
+  .crt-screen {
+    position:relative; z-index:2;
+    width:min(760px,92vw); max-height:85vh;
+    display:flex; flex-direction:column; gap:0;
+    padding:40px 50px; box-sizing:border-box;
+    overflow:hidden;
+  }
+  /* CRT screen edge vignette */
+  .crt-screen::after {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(ellipse at center,
+      transparent 60%, rgba(0,20,0,0.6) 100%);
+  }
+  .crt-header-line {
+    color:#20c20e; font-size:10px; letter-spacing:4px;
+    margin-bottom:24px; opacity:0.7;
+    text-shadow:0 0 8px #20c20e;
+  }
+  .crt-divider {
+    border:none; border-top:1px solid #0d5c0d;
+    margin:12px 0; opacity:0.5;
+  }
+  #crtBody {
+    color:#20c20e; font-size:13px; line-height:1.9;
+    white-space:pre-wrap; word-break:break-word;
+    overflow-y:auto; flex:1;
+    text-shadow:0 0 6px rgba(32,194,14,0.7);
+    max-height:50vh;
+    scrollbar-width:none;
+  }
+  #crtBody::-webkit-scrollbar { display:none; }
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+  #crtCursor {
+    display:inline-block; width:8px; height:14px;
+    background:#20c20e; margin-left:2px;
+    animation:blink 0.8s infinite;
+    vertical-align:middle;
+    box-shadow:0 0 6px #20c20e;
+  }
+  .crt-footer-line {
+    margin-top:20px; color:#0d5c0d; font-size:10px;
+    letter-spacing:3px; text-align:center; opacity:0;
+    transition:opacity 0.6s;
+  }
+  .crt-footer-line.visible { opacity:1; }
+  .crt-skip-btn {
+    position:absolute; bottom:16px; right:24px; z-index:3;
+    background:transparent; border:1px solid #0d5c0d;
+    color:#0d5c0d; font-family:"Share Tech Mono",monospace;
+    font-size:9px; letter-spacing:2px; padding:4px 10px;
+    cursor:pointer; transition:all 0.2s;
+  }
+  .crt-skip-btn:hover { border-color:#20c20e; color:#20c20e; }
+
   /* ── IMAGE BOARD OVERLAY ── */
   #imageBoardOverlay {
     position:fixed; inset:0; z-index:700;
@@ -2165,6 +2312,7 @@
         <button class="gm-init-btn" onclick="openInitiative()">⚡ Initiative Draw</button>
         <button class="gm-wd-btn" onclick="openWuerfelLobby()">🎲 Würfel Dürfel</button>
         <button class="gm-ib-btn" onclick="openImageBoard()">🖼 Image Board</button>
+        <button class="gm-ho-btn" onclick="openHandoutPanel()">📄 Transmission</button>
         <button class="gm-session-btn" id="gmSessionBtn" onclick="toggleSession()">
           ✓ Session Active — Close Map
         </button>
@@ -2417,7 +2565,7 @@ function _doLogin(nameUpper) {
   screen.style.transition = 'opacity 0.6s ease';
   screen.style.opacity = '0';
   _authReadyPromise.then(() => {
-    setTimeout(() => { screen.remove(); scans.remove(); _loggedIn = true; heartbeat(); renderDate(); applySessionGateAfterLogin(); updateSessionBtn(); bvInit(); startGlobalIbWatcher(); }, 300);
+    setTimeout(() => { screen.remove(); scans.remove(); _loggedIn = true; heartbeat(); renderDate(); applySessionGateAfterLogin(); updateSessionBtn(); bvInit(); startGlobalIbWatcher(); startHandoutWatcher(); }, 300);
   });
 }
 
@@ -7253,7 +7401,214 @@ window.addEventListener('resize', function() {
 });
 // ── END IMAGE BOARD ─────────────────────────────────────────────────────────
 
+// ── HANDOUT SYSTEM ───────────────────────────────────────────────────────────
+var handoutRef = ref(db, 'session/handout');
+var hoLastTs   = 0;   // ignore handouts already seen before this session
+var crtTyping  = false;
+var crtSkipped = false;
+var crtInterval = null;
+
+// ── GM: open panel, populate player list ─────────────────────────────────────
+window.openHandoutPanel = function() {
+  if (!isGM) return;
+  document.getElementById('handoutPanel').classList.add('open');
+  hoPopulatePlayers();
+};
+
+window.closeHandoutPanel = function() {
+  document.getElementById('handoutPanel').classList.remove('open');
+};
+
+function hoPopulatePlayers() {
+  var list = document.getElementById('hoPlayerList');
+  list.innerHTML = '';
+  document.getElementById('hoAll').checked = false;
+  // Build from the live online players set
+  var players = window._onlinePlayers || new Set();
+  players.forEach(function(name) {
+    if (name === myName) return; // don't include the GM
+    var chip = document.createElement('label');
+    chip.className = 'ho-player-chip';
+    chip.innerHTML = '<input type="checkbox" value="' + name + '"> ' + name;
+    chip.querySelector('input').addEventListener('change', function() {
+      chip.classList.toggle('selected', this.checked);
+      if (!this.checked) document.getElementById('hoAll').checked = false;
+    });
+    list.appendChild(chip);
+  });
+  if (list.children.length === 0) {
+    list.innerHTML = '<span style="color:#2a4433;font-size:10px;letter-spacing:1px">NO OPERATIVES ONLINE</span>';
+  }
+}
+
+window.hoToggleAll = function(cb) {
+  document.querySelectorAll('#hoPlayerList .ho-player-chip input').forEach(function(inp) {
+    inp.checked = cb.checked;
+    inp.closest('label').classList.toggle('selected', cb.checked);
+  });
+};
+
+window.sendHandout = function() {
+  if (!isGM) return;
+  var text = document.getElementById('hoText').value.trim();
+  if (!text) return;
+
+  // Collect targets
+  var allChecked = document.getElementById('hoAll').checked;
+  var targets;
+  if (allChecked) {
+    targets = 'all';
+  } else {
+    targets = [];
+    document.querySelectorAll('#hoPlayerList .ho-player-chip input:checked').forEach(function(inp) {
+      targets.push(inp.value);
+    });
+    if (targets.length === 0) { alert('Bitte mindestens einen Spieler auswählen.'); return; }
+  }
+
+  var ts = Date.now();
+  set(handoutRef, { text: text, targets: targets, ts: ts }).then(function() {
+    document.getElementById('hoText').value = '';
+    closeHandoutPanel();
+  });
+};
+
+// ── Player: listen for incoming handouts ──────────────────────────────────────
+window.startHandoutWatcher = function() {
+  hoLastTs = Date.now(); // ignore anything already in Firebase before login
+  onValue(handoutRef, function(snap) {
+    var data = snap.val();
+    if (!data || !data.ts || data.ts <= hoLastTs) return;
+    hoLastTs = data.ts;
+
+    // Check if this player is a target
+    var isTarget = false;
+    if (data.targets === 'all') {
+      isTarget = !isGM; // GMs sent it, they don't receive it
+    } else if (Array.isArray(data.targets)) {
+      isTarget = data.targets.indexOf(myName) !== -1;
+    }
+    if (!isTarget) return;
+
+    crtShow(data.text);
+  });
+};
+
+// ── CRT display ───────────────────────────────────────────────────────────────
+function crtShow(text) {
+  var overlay = document.getElementById('crtOverlay');
+  var body    = document.getElementById('crtBody');
+  var footer  = document.getElementById('crtFooter');
+
+  body.innerHTML = '';
+  footer.classList.remove('visible');
+  crtSkipped = false;
+  crtTyping  = true;
+  if (crtInterval) clearInterval(crtInterval);
+
+  overlay.classList.add('open');
+
+  // Add blinking cursor element
+  var cursor = document.createElement('span');
+  cursor.id = 'crtCursor';
+  body.appendChild(cursor);
+
+  var chars  = text.split('');
+  var i      = 0;
+  var DELAY  = 28; // ms per character
+
+  crtInterval = setInterval(function() {
+    if (i >= chars.length) {
+      clearInterval(crtInterval);
+      crtInterval = null;
+      crtTyping   = false;
+      cursor.remove();
+      footer.classList.add('visible');
+      return;
+    }
+    // Insert character before cursor
+    var ch = chars[i++];
+    var node = document.createTextNode(ch);
+    body.insertBefore(node, cursor);
+    // Auto-scroll
+    body.scrollTop = body.scrollHeight;
+  }, DELAY);
+}
+
+window.crtSkip = function() {
+  // Instantly show full text
+  if (crtInterval) clearInterval(crtInterval);
+  crtInterval = null;
+  crtTyping   = false;
+  crtSkipped  = true;
+  var body   = document.getElementById('crtBody');
+  var footer = document.getElementById('crtFooter');
+  // Rebuild with full text (retrieve from last handout — reconstruct from body nodes)
+  var full = body.innerText || body.textContent;
+  // Remove cursor if present
+  var cur = document.getElementById('crtCursor');
+  if (cur) cur.remove();
+  footer.classList.add('visible');
+};
+
+function crtClose() {
+  document.getElementById('crtOverlay').classList.remove('open');
+  document.getElementById('crtBody').innerHTML = '';
+  document.getElementById('crtFooter').classList.remove('visible');
+  if (crtInterval) { clearInterval(crtInterval); crtInterval = null; }
+  crtTyping = false;
+}
+
+// Dismiss on any key press (after typing done)
+document.addEventListener('keydown', function(e) {
+  var overlay = document.getElementById('crtOverlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  if (crtTyping) return;
+  crtClose();
+});
+// Dismiss on click — wired up once after DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+  var ov = document.getElementById('crtOverlay');
+  if (ov) ov.addEventListener('click', function(e) {
+    if (e.target.classList.contains('crt-skip-btn')) return;
+    if (!crtTyping) crtClose();
+  });
+});
+
+// ── END HANDOUT SYSTEM ────────────────────────────────────────────────────────
+
 </script>
+<!-- HANDOUT PANEL (GM) -->
+<div id="handoutPanel">
+  <div class="ho-box">
+    <div class="ho-box-title">// WEYLAND-YUTANI — SECURE TRANSMISSION</div>
+    <div>
+      <div class="ho-targets-label">RECIPIENTS</div>
+      <label class="ho-all-row">
+        <input type="checkbox" id="hoAll" onchange="hoToggleAll(this)"> ALL OPERATIVES
+      </label>
+      <div id="hoPlayerList"></div>
+    </div>
+    <textarea id="hoText" placeholder="Paste transmission text here..."></textarea>
+    <div class="ho-actions">
+      <button class="ho-cancel-btn" onclick="closeHandoutPanel()">ABORT</button>
+      <button class="ho-send-btn" onclick="sendHandout()">📡 TRANSMIT</button>
+    </div>
+  </div>
+</div>
+
+<!-- CRT HANDOUT OVERLAY (players) -->
+<div id="crtOverlay">
+  <div class="crt-screen">
+    <div class="crt-header-line">WEYLAND-YUTANI CORP // MU/TH/UR 6000 // SECURE CHANNEL</div>
+    <hr class="crt-divider">
+    <div id="crtBody"></div>
+    <hr class="crt-divider">
+    <div class="crt-footer-line" id="crtFooter">[ PRESS ANY KEY TO DISMISS ]</div>
+  </div>
+  <button class="crt-skip-btn" onclick="crtSkip()">SKIP ▶</button>
+</div>
+
 <!-- INTERCEPTION ALERT -->
 <div id="interceptAlert">
   <div class="intercept-box">
