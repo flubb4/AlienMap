@@ -1103,6 +1103,34 @@
     animation: fadeout 2s forwards;
   }
   @keyframes fadeout { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+
+  /* ── TERMINAL LOGS ── */
+  .log-section { margin-bottom:10px; border:1px solid var(--border-bright); }
+  .log-section-header {
+    padding:10px 14px; cursor:pointer;
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--bg2); color:var(--green);
+    font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:2px;
+    user-select:none;
+  }
+  .log-section-header:hover { background:var(--bg3); }
+  .log-chevron { font-size:9px; transition:transform 0.2s; }
+  .log-section.open .log-chevron { transform:rotate(90deg); }
+  .log-section-body { display:none; padding:14px; background:var(--bg); }
+  .log-section.open .log-section-body { display:block; }
+  .t-block { font-family:'Share Tech Mono',monospace; font-size:11px; line-height:1.9; }
+  .t-head {
+    border:1px solid var(--green-dark); padding:7px 12px; margin-bottom:10px;
+    color:var(--green); font-size:10px; letter-spacing:1px; white-space:pre;
+  }
+  .t-entry { padding:3px 0; border-bottom:1px solid var(--bg3); color:var(--text-dim); }
+  .t-entry .t-ts { color:var(--green-dim); }
+  .t-entry .t-who { color:var(--amber-dim); }
+  .t-entry.t-warn { color:var(--red-dim); }
+  .t-foot {
+    border-top:1px solid var(--green-dark); padding:7px 12px; margin-top:10px;
+    font-size:9px; color:var(--green-dark); text-align:center; letter-spacing:3px; white-space:pre;
+  }
 </style>
 </head>
 <body>
@@ -1196,6 +1224,7 @@
           <div class="nav-children">
             <div class="nav-item" style="padding-left:58px" onclick="showPage('m-40eridani')">Mission</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('m-40eridani-npcs')">NPCs</div>
+            <div class="nav-item" style="padding-left:58px" onclick="showPage('logs-40eridani')">📟 Terminal Logs</div>
           </div>
         </div>
         <div class="nav-group" id="grp-mtheta" style="padding-left:0">
@@ -1204,6 +1233,7 @@
             <div class="nav-item" style="padding-left:58px" onclick="showPage('m-theta')">Mission</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('theta-npcs')">NPCs</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('theta-planet')">Planeten Info</div>
+            <div class="nav-item" style="padding-left:58px" onclick="showPage('logs-theta')">📟 Terminal Logs</div>
           </div>
         </div>
       </div>
@@ -1239,6 +1269,7 @@
             <div class="nav-item" style="padding-left:58px" onclick="showPage('sutters-server')">Server Room</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('sutters-stasis')">Stasis &amp; Storage</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('sutters-ablauf')">&#128197; Session-Ablauf</div>
+            <div class="nav-item" style="padding-left:58px" onclick="showPage('logs-sutters')">📟 Terminal Logs</div>
           </div>
         </div>
 
@@ -1250,6 +1281,7 @@
             <div class="nav-item" style="padding-left:58px" onclick="showPage('hydrae-gespraeche')">Gespräche</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('rapture-protocol')">Systeminfo &amp; Rapture Protocol</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('hydrae-nach')">Nach 24.01.2185 — Rückkehr</div>
+            <div class="nav-item" style="padding-left:58px" onclick="showPage('logs-hydrae')">📟 Terminal Logs</div>
           </div>
         </div>
 
@@ -1265,6 +1297,7 @@
             <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-modulb')">Modul B</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-modulc')">Modul C</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-modulf')">Modul F</div>
+            <div class="nav-item" style="padding-left:58px" onclick="showPage('logs-atlas')">📟 Terminal Logs</div>
           </div>
         </div>
 
@@ -1281,6 +1314,7 @@
             <div class="nav-item" style="padding-left:58px" onclick="showPage('arceon-med')">Med Bay</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('arceon-storage')">Storage (Abgeschlossen)</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('eyemidge')" style="color:var(--red);">☣ Eyemidge — Kreaturenblatt</div>
+            <div class="nav-item" style="padding-left:58px" onclick="showPage('logs-arceon')">📟 Terminal Logs</div>
           </div>
         </div>
 
@@ -1299,6 +1333,7 @@
             <div class="nav-item" style="padding-left:58px" onclick="showPage('lambda-station')">Stationsaufbau</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('lambda-planet')">Planeten Info</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('lambda-loot')">Loot &amp; Belohnungen</div>
+            <div class="nav-item" style="padding-left:58px" onclick="showPage('logs-lambda')">📟 Terminal Logs</div>
           </div>
         </div>
 
@@ -1312,6 +1347,7 @@
             <div class="nav-item" style="padding-left:58px" onclick="showPage('van-raeume')">Räume</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('van-raetsel1')">Rätsel 1</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('van-raetsel2')">Rätsel 2</div>
+            <div class="nav-item" style="padding-left:58px" onclick="showPage('logs-vanmaanen')">📟 Terminal Logs</div>
           </div>
         </div>
 
@@ -11526,6 +11562,317 @@ Acid Splash: 8<br>
 </table>
 </div>`
 },
+
+// ── TERMINAL LOGS ──────────────────────────────────────────────────────────
+
+'logs-40eridani': {
+  title: 'ERD-7 Halcyon Reach — Terminal Logs',
+  cat: '40 Eridani / Terminal Logs',
+  render: () => `<div class="content">
+<h2>📟 Terminal Logs — ERD-7 Halcyon Reach</h2>
+<p class="text-dim">40 Eridani-System. Logs vor Spieler-Ankunft. Für Handout: Text kopieren → Transmission Panel.</p>
+${logSection('EMPFANG', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — ERD-7 HALCYON REACH // EMPFANG   ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.040–058    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.040/08:00]</span> <span class="t-who">SYSTEM</span> &gt; Tagesbetrieb gestartet. Empfangssystem aktiv. Besatzungsstatus: 6 von 6 angemeldet. Keine eingehenden Docking-Anfragen.</div>
+<div class="t-entry"><span class="t-ts">[2183.044/14:15]</span> <span class="t-who">WALKER, B.</span> &gt; Docking-Anfrage ICC Frachter "Galloway" für übermorgen bestätigt. Bucht 2 reserviert. Standard-Einweisung vorbereitet.</div>
+<div class="t-entry"><span class="t-ts">[2183.048/09:30]</span> <span class="t-who">WALKER, B.</span> &gt; Galloway 6 Stunden verspätet. Kein Kontakt. ICC HQ informiert. Routine-Vorfall, wahrscheinlich Navigationsfehler.</div>
+<div class="t-entry"><span class="t-ts">[2183.052/16:00]</span> <span class="t-who">WALKER, B.</span> &gt; Galloway immer noch nicht eingetroffen. ICC bestätigt: Schiff hat Kurs verlassen, letzte bekannte Position: 0.8 AU von hier. Suche eingeleitet.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.056/22:30]</span> <span class="t-who">SYSTEM</span> &gt; Empfangssensor: unerwartetes Docking-Signal auf Bucht 3. Keine Anfrage registriert. Kein Schiff auf Kamera sichtbar. Signal hält an.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.058/04:55]</span> <span class="t-who">WALKER, B.</span> &gt; Ich hab die Bucht 3 geöffnet. Es ist ein Druckanzug. Nur ein Druckanzug. Leer. Von innen ausgekleidet mit — mit etwas. Ich rufe Morgan—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('TECH-SEKTOR', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — ERD-7 HALCYON REACH // TECH-SEK  ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.040–058    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.040/09:00]</span> <span class="t-who">HUANG, Y.</span> &gt; Wöchentliche Systemdiagnose abgeschlossen. Kommunikationsarray: 100%. Energiespeicher: 88%. Alle Werte nominal.</div>
+<div class="t-entry"><span class="t-ts">[2183.044/11:30]</span> <span class="t-who">HUANG, Y.</span> &gt; Software-Update von W-Y Ops eingespielt — Sicherheitspatch 2183-B. Neustart der Subsysteme abgeschlossen. Keine Probleme.</div>
+<div class="t-entry"><span class="t-ts">[2183.048/16:00]</span> <span class="t-who">HUANG, Y.</span> &gt; Kommunikationsarray zeigt sporadisches Rauschen auf Frequenz 7.4 GHz. Kein bekannter Sender. Notiere für Folgeprüfung.</div>
+<div class="t-entry"><span class="t-ts">[2183.053/20:15]</span> <span class="t-who">HUANG, Y.</span> &gt; Frequenz 7.4 GHz weiterhin aktiv. Muster analysiert: nicht zufällig. Rhythmisch. Kein bekanntes Protokoll. Melde an W-Y Ops — keine Antwort.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.056/03:00]</span> <span class="t-who">SYSTEM</span> &gt; KOMMUNIKATIONSARRAY — Ausgehende Verbindung blockiert. Eingehende Signalstärke: 340% über Normal. Quelle: unbekannt, Peilung: 0.8 AU.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.058/05:30]</span> <span class="t-who">HUANG, Y.</span> &gt; Die Frequenz ist lauter. Ich glaube das ist die Galloway. Aber das Signal ist kein menschliches Protokoll mehr. Was—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('MEDBAY', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — ERD-7 HALCYON REACH // MEDBAY    ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.040–058    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.040/07:00]</span> <span class="t-who">SYSTEM</span> &gt; Medbay initialisiert. Personal: DR. NAZARI, F. Betriebsstatus: nominal. Bestand: vollständig.</div>
+<div class="t-entry"><span class="t-ts">[2183.044/10:30]</span> <span class="t-who">DR. NAZARI, F.</span> &gt; Jährliche Impfauffrischungen für alle 6 Crewmitglieder abgeschlossen. Alle gesund.</div>
+<div class="t-entry"><span class="t-ts">[2183.049/14:00]</span> <span class="t-who">DR. NAZARI, F.</span> &gt; Walker hat Schnittwunden an der Hand — Unfall beim Docking-Equipment. Genäht, versorgt. Kein weiterer Befund.</div>
+<div class="t-entry"><span class="t-ts">[2183.053/21:30]</span> <span class="t-who">DR. NAZARI, F.</span> &gt; Walker meldet sich erneut. Wunden heilen nicht normal. Gewebe verändert sich. Ich verstehe nicht wie. Proben genommen.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.057/09:00]</span> <span class="t-who">SYSTEM</span> &gt; Dr. Nazari nicht zu Schichtbeginn erschienen. Letzte Anmeldung: Medbay 2183.056/23:15. Türlog zeigt kein Verlassen.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.058/11:00]</span> <span class="t-who">SYSTEM</span> &gt; Medbay innen gesperrt. Lebenszeichen-Sensor: Signal vorhanden. Sprechanlage: keine Antwort. Protokoll: Wellness-Check erforderlich.</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('LAGERRAUM', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — ERD-7 HALCYON REACH // LAGER     ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.040–058    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.040/10:00]</span> <span class="t-who">SYSTEM</span> &gt; Lagerbestandsprüfung abgeschlossen. 312 Einheiten erfasst. Versorgungslevel: ausreichend für 90 Tage.</div>
+<div class="t-entry"><span class="t-ts">[2183.044/09:30]</span> <span class="t-who">OSEI, K.</span> &gt; W-Y Frachtlieferung entladen. 22 Kisten Standardversorgung + 1 Kiste "Forschungsprobe" (Direktive 44-A, nicht zu öffnen). Eingelagert Sektor D.</div>
+<div class="t-entry"><span class="t-ts">[2183.049/16:00]</span> <span class="t-who">OSEI, K.</span> &gt; Kiste Sektor D leicht verschoben seit gestern. Kein anderer war drin laut Log. Kiste noch versiegelt.</div>
+<div class="t-entry"><span class="t-ts">[2183.053/08:30]</span> <span class="t-who">OSEI, K.</span> &gt; Kiste ist warm. Ich halte die Hand daran. Klar und deutlich: warm. Habe das gemeldet. Warte auf Antwort von W-Y.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.057/03:00]</span> <span class="t-who">SYSTEM</span> &gt; Lagerraum Sektor D — Bewegungssensor: aktiv. Keine Person autorisiert. Zugang verriegelt. CO2-Konzentration: erhöht.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.058/06:15]</span> <span class="t-who">OSEI, K.</span> &gt; Die Kiste ist aufgebrochen. Von innen. Sektor D riecht nach — ich weiß nicht wie ich das beschreibe. Weyland-Yutani weiß was in der Kiste war—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+</div>`
+},
+
+'logs-theta': {
+  title: 'Prospect\'s Rest — Terminal Logs',
+  cat: 'Theta Persei / Terminal Logs',
+  render: () => `<div class="content">
+<h2>📟 Terminal Logs — Theta Persei / Prospect's Rest</h2>
+<p class="text-dim">Frontier-Kolonie. Logs vor Spieler-Ankunft. Für Handout: Text kopieren → Transmission Panel.</p>
+${logSection('VERWALTUNGSBÜRO', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — PROSPECT'S REST // VERWALTUNG    ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.143–158    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.143/08:00]</span> <span class="t-who">CALLOWAY, M.</span> &gt; Wochenbericht abgeschlossen. Kolonistenzahl: 247. Ressourcen: stabil. Versorgungsschiff erwartet in 8 Tagen.</div>
+<div class="t-entry"><span class="t-ts">[2183.146/11:30]</span> <span class="t-who">CALLOWAY, M.</span> &gt; Beschwerden von Sektor 4 Bewohnern — Geräusche nachts. Miliz-Patrouille beauftragt. Bericht: nichts gefunden.</div>
+<div class="t-entry"><span class="t-ts">[2183.149/14:00]</span> <span class="t-who">CALLOWAY, M.</span> &gt; 3 Kolonisten von Außenposten Nordost seit gestern vermisst. Suchtrupp geschickt. Schlechtes Wetter erschwerend. Bisher kein Ergebnis.</div>
+<div class="t-entry"><span class="t-ts">[2183.152/09:30]</span> <span class="t-who">SYSTEM</span> &gt; Eingehende Nachricht W-Y Ops: Alle Außenposten-Aktivitäten vorübergehend eingestellt. Begründung: Sicherheitsprotokoll 14-C. Bestätigung erforderlich.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.155/21:00]</span> <span class="t-who">CALLOWAY, M.</span> &gt; Suchtrupp nicht zurückgekehrt. 7 Personen. Wir sind jetzt 240. Niemand geht mehr raus. Habe W-Y um Entsendung gebeten. Warte.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.158/03:45]</span> <span class="t-who">CALLOWAY, M.</span> &gt; Jemand schreibt mit dem Finger an das Bürofenster von außen. Es ist die dritte Etage. Ich öffne das Fenster nicht—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('UNTERKÜNFTE', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — PROSPECT'S REST // UNTERKUNFT    ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.143–158    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.143/22:00]</span> <span class="t-who">SYSTEM</span> &gt; Belegungsrate Wohnblöcke: 94%. Temperaturkontrolle: optimal. Nachtruhe 22:00–06:00 aktiv.</div>
+<div class="t-entry"><span class="t-ts">[2183.146/07:15]</span> <span class="t-who">MBEKI, A.</span> &gt; Nacht war laut. Schreien draußen — Miliz findet nichts. Gut. Vielleicht Tiere.</div>
+<div class="t-entry"><span class="t-ts">[2183.149/23:30]</span> <span class="t-who">MBEKI, A.</span> &gt; Fenster Wohnblock 4 zeigt Kratzer außen. Nicht von Tieren. Zu gleichmäßig. Zu hoch.</div>
+<div class="t-entry"><span class="t-ts">[2183.152/18:00]</span> <span class="t-who">SYSTEM</span> &gt; Energieabfall Wohnblock 2 — Ursache nicht identifiziert. Notstrom aktiv. Blöcke 2+3 ohne Licht: 14 Minuten.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.156/02:00]</span> <span class="t-who">MBEKI, A.</span> &gt; Ich schlafe nicht. Block 4 Nachbarin schreit seit einer Stunde. Jetzt nicht mehr. Ich klopfe nicht an.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.158/05:00]</span> <span class="t-who">SYSTEM</span> &gt; VERMISST: 14 Personen Wohnblock 4. Türlog: kein Verlassen registriert. Suche angefordert. Reaktion — ausstehend.</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('WERKSTATT', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — PROSPECT'S REST // WERKSTATT     ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.143–158    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.143/09:00]</span> <span class="t-who">DIAZ, M.</span> &gt; Fahrzeugflotte 7 Einheiten — alle wartungsfertig. Nächste Inspektion in 3 Wochen.</div>
+<div class="t-entry"><span class="t-ts">[2183.146/14:30]</span> <span class="t-who">DIAZ, M.</span> &gt; ATV-3 kommt zurück mit Kratzer entlang der Fahrerseite. Fahrer sagt: Fels. Die Kratzer gehen die falsche Richtung für Fels.</div>
+<div class="t-entry"><span class="t-ts">[2183.149/11:00]</span> <span class="t-who">DIAZ, M.</span> &gt; ATV-3 steht im Hangar. Kratzer von innen nach außen am Dach. Metall. Was macht das an Metall so?</div>
+<div class="t-entry"><span class="t-ts">[2183.152/17:00]</span> <span class="t-who">SYSTEM</span> &gt; Wartungshallentür Sektion C: Sensor zeigt offen. Kein Personal autorisiert. Zugang verriegelt per Protokoll.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.155/01:30]</span> <span class="t-who">DIAZ, M.</span> &gt; Etwas bewegt sich in der Werkstatthalle. Ich bin im Büro. Tür zu. Ich höre es über dem Metall laufen. Oben. Decke.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.158/04:00]</span> <span class="t-who">DIAZ, M.</span> &gt; Morgen kommt das Versorgungsschiff. Ich warte hier bis Morgen—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('LAGER', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — PROSPECT'S REST // LAGER         ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.143–158    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.143/10:00]</span> <span class="t-who">SYSTEM</span> &gt; Lagerbestand: 1204 Einheiten. Versorgungsstand: 87 Tage. Auffüllung mit Versorgungsschiff in 8 Tagen.</div>
+<div class="t-entry"><span class="t-ts">[2183.146/13:30]</span> <span class="t-who">VELASQUEZ, R.</span> &gt; Bestandscheck: 14 Einheiten Konserven fehlen gegenüber Manifest. Kein Entnahmeprotokoll. An Calloway gemeldet.</div>
+<div class="t-entry"><span class="t-ts">[2183.149/09:00]</span> <span class="t-who">VELASQUEZ, R.</span> &gt; Weitere 22 Einheiten weg. Calloway: intern weiterverfolgen. Entnahme wäre auf Kameras — Kameras liefen. Kein Bild.</div>
+<div class="t-entry"><span class="t-ts">[2183.153/16:45]</span> <span class="t-who">SYSTEM</span> &gt; Lagerraum Sektor A: Biometriesensor registriert Wärmequelle. Keine registrierte Person. Wärmeprofil: nicht human.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.156/03:20]</span> <span class="t-who">VELASQUEZ, R.</span> &gt; Ich war im Lager. Ich dachte ich höre was. Das Lager ist leer. Ich meine: alles weg. 1204 Einheiten. Eine Nacht.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.158/06:00]</span> <span class="t-who">VELASQUEZ, R.</span> &gt; Das Lager ist nicht leer. Ich habe mich geirrt. Das Lager ist voll—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+</div>`
+},
+'logs-sutters': {
+  title: 'Sutter\'s World — Terminal Logs',
+  cat: '111 Tauri / Terminal Logs',
+  render: () => `<div class="content">
+<h2>📟 Terminal Logs — 111 Tauri / Sutter's World</h2>
+<p class="text-dim">Bergbaukolonie AX-19. Logs vor Spieler-Ankunft. Für Handout: Text kopieren → Transmission Panel.</p>
+${logSection('BARRACKS (AX-19)', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — SUTTER'S WORLD // BARRACKS       ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.252–268    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.252/06:00]</span> <span class="t-who">SYSTEM</span> &gt; Schichtwechsel A → B. Besatzungsstatus: 34 aktiv. Kälteschlaf: 0. Notbettsystem: nominal.</div>
+<div class="t-entry"><span class="t-ts">[2183.255/21:30]</span> <span class="t-who">TORRES, W.</span> &gt; Schlafsaal C klagt über Lärm aus den Wartungsschächten. Schicht 3 kommt nicht zur Ruhe. Untersuchungsanfrage an Engineering.</div>
+<div class="t-entry"><span class="t-ts">[2183.258/08:15]</span> <span class="t-who">SYSTEM</span> &gt; Betriebliche Mitteilung: Alle Ruhephasen um 2 Stunden verkürzt — Produktionsquoten-Rückstand. Kompensation gemäß Vertrag Abschnitt 9.4.</div>
+<div class="t-entry"><span class="t-ts">[2183.261/03:50]</span> <span class="t-who">TORRES, W.</span> &gt; Drei Leute aus Schlafsaal C berichten dasselbe — nachts steht jemand in der Ecke und schaut zu. Kameras zeigen nichts.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.265/23:00]</span> <span class="t-who">SYSTEM</span> &gt; VERMISST: DELACROIX, F. Letzter Standort: Schlafsaal C. Suche eingeleitet. Kein Ausruf beim Gate registriert.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.268/04:12]</span> <span class="t-who">TORRES, W.</span> &gt; Ich schlafe nicht mehr in Schlafsaal C. Ich weiß nicht warum ich das schreibe. Niemand liest das hier. Ich schlafe nicht mehr in—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('COMMAND ROOM', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — SUTTER'S WORLD // COMMAND ROOM   ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.252–268    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.252/07:00]</span> <span class="t-who">MORGAN, K.</span> &gt; Tagesbriefing: Förderquote 87% des Solls. W-Y HQ mahnt schriftlich. Erhöhe Schichtdauer auf 14 Stunden. Entscheidung ist final.</div>
+<div class="t-entry"><span class="t-ts">[2183.255/11:30]</span> <span class="t-who">MU-TH-UR 6000</span> &gt; Eingehende Mitteilung W-Y Operations: Quartalsrevision vorgezogen auf 2183.290. Alle Managementprotokolle bis dahin vollständig.</div>
+<div class="t-entry"><span class="t-ts">[2183.258/16:00]</span> <span class="t-who">MORGAN, K.</span> &gt; Shan meldet merkwürdigen Fund in Schacht 7 — organisches Material, nicht mineralisch. Anweisung: Förderung weiterführen. Probe eingelagert.</div>
+<div class="t-entry"><span class="t-ts">[2183.262/09:30]</span> <span class="t-who">MORGAN, K.</span> &gt; W-Y Directive Order 77-B eingetroffen. Inhalt: Geheimhaltungsstufe Lila. Probe sicherstellen, alle Berichte über Schacht 7 unter Verschluss. Führe aus.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.265/20:15]</span> <span class="t-who">MU-TH-UR 6000</span> &gt; Kontaktunterbrechung Schacht 7 Arbeitergruppe Gamma. Letzte Meldung: ALARM. Dauer der Unterbrechung: 3 Stunden 12 Minuten.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.268/07:01]</span> <span class="t-who">MORGAN, K.</span> &gt; Sende diese Nachricht an W-Y HQ. Wir brauchen Hilfe. Wir brauchen sofort— [Übertragung unterbrochen]</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('GARAGE & WORKSHOP (AX-31)', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — SUTTER'S WORLD // GARAGE AX-31  ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.252–268    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.252/08:00]</span> <span class="t-who">REEVES, J.</span> &gt; Routinewartung Cat-789 Bohrkopf abgeschlossen. Nächste Wartung in 240 Betriebsstunden. Schmiermittelstand: OK.</div>
+<div class="t-entry"><span class="t-ts">[2183.255/14:20]</span> <span class="t-who">SYSTEM</span> &gt; Lieferauftrag ICC-3301: Ersatzteile für Druckregler Typ 4-B erhalten. Wareneingang geprüft, eingelagert.</div>
+<div class="t-entry"><span class="t-ts">[2183.259/10:45]</span> <span class="t-who">REEVES, J.</span> &gt; Fahrzeug APC-2 zeigt Kratzer an der Unterseite. Keine Kollision im Log. Jemand war damit draußen. Wer? Melde an Morgan.</div>
+<div class="t-entry"><span class="t-ts">[2183.262/17:00]</span> <span class="t-who">REEVES, J.</span> &gt; Morgan interessiert sich nicht für den APC. Kratzer vertiefen sich. Nein — nicht Kratzer. Schnitte. Von innen nach außen.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.266/23:30]</span> <span class="t-who">SYSTEM</span> &gt; SENSORALARM — Bewegung Werkzeugbereich. Kamera 3 zeigt Störsignal. Werkzeuge nicht an ursprünglichem Platz.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.268/06:00]</span> <span class="t-who">REEVES, J.</span> &gt; Ich sperr das hier zu. Wer auch immer das liest — geh nicht allein in die Garage—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('LANDING PAD', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — SUTTER'S WORLD // LANDING PAD    ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.252–268    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.252/09:00]</span> <span class="t-who">SYSTEM</span> &gt; Landeplattform-Status: frei. Wetterbedingungen: Wind 23 m/s, akzeptabel. Navigationsbaken: aktiv.</div>
+<div class="t-entry"><span class="t-ts">[2183.255/12:30]</span> <span class="t-who">SYSTEM</span> &gt; Ankunft Shuttle W-Y Express 4. Frachtmanifest geprüft. Passagiere: 0. Fracht: Bohrequipment + 1× versiegelte Kiste (W-Y Priority Cargo).</div>
+<div class="t-entry"><span class="t-ts">[2183.259/08:45]</span> <span class="t-who">MBEKI, T.</span> &gt; Shuttle W-Y Express 4 wollte nicht starten. Piloten sagen Triebwerk läuft, aber Schiff hebt nicht ab. Nach 20 Min gelöst. Seltsam.</div>
+<div class="t-entry"><span class="t-ts">[2183.262/16:00]</span> <span class="t-who">MBEKI, T.</span> &gt; Kommunikation mit Orbit: gestört. Fehlercode 7-7: magnetische Interferenz. Quelle unklar. Wetterbedingungen nominal.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.266/21:15]</span> <span class="t-who">SYSTEM</span> &gt; Startanforderung von MORGAN, K. abgelehnt. Protokoll: kein Start ohne W-Y Ops-Genehmigung. Code: LOCKDOWN-ALPHA-7. Startsperre aktiv.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.268/03:33]</span> <span class="t-who">MBEKI, T.</span> &gt; Das war Schreien. Aus dem Schacht. Ich riegele die Landebucht ab. Ich fliege weg. Ich fliege—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('MAINTENANCE TUNNELS', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — SUTTER'S WORLD // WARTUNGSSCH.   ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.252–268    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.252/07:30]</span> <span class="t-who">SYSTEM</span> &gt; Drucküberwachung Wartungsschächte: nominal. Lüftung Sektor A–F: aktiv. Temperaturdifferenz im Normbereich.</div>
+<div class="t-entry"><span class="t-ts">[2183.255/16:00]</span> <span class="t-who">VOLKOV, P.</span> &gt; Lüftungsschacht SE-4 blockiert. Unbekannte organische Substanz am Gitter. Gereinigt. Probe genommen, falls Laborbedarf.</div>
+<div class="t-entry"><span class="t-ts">[2183.259/11:20]</span> <span class="t-who">VOLKOV, P.</span> &gt; SE-4 wieder blockiert. Substanz ist mehr geworden. Klebrig. Nicht identifizierbar. Wieder gereinigt.</div>
+<div class="t-entry"><span class="t-ts">[2183.262/19:00]</span> <span class="t-who">SYSTEM</span> &gt; Temperatursensor Wartungsschacht NW-2: +4.1°C Anstieg innerhalb 6h. Keine technische Ursache identifiziert.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.266/02:40]</span> <span class="t-who">VOLKOV, P.</span> &gt; Ich bin im Schacht NW-3 und mein Licht flackert. Ich höre etwas auf dem Metall. Kriecht. Geht weg wenn ich klopfe. Kommt wieder.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.268/01:15]</span> <span class="t-who">SYSTEM</span> &gt; VERBINDUNGSUNTERBRECHUNG — Wartungspersonal Schacht NW-2/NW-3. Letztes Funksignal: keine Sprachübertragung. Tonaufnahme gesichert. [DATEI GESPERRT]</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('MEDBAY', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — SUTTER'S WORLD // MEDBAY         ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.252–268    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.252/06:30]</span> <span class="t-who">SYSTEM</span> &gt; Medbay initialisiert. Medikamente: Bestand vollständig. Chirurgieprotokoll: 0 offene Fälle.</div>
+<div class="t-entry"><span class="t-ts">[2183.255/09:15]</span> <span class="t-who">DR. KAMAU, E.</span> &gt; Routineuntersuchungen Schicht A abgeschlossen. Befund: erhöhter Cortisolspiegel bei 60% der Belegschaft. Stressreaktion auf verkürzte Ruhezeit. Protokoll eingereicht.</div>
+<div class="t-entry"><span class="t-ts">[2183.259/14:30]</span> <span class="t-who">DR. KAMAU, E.</span> &gt; Volkov eingeliefert. Schnittwunden Unterarme und Rücken. Gibt an: Sturz im Schacht. Verletzungsmuster passt nicht zum Sturz.</div>
+<div class="t-entry"><span class="t-ts">[2183.262/22:00]</span> <span class="t-who">SYSTEM</span> &gt; 3 neue Einlieferungen. Symptome: Bewusstlosigkeit, unregelmäßiger Herzschlag, Fremdkörper-Verdacht Thorax. Diagnose: unbekannt.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.266/11:45]</span> <span class="t-who">DR. KAMAU, E.</span> &gt; Patient 3 verstorben. Obduktion: Fremdkörper im Brustkorb — bei Öffnung nicht mehr vorhanden. Loch in der Deckenverkleidung über dem Tisch.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.268/05:00]</span> <span class="t-who">SYSTEM</span> &gt; Medbay-Druckkammern aktiviert. Ärztl. Personal nicht erreichbar. Biologische Kontamination — Sensor 7. Protokoll: ABRIEGEL—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('MESS HALL', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — SUTTER'S WORLD // MESS HALL      ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.252–268    ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.252/11:45]</span> <span class="t-who">SYSTEM</span> &gt; Mittagessen bereit. Erwartete Belegschaft: 34. Tagesmenü: Rindfleischeintopf (synthetisch), Müsliriegel, Gemüsekonserven.</div>
+<div class="t-entry"><span class="t-ts">[2183.255/18:30]</span> <span class="t-who">SANTOS, G.</span> &gt; Kühleinheit C zeigt Temperaturschwankungen. Lebensmittel geprüft: keine Verderbnis. Wartungsantrag eingereicht.</div>
+<div class="t-entry"><span class="t-ts">[2183.259/12:00]</span> <span class="t-who">SANTOS, G.</span> &gt; Tischgruppe 3 bleibt leer seit heute Morgen. Schicht Gamma aus Schacht 7. Niemand sagt warum. Morgan sagt: kein Kommentar.</div>
+<div class="t-entry"><span class="t-ts">[2183.262/19:45]</span> <span class="t-who">SYSTEM</span> &gt; Bewegungsmelder Essensausgabe: aktiv. Keine eingeloggte Person im Bereich. Kamera: Bild ausgefallen, 4 Minuten.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.266/06:00]</span> <span class="t-who">SANTOS, G.</span> &gt; Ich mache Frühstück für 34. Es kommen 19. Ich frage nicht warum. Die anderen fragen auch nicht.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.268/11:30]</span> <span class="t-who">SANTOS, G.</span> &gt; Das Essen ist noch da. Niemand kommt mehr zum Essen. Ich sitze hier. Die Tür ist abgeschlossen. Ich höre—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+// SUTTERS-PART1-END
+</div>`
+},
+'logs-hydrae': {
+  title: '289 G. Hydrae — Jeremiah VI // Terminal Logs',
+  cat: '289 G. Hydrae / Terminal Logs',
+  render: () => `<div class="content">
+<h2>📟 Terminal Logs — 289 G. Hydrae / Jeremiah VI</h2>
+<p class="text-dim">W-Y Promethium-Förderstation Jeremiah VI. Protokolle vor Ankunft der Besatzung. Für Handout: Text kopieren → Übertragungspanel.</p>
+${logSection('BAR / SOZIALBEREICH', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — JEREMIAH VI // BAR               ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2184.272–308   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2184.272/20:00]</span> <span class="t-who">SYSTEM</span> &gt; Schichtprotokoll. Bar-Betrieb: aktiv. AX-62 (Boyd) meldet nominal. Besatzung anwesend: 19 von 25. Alkoholdispenser: befüllt.</div>
+<div class="t-entry"><span class="t-ts">[2184.279/19:30]</span> <span class="t-who">KOWALCZYK, T.</span> &gt; Öffentlicher Vermerk: Boyd hat heute Abend vier Leute durch echte Scheiße gehalten. Ich weiß nicht wie er das macht. Danke, Boyd.</div>
+<div class="t-entry"><span class="t-ts">[2184.285/14:00]</span> <span class="t-who">MU-TH-UR 9000</span> &gt; Auslastungsanalyse AX-62: Soziale Interaktionsrate +340% über Norm. Empfohlener Einsatzbereich überschritten. Keine Maßnahme erforderlich.</div>
+<div class="t-entry"><span class="t-ts">[2184.290/22:15]</span> <span class="t-who">DIAZ, R.</span> &gt; Gerücht macht die Runde — WY zieht die Stecker. Keiner redet laut drüber. Keiner muss. Man sieht es jedem an. Boyd sitzt einfach dabei.</div>
+<div class="t-entry"><span class="t-ts">[2184.301/03:45]</span> <span class="t-who">NGUYEN, P.</span> &gt; Nguyen hatte einen Zusammenbruch im Bar. Boyd hat ihn draußen hingesetzt und geredet bis das Licht kam. Ich weiß nicht was er sagt. Aber es hilft.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2184.308/21:00]</span> <span class="t-who">SYSTEM</span> &gt; Bar-Belegung: 11 Personen. Lautstärke: minimal. Keine Bestellungen. Kein Gespräch. Boyd sitzt still. Besatzung sitzt still. Status: ungewöhnlich.</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('DOCKINGBUCHT', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — JEREMIAH VI // DOCKINGBUCHT      ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2184.273–307   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2184.273/11:00]</span> <span class="t-who">SYSTEM</span> &gt; Shuttle HCL-447: Ankunft 2184.273 geplant. Status: VERSPÄTET. Neue ETA: unbekannt. HCL-Kontakt: keine Antwort.</div>
+<div class="t-entry"><span class="t-ts">[2184.281/08:30]</span> <span class="t-who">VASQUEZ, O.</span> &gt; Shuttle angekommen. Falsche Ersatzteile. Druckregler Typ 4-C statt Typ 4-B. Nicht kompatibel. Petrov dreht durch. Ich auch.</div>
+<div class="t-entry"><span class="t-ts">[2184.287/16:45]</span> <span class="t-who">SYSTEM</span> &gt; Direktive 9-C aktiviert: Ausgabe von Notfallvorräten autorisiert. Betrifft: Lebensmittelreserve Ebene 2. Genehmigung: MCCREADY, S.</div>
+<div class="t-entry"><span class="t-ts">[2184.293/07:00]</span> <span class="t-who">VASQUEZ, O.</span> &gt; 4 Stunden Kommunikationsausfall. Relay-Station Hydrae-3 antwortet nicht. Notkanal ebenfalls stumm. Wir sind allein hier draußen.</div>
+<div class="t-entry"><span class="t-ts">[2184.300/09:00]</span> <span class="t-who">SYSTEM</span> &gt; Eingehende Mitteilung HCL Operations: Shuttle HCL-491 storniert. Nachfolgeflug frühestens 2184.340. Keine weiteren Informationen.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2184.307/02:18]</span> <span class="t-who">VASQUEZ, O.</span> &gt; Kurzwellen-Interferenz aus Richtung 289 G. Hydrae Tiefsystem. Kein bekanntes Muster. Nicht auf unserer Frequenz. Trotzdem: es klingt fast wie—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('OPERATIONS / BÜRO', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — JEREMIAH VI // OPERATIONS        ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2184.274–309   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2184.274/07:30]</span> <span class="t-who">MCCREADY, S.</span> &gt; Monatsbericht Q3/2184 eingereicht. Zielerfüllung Promethium-Extraktion: 38%. Betriebskosten: 112% des Budgets. Bitte um Rückmeldung.</div>
+<div class="t-entry"><span class="t-ts">[2184.280/14:00]</span> <span class="t-who">MU-TH-UR 9000</span> &gt; Eingangsbestätigung W-Y Div. 6: Bericht 2184-Q3 erhalten. Keine weiteren Mitteilungen. Verbindung beendet.</div>
+<div class="t-entry"><span class="t-ts">[2184.288/11:15]</span> <span class="t-who">MCCREADY, S.</span> &gt; Antrag Wartungsbudget Reaktorkühlung: ABGELEHNT. Begründung: Budgetperiode läuft bis 2185.001. Petrov soll improvisieren.</div>
+<div class="t-entry"><span class="t-ts">[2184.295/08:00]</span> <span class="t-who">MU-TH-UR 9000</span> &gt; Automatische Quotenwarnung: 3. Quartal in Folge unter Zielkorridor. Statusklassifikation: KRITISCH. Maßnahmenplan erforderlich bis 2184.330.</div>
+<div class="t-entry"><span class="t-ts">[2184.303/23:50]</span> <span class="t-who">MCCREADY, S.</span> &gt; Interner Vermerk — nur Führungsebene: WY-Schließungsszenario nicht auszuschließen. Bitte keine Weitergabe. Besatzungsruhe aufrechterhalten.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2184.309/06:03]</span> <span class="t-who">SYSTEM</span> &gt; Verbindung zu W-Y Div. 6 unterbrochen. Ursache: unbekannt. Automatische Wiederherstellung: fehlgeschlagen. Kein Zeitplan verfügbar.</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('MASCHINENRAUM / WARTUNG', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — JEREMIAH VI // MASCHINENRAUM     ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2184.271–308   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2184.271/09:00]</span> <span class="t-who">PETROV, A.</span> &gt; Druckventil 4-B provisorisch abgedichtet. Hält vielleicht 72 Stunden. Ersatzteil nicht vorhanden. Meldung an McCready — keine Antwort.</div>
+<div class="t-entry"><span class="t-ts">[2184.278/16:30]</span> <span class="t-who">SYSTEM</span> &gt; Generatorkapazität aktuell: 64%. Planmäßige Wartung überfällig seit 2184.140. Empfehlung: Sofortwartung. Genehmigungsstatus: ausstehend.</div>
+<div class="t-entry"><span class="t-ts">[2184.286/12:00]</span> <span class="t-who">PETROV, A.</span> &gt; Kühlmittelreserve aufgebraucht. Reaktor läuft auf Notbetrieb. Aufbereitungswasser als Ersatz eingesetzt. Nicht ideal. Hält vorerst.</div>
+<div class="t-entry"><span class="t-ts">[2184.294/04:22]</span> <span class="t-who">SYSTEM</span> &gt; Seismometer Tiefenkanal 7: unregelmäßige Vibration registriert. Amplitude niedrig. Muster inkonsistent. Diagnose: Sensor-Drift. Keine Maßnahme.</div>
+<div class="t-entry"><span class="t-ts">[2184.302/18:10]</span> <span class="t-who">PETROV, A.</span> &gt; Vibration hält seit 8 Tagen an. Sensor-Drift schließe ich aus. Schacht 7 gesperrt bis Ursache festgestellt. McCready informiert.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2184.308/07:45]</span> <span class="t-who">PETROV, A.</span> &gt; Ich gehe nicht mehr in Schacht 7. Das ist kein Gerät. Geräte haben kein Muster. Das hier hat ein Muster. Es wartet auf etwas.</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('MINENSCHACHT 7 — FÖRDERANLAGE', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — JEREMIAH VI // SCHACHT 7         ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2184.272–306   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2184.272/18:00]</span> <span class="t-who">SYSTEM</span> &gt; Tagesproduktion Schicht B: Promethium 2,1 Tonnen (Tagessoll: 8,0 t). Auslastung Bohranlagen: 34%. Ursache: Geräteverschleiß.</div>
+<div class="t-entry"><span class="t-ts">[2184.280/14:30]</span> <span class="t-who">HOFFMANN, D.</span> &gt; Bohranlage 3 ausgefallen — Lager gebrochen. Keine Ersatzteile. Schacht 5 zeigt Deckenrisse. Förderung auf Schacht 7 umgeleitet.</div>
+<div class="t-entry"><span class="t-ts">[2184.288/10:00]</span> <span class="t-who">HOFFMANN, D.</span> &gt; Gaswarnung Schacht 6. Evakuiert. Messgerät zeigt nach 20 Minuten nichts. Vermutlich Fehlalarm — Sensor 6 schon länger unzuverlässig.</div>
+<div class="t-entry"><span class="t-ts">[2184.297/03:14]</span> <span class="t-who">SYSTEM</span> &gt; Seismisches Ereignis registriert. Tiefe: 840m, Schacht 7. Klassifikation: unbekannt. Kein Erdbebencharakter. Einmalig. Keine Folgeereignisse.</div>
+<div class="t-entry"><span class="t-ts">[2184.303/22:50]</span> <span class="t-who">HOFFMANN, D.</span> &gt; Bewegungsmelder Tiefenebene 3, Schacht 7 — Auslösung 22:47. Niemand war unten. Niemand. Sensor morgen prüfen.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2184.306/01:09]</span> <span class="t-who">HOFFMANN, D.</span> &gt; Bin in Schacht 7. Die Wände. Das ist nicht Gestein. Das ist nicht — [Übertragung unterbrochen. Letzter bekannter Standort: Tiefenebene 4.]</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('MEDBAY — C-BLOCK CHIRURGIE', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — JEREMIAH VI // MEDBAY C-BLOCK    ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2184.275–309   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2184.275/10:00]</span> <span class="t-who">DR. NAKAMURA, Y.</span> &gt; Routineuntersuchungen abgeschlossen: 25 Besatzungsmitglieder. 11 erhöhte Stresswerte. 3 erfüllen klinische Kriterien für Erschöpfungssyndrom.</div>
+<div class="t-entry"><span class="t-ts">[2184.283/16:20]</span> <span class="t-who">DR. NAKAMURA, Y.</span> &gt; Boyd hat mir heute 3 Personen geschickt. Akute depressive Episode, ausgelöst durch Schließungsgerüchte. Behandlung eingeleitet. Danke, Boyd.</div>
+<div class="t-entry"><span class="t-ts">[2184.291/09:00]</span> <span class="t-who">SYSTEM (AUTODOC-3)</span> &gt; Medikamentenvorrat Anxiolytika: 12% verbleibend. Letzter Nachbestellungsantrag: 2184.270. Status: nicht bestätigt. Erinnerung gesendet.</div>
+<div class="t-entry"><span class="t-ts">[2184.299/14:45]</span> <span class="t-who">DR. NAKAMURA, Y.</span> &gt; Petrov, A. eingeliefert. Schlafentzug, Panikattacken, dissoziativer Zustand. Berichtet Geräusch aus Schacht 7, nachts. Diagnose: stressbedingt.</div>
+<div class="t-entry"><span class="t-ts">[2184.305/06:30]</span> <span class="t-who">DR. NAKAMURA, Y.</span> &gt; Dokumentationsnotiz: 4 Patienten beschreiben unabhängig denselben Traum. Dunkelheit. Enge. Etwas Warmes, das atmet. Ich weiß nicht, was ich davon halten soll.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2184.309/05:47]</span> <span class="t-who">SYSTEM (AUTODOC-3)</span> &gt; NAKAMURA, Y. hat die Medbay um 03:14 verlassen. Kein Standort-Signal seitdem. Keine Rückmeldung. AutoDoc-Protokoll aktiv. Kein Arzt anwesend.</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+</div>`
+},
+// LOGS-THETA-END
 }; // end PAGES
 
 // ============================================================
@@ -11549,6 +11896,19 @@ let currentPage = 'home';
 function toggleGroup(id) {
   const grp = document.getElementById(id);
   grp.classList.toggle('open');
+}
+
+function toggleLogSection(el) {
+  el.closest('.log-section').classList.toggle('open');
+}
+
+function logSection(label, content) {
+  return `<div class="log-section">
+    <div class="log-section-header" onclick="toggleLogSection(this)">
+      <span>📟 ${label}</span><span class="log-chevron">›</span>
+    </div>
+    <div class="log-section-body"><div class="t-block">${content}</div></div>
+  </div>`;
 }
 
 function showPage(id) {
