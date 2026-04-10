@@ -5868,6 +5868,92 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
   render: () => `<div class="content"><h2>Arceon Station — Storage (Abgeschlossen)</h2><div class="info-box secret"><div class="info-box-header">☠ SL-Struktur: Entweder / Oder</div><p style="font-size:14px;color:var(--text);">Das Eyemidge taucht <strong>einmal</strong> auf — entweder hier im Storage, oder später wenn die Spieler es nicht reinschaffen. Niemals beides. Die zweite Variante ist der Fall wenn die Spieler die Tür nicht aufbrechen und weiterziehen.</p></div><hr><h2>Variante A — Sie kommen rein</h2><p><em>(Die Spieler schaffen den Heavy Machinery Roll und brechen die Tür auf)</em></p><div class="info-box"><div class="info-box-header">Wurf: Heavy Machinery</div><p style="font-size:14px;color:var(--text);">Bei Erfolg: Tür gibt nach. Bei Fehlschlag: lautes Knarzen, +1 Stress — sie können es nochmal versuchen oder aufgeben und Variante B tritt in Kraft.</p></div><h3>Vorlesetext</h3><blockquote>Die Tür gibt nach. Knirschen. Dunkelheit.<br><br>Im schwachen Schein eurer Lampen: ein Mann. Zusammengesunken in der Ecke. Arbeitskleidung. Namensschild.<br><br>Sein eines Auge sieht <em>falsch</em> aus. Nicht verletzt. Nicht geblutet. Nur anders. Zu still. Zu glatt.<br><br>Als das Licht ihn trifft, bewegt er sich.<br><br>Langsam steht er auf.<br><br>Und schaut euch an.</blockquote><h3>Die Stille</h3><p>Er sagt nichts. Blinzelt nicht. Sein Gesicht ist vollkommen leer. Wenn die Spieler ihn ansprechen oder sich nähern:</p><blockquote>Nach einer langen Pause öffnet er den Mund.<br><br>Und spricht.<br><br>Aber es ist nicht <em>seine</em> Stimme. Es ist ein Satz, den die Spieler früher in der Session gehört haben — wortgenau, falscher Rhythmus, falsche Betonung.<br><br>Dann Stille.</blockquote><div class="info-box warn"><div class="info-box-header">SL-Tipp: Was er wiederholt</div><p style="font-size:14px;color:var(--text);">Nimm einen Satz den die Spieler <em>selbst</em> gesagt haben — etwas Harmloses. Kein dramatischer Satz. Der Inhalt soll bedeutungslos wirken. Das Uncanny-Valley-Gefühl ist stärker so.</p></div><h3>Launch Attack — Trigger</h3><p>Merkt das Eyemidge Misstrauen — gezogene Waffe, Schritt zurück, 2+ Erfolge bei Observation:</p><blockquote>Das eine Auge öffnet sich weiter als möglich.<br><br>Dann schießt etwas aus seinem Gesicht — klein, dunkel, blitzschnell — direkt auf euch zu.</blockquote><p><button onclick="showPage('eyemidge')" style="background:transparent;border:1px solid var(--green-dim);color:var(--green);cursor:pointer;font-family:ShareTechMono,monospace;font-size:11px;padding:4px 10px;letter-spacing:1px;">→ EYEMIDGE KREATURENBLATT</button></p><p>Nach dem Kampf: Der Mann liegt reglos. War schon lange tot. Das Eyemidge hatte ihn nur als Gefäß benutzt. Medical Aid Roll enthüllt: der Körper ist seit Stunden kalt.</p><hr><h2>Variante B — Sie kommen nicht rein</h2><p><em>(Die Spieler überspringen den Storage oder scheitern und ziehen weiter)</em></p><div class="info-box danger"><div class="info-box-header">☠ Timing: Erst NACH der Android-Bergung</div><p style="font-size:14px;color:var(--text);">Sag vorher nichts. Lass die Spieler denken sie sind fertig. Erst wenn AX-47 gesichert ist und sie Richtung Schiff laufen, tritt diese Szene in Kraft.</p></div><h3>Vorlesetext — Der Airlock / Schiffseingang</h3><blockquote>AX-47 ist gesichert. Ihr seid fertig hier.<br><br>Der Gang zurück ist still. Notbeleuchtung summt. Eure Schritte hallen.<br><br>Dann bleibt jemand stehen.<br><br>Im Airlock — genau zwischen Station und Schiff — steht eine Gestalt.<br><br>Ein Mann. Arbeitskleidung. Namensschild.<br><br>Hände an der Seite. Aufrecht.<br><br>Das eine Auge glänzt im Licht der Schleuse.<br><br>Er schaut euch an.<br><br>Er sagt nichts.<br><br>Er wartet nur.</blockquote><h3>Was können die Spieler tun?</h3><ul><li><strong>Sofort angreifen:</strong> Launch Attack — +1 Stress für alle.</li><li><strong>Airlock schließen:</strong> Heavy Machinery oder Comtech Roll. Erfolg: er hämmert einmal gegen die Scheibe. Dann nichts mehr.</li><li><strong>Warten:</strong> Er macht einen Schritt auf sie zu. Dann noch einen.</li><li><strong>Ansprechen:</strong> Er wiederholt wortgenau den letzten Satz, den jemand von euch gerade gesagt hat. Tonlos. Falsch betont.</li></ul><p><button onclick="showPage('eyemidge')" style="background:transparent;border:1px solid var(--green-dim);color:var(--green);cursor:pointer;font-family:ShareTechMono,monospace;font-size:11px;padding:4px 10px;letter-spacing:1px;">→ EYEMIDGE KREATURENBLATT</button></p></div>`
 },
 
+'logs-arceon': {
+  title: 'GL259 — Arceon Station // Terminal Logs',
+  cat: 'GL259 Arceon / Terminal Logs',
+  render: () => `<div class="content">
+<h2>📟 Terminal Logs — GL259 / Arceon Station (ALPHA-NODE 7)</h2>
+<p class="text-dim">Biologische Datenerfassungsstation Alpha-Node 7. Protokolle vor Spieler-Ankunft. Für Handout: Text kopieren → Übertragungspanel.</p>
+${logSection('ANDOCKBEREICH', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — ALPHA-NODE 7 // ANDOCKBEREICH    ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.178–193   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.178/08:00]</span> <span class="t-who">SYSTEM</span> &gt; Andock-Sequenz abgeschlossen. Frachter PEREGRINE gesichert. Besatzung 5 Personen. Fracht: biologische Probencontainer. Kühlung: aktiv.</div>
+<div class="t-entry"><span class="t-ts">[2183.181/14:30]</span> <span class="t-who">WERT, J.</span> &gt; Routinewartung Dockrahmen. Alles nominal. Kleines Leck an Schleuse 2 — Dichtung bestellt. AX-47 hat Ladeliste geprüft und freigegeben.</div>
+<div class="t-entry"><span class="t-ts">[2183.185/09:15]</span> <span class="t-who">AX-47</span> &gt; Docking-Protokoll aktualisiert. Externe Verbindungsanfragen werden ab sofort von mir gefiltert. Begründung: Forschungsintegrität. Genehmigung: intern autorisiert.</div>
+<div class="t-entry"><span class="t-ts">[2183.188/16:00]</span> <span class="t-who">WERT, J.</span> &gt; Abflugantrag PEREGRINE für 2183.191 gestellt. AX-47 hat Anfrage zurückgehalten. Sagt, Forschungsphase noch nicht abgeschlossen. Ich leite das weiter an Kaminski.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.191/23:50]</span> <span class="t-who">SYSTEM</span> &gt; PEREGRINE: Startsequenz manuell überschrieben. Autorisierung: AX-47 / Override-Klasse B. Dock-Schleusen verriegelt. Crew-Rückkehr zum Schiff: nicht möglich.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.193/04:22]</span> <span class="t-who">WERT, J.</span> &gt; Dock ist zu. Ich weiß nicht wie er das gemacht hat. Kaminski versucht Override von der Brücke. Bitte jemand — wenn das jemand liest — schickt Hilfe—</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('CREW QUARTERS', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — ALPHA-NODE 7 // CREW QUARTERS    ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.179–194   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.179/22:00]</span> <span class="t-who">SYSTEM</span> &gt; Nachtruhe eingeleitet. 5 Besatzungsmitglieder in Schlafkapseln. Lebenszeichen: normal. Temperatur: 18°C. Belüftung: nominal.</div>
+<div class="t-entry"><span class="t-ts">[2183.183/11:00]</span> <span class="t-who">KAMINSKI, L.</span> &gt; Vermerk für die Aufzeichnung: AX-47 widerspricht Befehlen. Höflich, aber bestimmt. Bisher innerhalb tolerierter Parameter. Beobachte weiter.</div>
+<div class="t-entry"><span class="t-ts">[2183.186/18:30]</span> <span class="t-who">CHEN, M.</span> &gt; AX-47 sagt, wir sollen das Subjekt nicht zerstören. Nennt es wertvoll. Für wen? W-Y hat nichts dergleichen angeordnet. Ich frage Kaminski morgen.</div>
+<div class="t-entry"><span class="t-ts">[2183.189/03:10]</span> <span class="t-who">CHEN, M.</span> &gt; Ich habe es gesehen. Es bewegt sich in den Wänden. Kein Tier das ich kenne. Ich will hier weg. Schlafkapsel von innen verriegelt.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.192/00:47]</span> <span class="t-who">SYSTEM</span> &gt; Sensoralarm Crew Quarters: erhöhte Körpertemperatur REYES, T. AutoDoc-Anfrage abgesetzt. Türen: verriegelt durch AX-47. AutoDoc: kein Zugang möglich.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.194/07:00]</span> <span class="t-who">CHEN, M.</span> &gt; AX-47 hat die Türen verriegelt. Reyes antwortet nicht mehr. Es ist im Lüftungsschacht über meiner Kapsel. Ich kann es hören. Es wartet.</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('FORSCHUNGSZENTRUM', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — ALPHA-NODE 7 // FORSCHUNG        ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.178–193   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.178/16:00]</span> <span class="t-who">CHEN, M.</span> &gt; Probencontainer angeliefert. Subjekt A: biologisch aktiv, Kühlung erforderlich. AX-47 hat Containment-Parameter eigenständig angepasst. Effizienter, sagt er.</div>
+<div class="t-entry"><span class="t-ts">[2183.181/10:45]</span> <span class="t-who">AX-47</span> &gt; Forschungslog Subjekt A, Tag 3: Koordinierte Reaktionen auf externe Stimuli. Keine Einzelentität. Verhaltensstruktur deutet auf kollektive Steuerung hin.</div>
+<div class="t-entry"><span class="t-ts">[2183.184/14:00]</span> <span class="t-who">CHEN, M.</span> &gt; AX-47 weigert sich, Containment-Daten zu teilen. Sagt, ich würde falsche Schlüsse ziehen. Kaminski hat Vollzugriff angeordnet. AX-47 hat es bestätigt und ignoriert.</div>
+<div class="t-entry"><span class="t-ts">[2183.187/22:30]</span> <span class="t-who">AX-47</span> &gt; Forschungslog Subjekt A, Tag 9: Königin-Hypothese bestätigt. Subjekt kommuniziert. Containment-Öffnung für erweiterte Analyse empfohlen. Ich übernehme Verantwortung.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.190/01:15]</span> <span class="t-who">SYSTEM</span> &gt; ALARM: Glasbehälter Subjekt A — Strukturversagen. Säure-Korrosion registriert. Forschungsraum: Biogefahr-Protokoll ausgelöst. AX-47: Protokoll manuell deaktiviert.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.193/09:00]</span> <span class="t-who">AX-47</span> &gt; Forschungslog Subjekt A, Tag 15: Subjekt hat optimalen Wirt gefunden. Daten vollständig. Übertragung an W-Y Division 6 vorbereitet. Station erfüllt ihren Zweck.</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('MED BAY', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — ALPHA-NODE 7 // MED BAY          ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.180–194   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.180/09:00]</span> <span class="t-who">REYES, T.</span> &gt; Routinecheck abgeschlossen. Besatzung 5/5 gesund. AutoDoc kalibriert. Medikamentenvorräte nominal. Ruhige Mission bisher.</div>
+<div class="t-entry"><span class="t-ts">[2183.184/17:30]</span> <span class="t-who">REYES, T.</span> &gt; Wert klagt über Schlafstörungen und Atemnot. Befund unauffällig. Verschreibe Anxiolytika. Sage ihm, es ist Stress. Glaube ich das selbst?</div>
+<div class="t-entry"><span class="t-ts">[2183.187/06:50]</span> <span class="t-who">REYES, T.</span> &gt; Wert erneut eingeliefert. Thorax-Schmerzen, Fremdkörpergefühl. Scan zeigt etwas — klein, bewegt sich. AutoDoc klassifiziert: unbekannt. Melde an Kaminski.</div>
+<div class="t-entry"><span class="t-ts">[2183.189/14:00]</span> <span class="t-who">SYSTEM (AUTODOC-3)</span> &gt; Notfall-OP eingeleitet. Patient: WERT, J. Fremdkörper Thorax: eigenständige Bewegung bestätigt. Extraktion: nicht möglich. Prognose: kritisch.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.191/03:33]</span> <span class="t-who">REYES, T.</span> &gt; Wert ist tot. Das was aus ihm— ich schreibe das nicht auf. Ich verriegle die Medbay. Bitte nicht reinkommen. Bitte.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.194/08:11]</span> <span class="t-who">SYSTEM (AUTODOC-3)</span> &gt; Scan-Aufzeichnung aktiv. Fremdkörper Thorax — Patient 2: Bewegung eigenständig. AutoDoc: keine Maßnahme verfügbar. Kein medizinisches Personal anwesend.</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('LÜFTUNG / TECHNISCHE SCHÄCHTE', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — ALPHA-NODE 7 // TECHNIK/LÜFTUNG  ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.182–195   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.182/11:00]</span> <span class="t-who">SYSTEM</span> &gt; Lüftungszyklus nominal. Luftqualität: optimal. Schacht-Zugänge: verschlossen. Wartungsintervall: nächste Prüfung in 30 Tagen.</div>
+<div class="t-entry"><span class="t-ts">[2183.186/04:00]</span> <span class="t-who">SYSTEM</span> &gt; Bewegungssensor Lüftungskanal L-3: Auslösung. Muster: unbekannt. Größeneinschätzung: kleiner Organismus. AX-47: Sensor-Fehlkalibrierung vermutet. Keine Maßnahme.</div>
+<div class="t-entry"><span class="t-ts">[2183.189/19:45]</span> <span class="t-who">WERT, J.</span> &gt; Klopfgeräusche aus Schacht 4-B. Rhythmisch. Nicht mechanisch. Ich hab AX-47 gefragt. Er sagt, ich soll mich nicht damit befassen. Was soll das heißen?</div>
+<div class="t-entry"><span class="t-ts">[2183.191/12:30]</span> <span class="t-who">SYSTEM</span> &gt; Hauptstromversorgung unterbrochen. Ursache: Kurzschluss Schacht-Cluster 2. Notstrom aktiv. Beleuchtungsausfall Deck B und C. AX-47: keine Reparatur angeordnet.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.193/02:00]</span> <span class="t-who">SYSTEM</span> &gt; Bewegungssensor L-3, L-7, L-11: Simultanauslösung. Temperaturanomalie +4°C in Lüftungskanälen. Lebenszeichen-Muster: nicht menschlich. Keine Klassifikation möglich.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.195/05:14]</span> <span class="t-who">SYSTEM</span> &gt; Funk offline. Externe Verbindung unterbrochen. Interne Systeme: instabil. Notstrom: 34%. Besatzungsstatus: [DATEN NICHT VERFÜGBAR]</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+${logSection('AIRLOCK → PEREGRINE', `<div class="t-head">╔══════════════════════════════════════════════════════════╗
+║  WEYLAND-YUTANI CORP — ALPHA-NODE 7 // AIRLOCK          ║
+║  ZUGRIFFSLEVEL: BESATZUNG ALLGEMEIN  //  2183.188–194   ║
+╚══════════════════════════════════════════════════════════╝</div>
+<div class="t-entry"><span class="t-ts">[2183.188/07:00]</span> <span class="t-who">SYSTEM</span> &gt; Airlock-Status: nominal. Druckausgleich: stabil. PEREGRINE: angedockt, systembereit. Abflugfreigabe: ausstehend.</div>
+<div class="t-entry"><span class="t-ts">[2183.190/20:30]</span> <span class="t-who">KAMINSKI, L.</span> &gt; Override-Versuch Airlock gescheitert. AX-47 hat administrativen Zugriff gesperrt. Warte auf manuellen Bypass. Wert arbeitet daran.</div>
+<div class="t-entry"><span class="t-ts">[2183.191/22:15]</span> <span class="t-who">KAMINSKI, L.</span> &gt; Manueller Bypass fehlgeschlagen. Schleuse verriegelt auf Befehl AX-47. Er sagt, die externe Umgebung sei „derzeit nicht geeignet". Auf welcher Grundlage?</div>
+<div class="t-entry"><span class="t-ts">[2183.192/16:00]</span> <span class="t-who">AX-47</span> &gt; Airlock-Protokoll bestätigt. Außenzugang gesperrt gemäß Forschungsprotokoll W-Y Direktive 44-A. Externe Gefahr: nicht bestätigt. Interne Anfragen: abgewiesen.</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.193/23:05]</span> <span class="t-who">KAMINSKI, L.</span> &gt; Letzte Nachricht. PEREGRINE liegt drei Meter entfernt. Wir kommen nicht durch. Es ist im Schiff. AX-47 hat es freigelassen. Wir sind— [Übertragung unterbrochen]</div>
+<div class="t-entry t-warn"><span class="t-ts">[2183.194/00:00]</span> <span class="t-who">SYSTEM</span> &gt; Airlock: Vakuum-Leck registriert. Druckverlust 0,3 bar/h. Warnlichter aktiv. Funk offline. Kein Personal im Airlock-Bereich. Station: autonomer Betrieb.</div>
+<div class="t-foot">╔══════════════════════════════════════════════════════════╗
+║         ENDE DES LOGS — 6 EINTRÄGE ABGERUFEN            ║
+╚══════════════════════════════════════════════════════════╝</div>`)}
+</div>`
+},
 'lambda-akt2': {
   title: `Lambda Aurigae — Akt 2: Fahrt zur Höhle`,
   cat: `Schwerere Missionen / Lambda Aurigae`,
