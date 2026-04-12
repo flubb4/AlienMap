@@ -1960,60 +1960,59 @@
     text-transform:uppercase;text-shadow:0 0 20px #44ff88;
   }
   .xpc-wrap {
-    position:relative;cursor:pointer;user-select:none;
+    position:relative;
+    cursor:pointer;user-select:none;
+    perspective:700px; /* perspective must be on parent for rotateX to show depth */
+  }
+  /* XP amount floats ABOVE the chest — must be sibling of lid/body, not inside body */
+  .xpc-amount {
+    position:absolute;
+    bottom:calc(100% + 16px);left:50%;
+    transform:translateX(-50%) translateY(20px);
+    font-family:'Orbitron',sans-serif;font-size:42px;font-weight:900;
+    color:#44ff88;letter-spacing:4px;
+    text-shadow:0 0 30px #44ff88,0 0 70px #44ff8866;
+    opacity:0;white-space:nowrap;pointer-events:none;
+    transition:opacity 0.55s 0.4s, transform 0.65s 0.4s;
+  }
+  .xpc-wrap.opened .xpc-amount {
+    opacity:1;transform:translateX(-50%) translateY(-10px);
   }
   .xpc-lid {
-    width:160px;height:56px;
-    background:linear-gradient(135deg,#081e08,#1a4a1a,#081e08);
+    width:200px;height:60px;
+    background:linear-gradient(160deg,#071a07,#163816,#071a07);
     border:2px solid #44ff88;border-radius:6px 6px 0 0;
-    box-shadow:0 0 24px #44ff8866,inset 0 0 12px #44ff8822;
-    transform-origin:center top;
-    transform:rotateX(0deg);
-    transition:transform 0.7s cubic-bezier(0.3,-0.5,0.7,1.2);
-    perspective:400px;
+    box-shadow:0 0 28px #44ff8855,inset 0 0 14px #44ff8818;
+    transform-origin:top center; /* hinge at top edge */
+    transition:transform 0.75s cubic-bezier(0.25,-0.4,0.6,1.1);
     display:flex;align-items:center;justify-content:center;
     position:relative;z-index:2;
   }
   .xpc-lid-bar {
-    width:70%;height:3px;
+    width:65%;height:3px;
     background:linear-gradient(90deg,transparent,#44ff88,transparent);
-    border-radius:2px;
   }
   .xpc-body {
-    width:160px;height:90px;
-    background:linear-gradient(160deg,#061306,#0f2a0f,#061306);
+    width:200px;height:110px;
+    background:linear-gradient(170deg,#050f05,#0e220e,#050f05);
     border:2px solid #44ff88;border-top:none;
-    border-radius:0 0 8px 8px;
-    box-shadow:0 0 24px #44ff8866,inset 0 0 20px #44ff8811;
+    border-radius:0 0 10px 10px;
+    box-shadow:0 0 28px #44ff8855,inset 0 0 24px #44ff8810;
     display:flex;align-items:center;justify-content:center;
-    position:relative;overflow:hidden;
+    position:relative;
   }
   .xpc-lock {
-    font-size:34px;color:#44ff88;
-    text-shadow:0 0 14px #44ff88;
-    transition:opacity 0.25s;
+    font-size:40px;
+    transition:opacity 0.2s;
   }
   .xpc-inner-glow {
-    position:absolute;inset:0;
-    background:radial-gradient(circle at 50% 60%,#44ff8899,transparent 65%);
-    opacity:0;transition:opacity 0.5s 0.2s;
+    position:absolute;inset:0;border-radius:0 0 10px 10px;
+    background:radial-gradient(ellipse at 50% 40%,#44ff8877,transparent 70%);
+    opacity:0;transition:opacity 0.5s 0.25s;pointer-events:none;
   }
-  .xpc-wrap.opened .xpc-lid { transform:rotateX(-115deg); }
+  .xpc-wrap.opened .xpc-lid { transform:rotateX(-120deg); }
   .xpc-wrap.opened .xpc-lock { opacity:0; }
   .xpc-wrap.opened .xpc-inner-glow { opacity:1; }
-
-  .xpc-amount {
-    position:absolute;top:-10px;left:50%;
-    transform:translateX(-50%) translateY(0px);
-    font-family:'Orbitron',sans-serif;font-size:36px;font-weight:900;
-    color:#44ff88;letter-spacing:4px;
-    text-shadow:0 0 30px #44ff88,0 0 60px #44ff8866;
-    opacity:0;white-space:nowrap;pointer-events:none;
-    transition:opacity 0.5s 0.35s, transform 0.6s 0.35s;
-  }
-  .xpc-wrap.opened .xpc-amount {
-    opacity:1;transform:translateX(-50%) translateY(-80px);
-  }
 
   .xpc-hint {
     color:#44ff8888;font-size:11px;letter-spacing:3px;
@@ -6049,18 +6048,17 @@ window.xpcOpen = function() {
   if (wrap.classList.contains('opened')) return;
   wrap.classList.add('opened');
 
-  // Spawn particles
-  const body = wrap.querySelector('.xpc-body');
-  for (let i = 0; i < 18; i++) {
+  // Spawn particles from center of chest opening
+  for (let i = 0; i < 22; i++) {
     const p = document.createElement('div');
     p.className = 'xpc-particle';
-    const angle = (i / 18) * 360;
-    const dist = 60 + Math.random() * 80;
+    const angle = (i / 22) * 360;
+    const dist = 70 + Math.random() * 100;
     const dx = Math.round(Math.cos(angle * Math.PI / 180) * dist) + 'px';
-    const dy = Math.round(Math.sin(angle * Math.PI / 180) * dist - 40) + 'px';
-    p.style.cssText = `left:50%;top:30%;--dx:${dx};--dy:${dy};animation:xpc-fly 0.8s ease-out ${Math.random()*0.2}s forwards`;
-    body.appendChild(p);
-    setTimeout(() => p.remove(), 1100);
+    const dy = Math.round(Math.sin(angle * Math.PI / 180) * dist - 60) + 'px';
+    p.style.cssText = `position:absolute;left:50%;top:50%;margin:-2px 0 0 -2px;--dx:${dx};--dy:${dy};animation:xpc-fly 0.9s ease-out ${Math.random()*0.25}s forwards`;
+    wrap.appendChild(p);
+    setTimeout(() => p.remove(), 1300);
   }
 
   // Show hint change + dismiss button
@@ -8753,11 +8751,11 @@ window.startSupplyPanel = function() {
 <div id="xpChestOverlay">
   <div class="xpc-title">ERFAHRUNG ERHALTEN</div>
   <div class="xpc-wrap" id="xpcWrap" onclick="xpcOpen()">
+    <div class="xpc-amount" id="xpcAmount"></div>
     <div class="xpc-lid"><div class="xpc-lid-bar"></div></div>
     <div class="xpc-body">
-      <div class="xpc-lock">🔒</div>
+      <div class="xpc-lock">📦</div>
       <div class="xpc-inner-glow"></div>
-      <div class="xpc-amount" id="xpcAmount"></div>
     </div>
   </div>
   <div class="xpc-hint" id="xpcHint">KLICKEN ZUM ÖFFNEN</div>
