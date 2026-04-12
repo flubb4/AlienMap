@@ -1197,6 +1197,7 @@
         <div class="nav-item" onclick="showPage('char-silas')">Silas Ward (Android)</div>
         <div class="nav-item" onclick="showPage('char-maelys')">Maelys Mae Harlan (Officer)</div>
         <div class="nav-item" onclick="showPage('char-scott')">Scott Reynolds / Travis C. Cartern</div>
+        <div class="nav-item" onclick="showPage('char-isabela')">Isabela Cruz (Field Medic)</div>
         <div class="nav-item" onclick="showPage('agendas')">⚑ Persönliche Agendas — Übersicht</div>
       </div>
     </div>
@@ -1919,6 +1920,113 @@ const PAGES = {
     <div class="info-box danger">
       <div class="info-box-header">Stufe 4 — Die Entscheidung</div>
       <p>Scott bekommt die Möglichkeit, die volle Wahrheit zu erfahren — aber der Preis ist hoch. Er muss die Gruppe in Gefahr bringen, einen NPC opfern, oder Daten weitergeben, die auch für den Black-Veil-Plot relevant sind. Was ist ihm wichtiger — seine Antworten oder die Crew?</p>
+    </div>
+  </div>`
+},
+
+// ---- ISABELA CRUZ ----
+'char-isabela': {
+  title: 'Isabela Cruz — Field Medic',
+  cat: 'Spieler',
+  tags: [['amber', 'Spieler'], ['green', 'Field Medic'], ['blue', 'WY-CFD-47207-63A']],
+  render: () => `<div class="content">
+    <h2>Isabela Cruz</h2>
+    <p><strong>Karriere:</strong> Field Medic (Bordmedizinerin) | <strong>Herkunft:</strong> Kolonie Nueva Esperanza, Sanabria-System | <strong>Reg.:</strong> WY-CFD-47207-63A | <strong>Sicherheitsfreigabe:</strong> Stufe B</p>
+    <hr>
+
+    <h3>Hintergrund</h3>
+    <p>Isabela Cruz wuchs auf der abgelegenen Terraforming-Kolonie <strong>Nueva Esperanza</strong> im Sanabria-System auf — einer Welt, die offiziell als „in Entwicklung" gilt, tatsächlich aber seit Jahren mit zu wenig Personal, Material und Aufmerksamkeit der Weyland-Yutani Company auskommen muss.</p>
+    <p>Ihre Mutter, <strong>Elena Cruz</strong>, war die wichtigste medizinische Erstversorgerin der Kolonie — für Bergarbeiter, Techniker und Kolonisten gleichermaßen. Isabela begleitete sie bereits als Jugendliche bei Notfällen und lernte früh, mit dem Wenigen auszukommen, das vorhanden war. Ein prägendes Ereignis ereignete sich bei einem schweren Unfall in einer Erzraffinerie: Externe Hilfe traf erst Tage später ein. Ein Arbeiter starb in Isabelas Armen, während sie versuchte ihn zu versorgen. Dieses Erlebnis hat ihre Berufswahl und ihre Haltung gegenüber dem Tod für immer geprägt.</p>
+    <p>Nach ihrer medizinischen Ausbildung entschied sich Cruz bewusst gegen eine stationäre Tätigkeit auf den Kernwelten. Stattdessen verpflichtete sie sich als Bordmedizinerin auf Frachtschiffen, die abgelegene Kolonien, Forschungsstationen und Frontier-Außenposten ansteuern — dorthin, wo medizinische Hilfe sonst nicht verfügbar ist.</p>
+
+    <h3>Persönlichkeit & Psychologisches Profil</h3>
+    <p>Cruz zeigt ein stark ausgeprägtes Verantwortungsgefühl gegenüber Patienten. Sie ist überzeugt, dass niemand sterben sollte, nur weil Hilfe zu spät kommt. Interne Bewertungen weisen darauf hin, dass sie Verluste sehr persönlich nimmt und häufig versucht, jede mögliche Rettungsmaßnahme auszuschöpfen — auch unter riskanten Bedingungen.</p>
+    <ul>
+      <li>Hohe Empathie gegenüber verletzten Personen</li>
+      <li>Starkes Verantwortungsgefühl für Behandlungsergebnisse</li>
+      <li>Neigung, eigene Sicherheit zugunsten von Patienten zu vernachlässigen</li>
+      <li>Ausgeprägter Glaube daran, dass Lebewesen grundsätzlich rehabilitiert werden können</li>
+      <li>Sieht Unsicherheit, wo andere Misstrauen empfinden — und Gründe, wo andere Gefahr sehen</li>
+    </ul>
+    <p>Ihr persönlich formuliertes Ziel: <em>„Ich muss beweisen, dass ich Menschen retten kann."</em></p>
+
+    <h3>Capitán Carbón — Begleitendes Tier</h3>
+    <div class="info-box">
+      <div class="info-box-header">🦜 Capitán Carbón — Spitzname: Cabrón</div>
+      <p>Während eines Aufenthalts auf einer Frontier-Siedlung fand Cruz einen verletzten Papagei in schlechtem Zustand. Sie behandelte das Tier und nahm es dauerhaft in ihre Obhut. Für die meisten Crewmitglieder ist er ein störendes, unberechenbares Tier. Für Isabela ist er ein Lebewesen, das gelernt hat, dass Nähe mit Schmerz verbunden ist — und sie ist überzeugt, dass sich das ändern kann.</p>
+      <p>Er zeigt gegenüber den meisten Crewmitgliedern misstrauisches Verhalten und äußert regelmäßig kurze, zynische Kommentare:</p>
+      <ul>
+        <li><em>„Du Vollidiot."</em></li>
+        <li><em>„Schlechtester Pilot."</em></li>
+        <li><em>„Alle unfähig."</em></li>
+        <li><em>„Kapitän? Lächerlich."</em></li>
+      </ul>
+    </div>
+
+    <hr>
+    <h2>Persönliche Agenda</h2>
+
+    <h3>Langzeit-Quest — Warum musste ihre Mutter sterben?</h3>
+    <div class="info-box">
+      <div class="info-box-header">Kernmotivation</div>
+      <p>Gegen Ende ihrer Zeit auf Nueva Esperanza bemerkte Isabela, dass sich etwas verändert hatte. Die Verletzungen, die in die Klinik ihrer Mutter gebracht wurden, passten nicht mehr zu normalen Kolonieunfällen — innere Schäden ohne klare Ursache, Infektionen die sich ungewöhnlich schnell ausbreiteten. Ihre Mutter begann, Dinge aufzuschreiben, Proben zu sichern und Berichte anzulegen, die sie <em>nicht</em> an offizielle Stellen weiterleitete.</p>
+    </div>
+    <div class="info-box">
+      <div class="info-box-header">Der fremde Mann</div>
+      <p>Isabela hörte zufällig ein Gespräch: Ein Fremder — offensichtlich kein Kolonist — besuchte die Klinik. Das Gespräch war leise und angespannt. Ihre Mutter sagte, etwas „gehöre nicht hierher" und sie sei „nicht bereit, das zu vertuschen". Der Mann blieb ruhig und betonte, dass bestimmte Dinge „nicht in ihre Zuständigkeit fielen". Danach wirkte ihre Mutter verändert — aufmerksamer, vorsichtiger, mit einer unterschwelligen Unruhe.</p>
+    </div>
+    <div class="info-box warn">
+      <div class="info-box-header">⚠ Der Tod</div>
+      <p>Kurz darauf starb Elena Cruz. Offizielle Einstufung: <strong>Laborunfall</strong>. Die Details waren spärlich, die Informationen widersprüchlich. Company-Personal übernahm die Abwicklung, sicherte Teile der Klinik und beschlagnahmte Unterlagen. Es gab keine ausführliche Untersuchung — keine klaren Berichte, keine Möglichkeit, Fragen zu stellen.</p>
+      <p>Letzte Worte der Mutter, beiläufig gesprochen: <em>„Wenn du jemals etwas siehst, das keinen Sinn ergibt — versuche nicht, es zu verstehen. Lauf einfach."</em></p>
+    </div>
+    <p>Isabela akzeptierte die offizielle Version nach außen hin. In ihr blieb das Gefühl, dass entscheidende Informationen fehlen. Als Field Medic auf Frachtschiffen reist sie seitdem von Ort zu Ort — und sammelt Fragmente, die vielleicht irgendwann ein Gesamtbild ergeben. Sie sucht keine Rache. Sie sucht <strong>Klarheit</strong>.</p>
+
+    <h3>Kurzzeit-Quests</h3>
+    <div class="info-box">
+      <div class="info-box-header">A — Niemand stirbt, wenn Isabela es verhindern kann</div>
+      <p>Wenn jemand vor ihr liegt, verletzt oder dem Tod näher als dem Leben, gibt es keinen einfachen Rückzug. Befehle, Zeitdruck und Missionssicherheit verlieren an Bedeutung. Sie sucht nach Möglichkeiten, wo andere längst aufgegeben hätten — probiert noch eine Maßnahme, bleibt noch einen Moment länger. Jeder Patient ist eine Gelegenheit, das zu verhindern, was sie einmal nicht verhindern konnte.</p>
+    </div>
+    <div class="info-box">
+      <div class="info-box-header">B — Isabela sieht das Gute in Anderen</div>
+      <p>Wo andere Misstrauen empfinden, sieht sie Unsicherheit. Wo andere Gefahr sehen, vermutet sie Gründe, die noch nicht ausgesprochen wurden. Sie schenkt Vertrauen, wo andere Abstand halten — und geht Risiken ein, wenn sie glaubt, jemand verdiene eine zweite Chance. Manchmal liegt sie richtig. Manchmal irrt sie sich gefährlich.</p>
+    </div>
+    <div class="info-box">
+      <div class="info-box-header">C — Capitán Carbón kann wieder vertrauen lernen</div>
+      <p>Für Isabela ist der Papagei kein störendes Tier, sondern ein Lebewesen, das gelernt hat, dass Nähe mit Schmerz verbunden ist. Sie spricht täglich mit ihm, interpretiert selbst kleinste Verhaltensänderungen als Fortschritt und bleibt geduldig — auch wenn er sie und andere weiterhin beleidigt. Für sie spiegelt das Projekt Capitán Carbón ihre gesamte Weltanschauung wider.</p>
+    </div>
+
+    <hr>
+    <h2>GM-Eskalation — Stufenplan</h2>
+
+    <div class="info-box secret">
+      <div class="info-box-header">SL Only — Klassifizierter Anhang</div>
+      <p style="font-size:13px;color:var(--text);">Die folgenden Informationen sind für den Spielleiter. Isabela selbst kennt diese Zusammenhänge nicht — noch nicht.</p>
+      <ul style="font-size:13px;color:var(--text);">
+        <li><strong>A)</strong> Der Raffinerieunfall auf Nueva Esperanza könnte möglicherweise nicht ausschließlich technische Ursachen gehabt haben.</li>
+        <li><strong>B)</strong> Elena Cruz warnte Isabela mehrfach vor medizinischen Phänomenen, die sich nicht mit bekannten Lehrbüchern erklären ließen.</li>
+        <li><strong>C)</strong> Während eines früheren Einsatzes behandelte Cruz einen schwer verletzten Passagier, der anschließend spurlos aus einer Stationsklinik verschwand.</li>
+      </ul>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-header">Stufe 1 — Muster ohne Namen</div>
+      <p>Isabela beginnt, auf Missionen Verletzungsmuster zu sehen, die sie aus ihrer Kindheit kennt — die gleichen unerklärlichen inneren Schäden, die gleichen aggressiven Infektionen. Sie spricht zunächst nicht offen darüber, aber die Crew bemerkt, dass sie manchmal länger als nötig über einen Patienten gebeugt bleibt und sich Notizen macht, die sie niemandem zeigt.</p>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-header">Stufe 2 — Ein Name taucht auf</div>
+      <p>Auf einer Station oder in einem WY-Terminal stößt Isabela auf einen Bericht, der die Kolonie Nueva Esperanza erwähnt — zusammen mit einem Projektcodenamen oder einer Materialbezeichnung, die mit den Vorfällen ihrer Mutter in Verbindung stehen könnte. Der Bericht ist fragmentarisch, aber er ist real. Zum ersten Mal hat sie etwas Greifbares in der Hand.</p>
+    </div>
+
+    <div class="info-box warn">
+      <div class="info-box-header">Stufe 3 — Der verschwundene Patient</div>
+      <p>Jemand der Crew begegnet dem Passagier, den Isabela einst behandelte und der spurlos aus der Stationsklinik verschwand. Oder: Sie findet Akten über ihn. Was auch immer WY mit ihm gemacht hat — seine Akte zeigt, dass sein Zustand medizinisch als „unbekannte Ätiologie" klassifiziert wurde. Genau dieselbe Formulierung stand in den Berichten ihrer Mutter.</p>
+    </div>
+
+    <div class="info-box danger">
+      <div class="info-box-header">Stufe 4 — Die Entscheidung</div>
+      <p>Isabela bekommt Zugang zu Informationen, die die Umstände des Todes ihrer Mutter eindeutig klären — aber der Preis ist hoch. Sie muss entscheiden, ob sie diese Information teilt, verbirgt oder zerstört. Und ob sie bereit ist, mit der Antwort zu leben, wenn sie die Wahrheit kennt. Ihre Mutter hatte sie gewarnt: einfach laufen.</p>
     </div>
   </div>`
 },
