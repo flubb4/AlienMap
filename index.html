@@ -1860,6 +1860,91 @@
 }
 .wd-close-btn:hover{background:rgba(204,102,51,0.15)}
 
+  /* ── XP AWARD OVERLAY ── */
+  .gm-xp-btn {
+    display:block;width:100%;margin-bottom:6px;
+    background:rgba(68,255,136,0.06);border:1px solid #44ff88;
+    color:#44ff88;font-family:'Share Tech Mono',monospace;font-size:10px;
+    padding:7px 0;cursor:pointer;letter-spacing:2px;transition:all 0.2s;
+  }
+  .gm-xp-btn:hover { background:rgba(68,255,136,0.15); box-shadow:0 0 12px rgba(68,255,136,0.3); }
+
+  #xpAwardOverlay {
+    position:fixed;inset:0;z-index:3500;
+    background:rgba(0,0,0,0.97);
+    display:none;flex-direction:column;align-items:center;
+    font-family:'Share Tech Mono',monospace;overflow-y:auto;
+  }
+  #xpAwardOverlay.open { display:flex; }
+  .xpa-header {
+    width:100%;max-width:960px;
+    padding:24px 32px 0;
+    display:flex;align-items:center;justify-content:space-between;
+    flex-shrink:0;
+  }
+  .xpa-title {
+    font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;
+    color:#44ff88;letter-spacing:4px;text-transform:uppercase;
+  }
+  .xpa-subtitle { font-size:9px;color:#44ff8877;letter-spacing:3px;margin-top:4px; }
+  .xpa-close-btn {
+    background:transparent;border:1px solid #44ff88;color:#44ff88;
+    font-family:'Share Tech Mono',monospace;font-size:10px;
+    padding:6px 16px;cursor:pointer;letter-spacing:2px;
+  }
+  .xpa-close-btn:hover { background:rgba(68,255,136,0.12); }
+  .xpa-body {
+    width:100%;max-width:960px;
+    padding:24px 32px 40px;
+  }
+  .xpa-table {
+    width:100%;border-collapse:collapse;
+    font-size:11px;
+  }
+  .xpa-table th {
+    color:#44ff88;border-bottom:1px solid #44ff8855;
+    padding:8px 12px;text-align:center;letter-spacing:1px;font-size:10px;
+  }
+  .xpa-table th.xpa-q-head {
+    text-align:left;color:#aaffcc;font-size:9px;letter-spacing:2px;
+  }
+  .xpa-table td {
+    padding:10px 12px;border-bottom:1px solid #44ff8822;
+    vertical-align:middle;
+  }
+  .xpa-table td.xpa-q-cell {
+    color:#ccffdd;font-size:10px;letter-spacing:0.5px;line-height:1.4;
+  }
+  .xpa-table td.xpa-q-cell .xpa-xp-badge {
+    display:inline-block;margin-left:8px;
+    background:#44ff8822;border:1px solid #44ff8866;
+    color:#44ff88;font-size:8px;padding:1px 6px;letter-spacing:1px;
+  }
+  .xpa-table td.xpa-check-cell {
+    text-align:center;
+  }
+  .xpa-check {
+    width:20px;height:20px;cursor:pointer;accent-color:#44ff88;
+  }
+  .xpa-total-row td {
+    border-top:1px solid #44ff8855;border-bottom:none;
+    padding-top:14px;color:#44ff88;font-size:13px;font-weight:bold;
+    text-align:center;letter-spacing:1px;
+  }
+  .xpa-total-row td.xpa-q-cell { color:#aaffcc;font-size:10px;text-align:left; }
+  .xpa-award-btn {
+    display:block;margin:24px auto 0;
+    background:rgba(68,255,136,0.1);border:1px solid #44ff88;
+    color:#44ff88;font-family:'Share Tech Mono',monospace;
+    font-size:12px;padding:12px 40px;cursor:pointer;letter-spacing:3px;
+    transition:all 0.2s;
+  }
+  .xpa-award-btn:hover { background:rgba(68,255,136,0.25);box-shadow:0 0 20px rgba(68,255,136,0.4); }
+  .xpa-awarded-msg {
+    text-align:center;margin-top:16px;font-size:11px;
+    color:#44ff88;letter-spacing:2px;opacity:0;transition:opacity 0.4s;
+  }
+
   /* ── HANDOUT SYSTEM ── */
   .gm-ho-btn {
     width:100%; padding:7px 0; margin-bottom:4px;
@@ -2558,6 +2643,7 @@
         <button class="gm-wd-btn" onclick="openWuerfelLobby()">🎲 Würfel Dürfel</button>
         <button class="gm-ib-btn" onclick="openImageBoard()">🖼 Image Board</button>
         <button class="gm-ho-btn" onclick="openHandoutPanel()">📄 Transmission</button>
+        <button class="gm-xp-btn" onclick="openXPAward()">🏆 XP Award</button>
         <button class="gm-session-btn" id="gmSessionBtn" onclick="toggleSession()">
           ✓ Session Active — Close Map
         </button>
@@ -5728,6 +5814,108 @@ window._csDB = function(playerName, path, value) {
   _csDebounce[key] = setTimeout(() => window._csSave(playerName, path, value), _CS_MS);
 };
 
+// ── XP Award System ───────────────────────────────────────────────
+const XP_QUESTIONS = [
+  { id:'participated', label:'Hast du an der Session teilgenommen?',                                                          xp: 1 },
+  { id:'agenda',       label:'Hast du etwas riskiert oder geopfert, um bei deiner persönlichen Agenda weiterzukommen?',       xp: 1 },
+  { id:'buddy',        label:'Hast du dein Leben riskiert für deinen Buddy PC?',                                              xp: 1 },
+  { id:'rival',        label:'Hast du deinen Rivalen PC herausgefordert oder dich ihm widersetzt?',                           xp: 1 },
+  { id:'panic',        label:'Hast du einen Panik Roll gemacht?',                                                             xp: 1 },
+  { id:'event',        label:'Hast du ein gefährliches Event überstanden (gewalttätig oder nicht gewalttätig)?',              xp: 1 },
+  { id:'discovery',    label:'Hast du eine große Entdeckung gemacht?',                                                        xp: 1 },
+  { id:'outstanding',  label:'Hast du eine herausragende Leistung getätigt?',                                                 xp: 1 },
+  { id:'money',        label:'Hast du Geld verdient?',                                                                        xp: 1 },
+];
+
+function _xpaGetPlayers() {
+  const names = new Set();
+  if (window._onlinePlayers) window._onlinePlayers.forEach(n => names.add(n));
+  Object.keys(_csAllSheets).forEach(n => names.add(n));
+  // Remove GM from list
+  if (isGM && myName) names.delete(myName);
+  return [...names].sort();
+}
+
+window.openXPAward = function() {
+  if (!isGM) return;
+  const overlay = document.getElementById('xpAwardOverlay');
+  overlay.classList.add('open');
+  _xpaRender();
+};
+
+window.closeXPAward = function() {
+  document.getElementById('xpAwardOverlay').classList.remove('open');
+};
+
+function _xpaRender() {
+  const players = _xpaGetPlayers();
+  const wrap = document.getElementById('xpaTableWrap');
+  if (!players.length) {
+    wrap.innerHTML = '<p style="color:#44ff8877;text-align:center;letter-spacing:2px;margin-top:40px;">KEINE SPIELER ONLINE</p>';
+    return;
+  }
+
+  let html = '<table class="xpa-table"><thead><tr>';
+  html += '<th class="xpa-q-head">FRAGE</th>';
+  players.forEach(p => { html += `<th>${p.toUpperCase()}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  XP_QUESTIONS.forEach(q => {
+    html += `<tr>`;
+    html += `<td class="xpa-q-cell">${q.label}<span class="xpa-xp-badge">+${q.xp} XP</span></td>`;
+    players.forEach(p => {
+      html += `<td class="xpa-check-cell"><input type="checkbox" class="xpa-check" data-player="${p}" data-qid="${q.id}" data-xp="${q.xp}" onchange="_xpaUpdateTotals()"></td>`;
+    });
+    html += '</tr>';
+  });
+
+  // Totals row
+  html += '<tr class="xpa-total-row"><td class="xpa-q-cell">TOTAL XP DIESE SESSION</td>';
+  players.forEach(p => {
+    html += `<td id="xpa-total-${p}" class="xpa-total-cell">0</td>`;
+  });
+  html += '</tr></tbody></table>';
+  wrap.innerHTML = html;
+}
+
+window._xpaUpdateTotals = function() {
+  const players = _xpaGetPlayers();
+  const totals = {};
+  players.forEach(p => { totals[p] = 0; });
+  document.querySelectorAll('.xpa-check:checked').forEach(cb => {
+    totals[cb.dataset.player] = (totals[cb.dataset.player] || 0) + parseInt(cb.dataset.xp);
+  });
+  players.forEach(p => {
+    const el = document.getElementById('xpa-total-' + p);
+    if (el) el.textContent = '+' + (totals[p] || 0);
+  });
+};
+
+window.applyXPAward = function() {
+  if (!isGM) return;
+  const players = _xpaGetPlayers();
+  const totals = {};
+  players.forEach(p => { totals[p] = 0; });
+  document.querySelectorAll('.xpa-check:checked').forEach(cb => {
+    totals[cb.dataset.player] = (totals[cb.dataset.player] || 0) + parseInt(cb.dataset.xp);
+  });
+
+  players.forEach(p => {
+    if (!totals[p]) return;
+    const cur = parseInt(_csGet(_csAllSheets[p] || {}, 'xp')) || 0;
+    window._csSave(p, 'xp', cur + totals[p]);
+  });
+
+  // Flash confirmation
+  const msg = document.getElementById('xpaAwardedMsg');
+  msg.style.opacity = '1';
+  setTimeout(() => { msg.style.opacity = '0'; }, 3000);
+
+  // Uncheck all boxes
+  document.querySelectorAll('.xpa-check').forEach(cb => { cb.checked = false; });
+  _xpaUpdateTotals();
+};
+
 // ── Helper: nested path getter ────────────────────────────────────
 function _csGet(obj, path) {
   return path.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : ''), obj) || '';
@@ -8397,6 +8585,22 @@ window.startSupplyPanel = function() {
     <div class="wd-title">WÜRFEL DÜRFEL</div>
     <div class="wd-subtitle">// 1v1 DICE COMBAT //</div>
     <!-- rendered by renderWD() -->
+  </div>
+</div>
+
+<!-- ── XP AWARD OVERLAY ── -->
+<div id="xpAwardOverlay">
+  <div class="xpa-header">
+    <div>
+      <div class="xpa-title">XP Award</div>
+      <div class="xpa-subtitle">// END OF SESSION // EXPERIENCE POINTS //</div>
+    </div>
+    <button class="xpa-close-btn" onclick="closeXPAward()">✕ CLOSE</button>
+  </div>
+  <div class="xpa-body">
+    <div id="xpaTableWrap"></div>
+    <button class="xpa-award-btn" onclick="applyXPAward()">⬆ AWARD XP TO ALL PLAYERS</button>
+    <div class="xpa-awarded-msg" id="xpaAwardedMsg">XP ERFOLGREICH EINGETRAGEN ✓</div>
   </div>
 </div>
 
