@@ -1946,106 +1946,97 @@
   }
 
   /* ── XP CHEST ANIMATION ── */
+  /* ── XP TRANSMISSION (Weyland-Yutani Terminal) ── */
   #xpChestOverlay {
     position:fixed;inset:0;z-index:9500;
-    background:rgba(0,0,0,0.93);
-    display:none;flex-direction:column;
-    align-items:center;justify-content:center;
+    background:rgba(0,0,0,0.96);
+    display:none;align-items:center;justify-content:center;
     font-family:'Share Tech Mono',monospace;
   }
   #xpChestOverlay.visible { display:flex; }
-  .xpc-title {
-    color:#44ff88;font-family:'Orbitron',sans-serif;
-    font-size:14px;letter-spacing:6px;margin-bottom:40px;
-    text-transform:uppercase;text-shadow:0 0 20px #44ff88;
+
+  .xpc-terminal {
+    width:460px;max-width:92vw;
+    border:1px solid #44ff88;
+    background:#020a02;
+    box-shadow:0 0 60px #44ff8822,0 0 120px #44ff8808,inset 0 0 40px #44ff8806;
+    position:relative;overflow:hidden;
   }
-  .xpc-wrap {
+  /* CRT scanlines */
+  .xpc-terminal::before {
+    content:'';position:absolute;inset:0;pointer-events:none;z-index:10;
+    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.18) 3px,rgba(0,0,0,0.18) 4px);
+  }
+  /* Flicker animation */
+  @keyframes xpc-flicker {
+    0%,95%,100%{opacity:1} 96%{opacity:0.92} 97%{opacity:1} 98%{opacity:0.95}
+  }
+  .xpc-terminal { animation:xpc-flicker 8s infinite; }
+
+  .xpc-corp-bar {
+    padding:16px 20px 12px;
+    border-bottom:1px solid #44ff8830;
+    display:flex;align-items:baseline;gap:12px;
+  }
+  .xpc-corp-name {
+    font-family:'Orbitron',sans-serif;font-size:11px;font-weight:900;
+    color:#44ff88;letter-spacing:5px;text-shadow:0 0 16px #44ff88;
+  }
+  .xpc-corp-sub { font-size:8px;color:#44ff8855;letter-spacing:3px; }
+
+  .xpc-info {
+    padding:14px 20px;border-bottom:1px solid #44ff8818;
+  }
+  .xpc-info-row {
+    font-size:9px;color:#44ff8877;letter-spacing:1px;line-height:2;
+  }
+  .xpc-info-row b { color:#44ff88cc; }
+
+  .xpc-decrypt-zone {
+    padding:36px 20px 32px;
+    text-align:center;cursor:pointer;
+    transition:background 0.2s;
     position:relative;
-    cursor:pointer;user-select:none;
-    perspective:700px;
   }
-  .xpc-lid {
-    width:200px;height:60px;
-    background:linear-gradient(160deg,#071a07,#163816,#071a07);
-    border:2px solid #44ff88;border-radius:6px 6px 0 0;
-    box-shadow:0 0 28px #44ff8855,inset 0 0 14px #44ff8818;
-    transform-origin:bottom center; /* hinge where lid meets body — no gap */
-    transition:transform 0.75s cubic-bezier(0.25,-0.5,0.6,1.1);
-    display:flex;align-items:center;justify-content:center;
-    position:relative;z-index:2;
-  }
-  .xpc-lid-bar {
-    width:65%;height:3px;
-    background:linear-gradient(90deg,transparent,#44ff88,transparent);
-  }
-  .xpc-body {
-    width:200px;height:120px;
-    background:linear-gradient(170deg,#050f05,#0e220e,#050f05);
-    border:2px solid #44ff88;border-top:none;
-    border-radius:0 0 10px 10px;
-    box-shadow:0 0 28px #44ff8855,inset 0 0 24px #44ff8810;
-    display:flex;align-items:center;justify-content:center;
-    position:relative;
-  }
-  .xpc-lock {
-    font-size:40px;
-    transition:opacity 0.2s;
-    position:absolute;
-  }
-  /* XP amount shown INSIDE the body — visible once lid opens */
-  .xpc-amount {
-    position:absolute;
-    display:flex;flex-direction:column;align-items:center;gap:4px;
-    font-family:'Orbitron',sans-serif;font-size:40px;font-weight:900;
-    color:#44ff88;letter-spacing:4px;
-    text-shadow:0 0 30px #44ff88,0 0 70px #44ff8866;
-    opacity:0;white-space:nowrap;pointer-events:none;
-    transition:opacity 0.5s 0.45s;
-  }
-  .xpc-amount-label {
-    font-family:'Share Tech Mono',monospace;
-    font-size:10px;letter-spacing:3px;color:#aaffcc;
-    text-shadow:none;
-  }
-  .xpc-inner-glow {
-    position:absolute;inset:0;border-radius:0 0 10px 10px;
-    background:radial-gradient(ellipse at 50% 40%,#44ff8866,transparent 70%);
-    opacity:0;transition:opacity 0.5s 0.25s;pointer-events:none;
-  }
-  .xpc-wrap.opened .xpc-lid    { transform:rotateX(155deg); }
-  .xpc-wrap.opened .xpc-lock   { opacity:0; }
-  .xpc-wrap.opened .xpc-inner-glow { opacity:1; }
-  .xpc-wrap.opened .xpc-amount { opacity:1; }
+  .xpc-decrypt-zone:hover { background:rgba(68,255,136,0.025); }
 
-  .xpc-hint {
-    color:#44ff8888;font-size:11px;letter-spacing:3px;
-    margin-top:24px;
-    animation:xpc-pulse 1.4s ease-in-out infinite;
+  .xpc-prompt {
+    font-size:10px;color:#44ff8877;letter-spacing:4px;
+    animation:xpc-blink 1.1s step-end infinite;
   }
-  .xpc-hint.hidden { opacity:0; }
-  @keyframes xpc-pulse {
-    0%,100%{opacity:0.4} 50%{opacity:1}
+  @keyframes xpc-blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+  .xpc-scramble {
+    font-family:'Orbitron',sans-serif;
+    font-size:52px;font-weight:900;letter-spacing:4px;
+    color:#44ff88;text-shadow:0 0 40px #44ff88,0 0 80px #44ff8844;
+    min-height:64px;line-height:1;
+    display:none;margin-bottom:6px;
+  }
+  .xpc-xp-label {
+    font-size:9px;color:#aaffcc;letter-spacing:5px;
+    display:none;margin-top:4px;
+  }
+  @keyframes xpc-reveal-glow {
+    0%{text-shadow:0 0 80px #44ff88,0 0 160px #44ff88}
+    100%{text-shadow:0 0 40px #44ff88,0 0 80px #44ff8844}
+  }
+  .xpc-scramble.done {
+    animation:xpc-reveal-glow 1s ease-out forwards;
   }
 
-  .xpc-particle {
-    position:absolute;pointer-events:none;
-    width:5px;height:5px;border-radius:50%;
-    background:#44ff88;box-shadow:0 0 6px #44ff88;
+  .xpc-footer {
+    padding:10px 20px;border-top:1px solid #44ff8818;
+    display:flex;justify-content:flex-end;
   }
-  @keyframes xpc-fly {
-    0%{transform:translate(0,0) scale(1);opacity:1}
-    100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}
+  .xpc-close-btn {
+    background:transparent;border:1px solid #44ff8833;
+    color:#44ff8855;font-family:'Share Tech Mono',monospace;
+    font-size:9px;padding:6px 18px;cursor:pointer;letter-spacing:2px;
+    display:none;transition:all 0.2s;
   }
-
-  .xpc-dismiss-btn {
-    margin-top:36px;
-    background:transparent;border:1px solid #44ff8866;
-    color:#44ff8888;font-family:'Share Tech Mono',monospace;
-    font-size:11px;padding:8px 24px;cursor:pointer;letter-spacing:2px;
-    opacity:0;transition:opacity 0.4s 1s;
-  }
-  .xpc-dismiss-btn.visible { opacity:1; }
-  .xpc-dismiss-btn:hover { border-color:#44ff88;color:#44ff88; }
+  .xpc-close-btn:hover { border-color:#44ff88;color:#44ff88; }
+  .xpc-close-btn.visible { display:block; }
 
   /* ── HANDOUT SYSTEM ── */
   .gm-ho-btn {
@@ -6033,48 +6024,59 @@ window.startXPChestWatcher = function() {
   });
 };
 
+let _xpcAmount = 0;
+let _xpcOpened = false;
+
 window.xpcShow = function(amount) {
-  const wrap = document.getElementById('xpcWrap');
-  const amountEl = document.getElementById('xpcAmount');
-  const hint = document.getElementById('xpcHint');
-  const btn = document.getElementById('xpcDismissBtn');
-  // Reset state
-  wrap.classList.remove('opened');
-  document.getElementById('xpcAmountNum').textContent = '+' + amount + ' XP';
-  hint.classList.remove('hidden');
-  btn.classList.remove('visible');
+  _xpcAmount = amount;
+  _xpcOpened = false;
+  document.getElementById('xpcRecipient').textContent = myName || 'OPERATIVE';
+  document.getElementById('xpcPrompt').style.display = '';
+  document.getElementById('xpcScramble').style.display = 'none';
+  document.getElementById('xpcScramble').classList.remove('done');
+  document.getElementById('xpcXpLabel').style.display = 'none';
+  document.getElementById('xpcCloseBtn').classList.remove('visible');
   document.getElementById('xpChestOverlay').classList.add('visible');
 };
 
 window.xpcOpen = function() {
-  const wrap = document.getElementById('xpcWrap');
-  if (wrap.classList.contains('opened')) return;
-  wrap.classList.add('opened');
+  if (_xpcOpened) return;
+  _xpcOpened = true;
 
-  // Spawn particles from center of chest opening
-  for (let i = 0; i < 22; i++) {
-    const p = document.createElement('div');
-    p.className = 'xpc-particle';
-    const angle = (i / 22) * 360;
-    const dist = 70 + Math.random() * 100;
-    const dx = Math.round(Math.cos(angle * Math.PI / 180) * dist) + 'px';
-    const dy = Math.round(Math.sin(angle * Math.PI / 180) * dist - 60) + 'px';
-    p.style.cssText = `position:absolute;left:50%;top:50%;margin:-2px 0 0 -2px;--dx:${dx};--dy:${dy};animation:xpc-fly 0.9s ease-out ${Math.random()*0.25}s forwards`;
-    wrap.appendChild(p);
-    setTimeout(() => p.remove(), 1300);
-  }
+  const prompt   = document.getElementById('xpcPrompt');
+  const scramble = document.getElementById('xpcScramble');
+  const label    = document.getElementById('xpcXpLabel');
+  const closeBtn = document.getElementById('xpcCloseBtn');
 
-  // Show hint change + dismiss button
-  const hint = document.getElementById('xpcHint');
-  hint.classList.add('hidden');
-  setTimeout(() => {
-    document.getElementById('xpcDismissBtn').classList.add('visible');
-  }, 800);
+  prompt.style.display = 'none';
+  scramble.style.display = 'block';
+
+  const finalText = '+' + _xpcAmount + ' XP';
+  const glyphs = '!#$%&?@▓▒░█▄▀■□▪▫◆◇○●╬╪╫╩╦═╠║│─┼';
+  const totalFrames = 32;
+  let frame = 0;
+
+  const timer = setInterval(() => {
+    frame++;
+    const revealCount = Math.floor((frame / totalFrames) * finalText.length);
+    let display = finalText.slice(0, revealCount);
+    for (let i = revealCount; i < finalText.length; i++) {
+      display += finalText[i] === ' ' ? ' ' : glyphs[Math.floor(Math.random() * glyphs.length)];
+    }
+    scramble.textContent = display;
+
+    if (frame >= totalFrames) {
+      clearInterval(timer);
+      scramble.textContent = finalText;
+      scramble.classList.add('done');
+      label.style.display = 'block';
+      setTimeout(() => closeBtn.classList.add('visible'), 600);
+    }
+  }, 45);
 };
 
 window.xpcDismiss = function() {
   document.getElementById('xpChestOverlay').classList.remove('visible');
-  // Remove the chest from Firebase so it doesn't re-trigger
   if (myName) remove(ref(db, 'session/xpChest/' + myName));
 };
 
@@ -8750,22 +8752,27 @@ window.startSupplyPanel = function() {
   </div>
 </div>
 
-<!-- ── XP CHEST (player-side) ── -->
+<!-- ── XP TRANSMISSION (player-side) ── -->
 <div id="xpChestOverlay">
-  <div class="xpc-title">ERFAHRUNG ERHALTEN</div>
-  <div class="xpc-wrap" id="xpcWrap" onclick="xpcOpen()">
-    <div class="xpc-lid"><div class="xpc-lid-bar"></div></div>
-    <div class="xpc-body">
-      <div class="xpc-lock">🔒</div>
-      <div class="xpc-inner-glow"></div>
-      <div class="xpc-amount" id="xpcAmount">
-        <span id="xpcAmountNum"></span>
-        <span class="xpc-amount-label">ERFAHRUNGSPUNKTE</span>
-      </div>
+  <div class="xpc-terminal">
+    <div class="xpc-corp-bar">
+      <span class="xpc-corp-name">WEYLAND-YUTANI</span>
+      <span class="xpc-corp-sub">// ENCRYPTED TRANSMISSION //</span>
+    </div>
+    <div class="xpc-info">
+      <div class="xpc-info-row">SYSTEM: <b>OPERATIVE EVALUATION PROTOCOL</b></div>
+      <div class="xpc-info-row">STATUS: <b>SESSION COMPLETE — AWAITING DECRYPT</b></div>
+      <div class="xpc-info-row">RECIPIENT: <b id="xpcRecipient">OPERATIVE</b></div>
+    </div>
+    <div class="xpc-decrypt-zone" id="xpcDecryptZone" onclick="xpcOpen()">
+      <div class="xpc-prompt" id="xpcPrompt">▶ TAP TO DECRYPT EXPERIENCE DATA ◀</div>
+      <div class="xpc-scramble" id="xpcScramble"></div>
+      <div class="xpc-xp-label" id="xpcXpLabel">ERFAHRUNGSPUNKTE ERHALTEN</div>
+    </div>
+    <div class="xpc-footer">
+      <button class="xpc-close-btn" id="xpcCloseBtn" onclick="xpcDismiss()">[ ÜBERTRAGUNG SCHLIESSEN ]</button>
     </div>
   </div>
-  <div class="xpc-hint" id="xpcHint">KLICKEN ZUM ÖFFNEN</div>
-  <button class="xpc-dismiss-btn" id="xpcDismissBtn" onclick="xpcDismiss()">✕ SCHLIESSEN</button>
 </div>
 
 <!-- ── XP AWARD OVERLAY ── -->
