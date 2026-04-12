@@ -1962,29 +1962,15 @@
   .xpc-wrap {
     position:relative;
     cursor:pointer;user-select:none;
-    perspective:700px; /* perspective must be on parent for rotateX to show depth */
-  }
-  /* XP amount floats ABOVE the chest — must be sibling of lid/body, not inside body */
-  .xpc-amount {
-    position:absolute;
-    bottom:calc(100% + 16px);left:50%;
-    transform:translateX(-50%) translateY(20px);
-    font-family:'Orbitron',sans-serif;font-size:42px;font-weight:900;
-    color:#44ff88;letter-spacing:4px;
-    text-shadow:0 0 30px #44ff88,0 0 70px #44ff8866;
-    opacity:0;white-space:nowrap;pointer-events:none;
-    transition:opacity 0.55s 0.4s, transform 0.65s 0.4s;
-  }
-  .xpc-wrap.opened .xpc-amount {
-    opacity:1;transform:translateX(-50%) translateY(-10px);
+    perspective:700px;
   }
   .xpc-lid {
     width:200px;height:60px;
     background:linear-gradient(160deg,#071a07,#163816,#071a07);
     border:2px solid #44ff88;border-radius:6px 6px 0 0;
     box-shadow:0 0 28px #44ff8855,inset 0 0 14px #44ff8818;
-    transform-origin:top center; /* hinge at top edge */
-    transition:transform 0.75s cubic-bezier(0.25,-0.4,0.6,1.1);
+    transform-origin:bottom center; /* hinge where lid meets body — no gap */
+    transition:transform 0.75s cubic-bezier(0.25,-0.5,0.6,1.1);
     display:flex;align-items:center;justify-content:center;
     position:relative;z-index:2;
   }
@@ -1993,7 +1979,7 @@
     background:linear-gradient(90deg,transparent,#44ff88,transparent);
   }
   .xpc-body {
-    width:200px;height:110px;
+    width:200px;height:120px;
     background:linear-gradient(170deg,#050f05,#0e220e,#050f05);
     border:2px solid #44ff88;border-top:none;
     border-radius:0 0 10px 10px;
@@ -2004,15 +1990,32 @@
   .xpc-lock {
     font-size:40px;
     transition:opacity 0.2s;
+    position:absolute;
+  }
+  /* XP amount shown INSIDE the body — visible once lid opens */
+  .xpc-amount {
+    position:absolute;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-family:'Orbitron',sans-serif;font-size:40px;font-weight:900;
+    color:#44ff88;letter-spacing:4px;
+    text-shadow:0 0 30px #44ff88,0 0 70px #44ff8866;
+    opacity:0;white-space:nowrap;pointer-events:none;
+    transition:opacity 0.5s 0.45s;
+  }
+  .xpc-amount-label {
+    font-family:'Share Tech Mono',monospace;
+    font-size:10px;letter-spacing:3px;color:#aaffcc;
+    text-shadow:none;
   }
   .xpc-inner-glow {
     position:absolute;inset:0;border-radius:0 0 10px 10px;
-    background:radial-gradient(ellipse at 50% 40%,#44ff8877,transparent 70%);
+    background:radial-gradient(ellipse at 50% 40%,#44ff8866,transparent 70%);
     opacity:0;transition:opacity 0.5s 0.25s;pointer-events:none;
   }
-  .xpc-wrap.opened .xpc-lid { transform:rotateX(-120deg); }
-  .xpc-wrap.opened .xpc-lock { opacity:0; }
+  .xpc-wrap.opened .xpc-lid    { transform:rotateX(-155deg); }
+  .xpc-wrap.opened .xpc-lock   { opacity:0; }
   .xpc-wrap.opened .xpc-inner-glow { opacity:1; }
+  .xpc-wrap.opened .xpc-amount { opacity:1; }
 
   .xpc-hint {
     color:#44ff8888;font-size:11px;letter-spacing:3px;
@@ -6037,7 +6040,7 @@ window.xpcShow = function(amount) {
   const btn = document.getElementById('xpcDismissBtn');
   // Reset state
   wrap.classList.remove('opened');
-  amountEl.textContent = '+' + amount + ' XP';
+  document.getElementById('xpcAmountNum').textContent = '+' + amount + ' XP';
   hint.classList.remove('hidden');
   btn.classList.remove('visible');
   document.getElementById('xpChestOverlay').classList.add('visible');
@@ -8751,11 +8754,14 @@ window.startSupplyPanel = function() {
 <div id="xpChestOverlay">
   <div class="xpc-title">ERFAHRUNG ERHALTEN</div>
   <div class="xpc-wrap" id="xpcWrap" onclick="xpcOpen()">
-    <div class="xpc-amount" id="xpcAmount"></div>
     <div class="xpc-lid"><div class="xpc-lid-bar"></div></div>
     <div class="xpc-body">
-      <div class="xpc-lock">📦</div>
+      <div class="xpc-lock">🔒</div>
       <div class="xpc-inner-glow"></div>
+      <div class="xpc-amount" id="xpcAmount">
+        <span id="xpcAmountNum"></span>
+        <span class="xpc-amount-label">ERFAHRUNGSPUNKTE</span>
+      </div>
     </div>
   </div>
   <div class="xpc-hint" id="xpcHint">KLICKEN ZUM ÖFFNEN</div>
