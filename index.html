@@ -1430,7 +1430,7 @@
   background: #020a06;
   border: 1px solid #1a3a10;
   box-shadow: 0 0 80px rgba(180,120,20,0.12), 0 0 160px rgba(180,120,20,0.05);
-  width: 720px; max-width: 96vw;
+  width: 1020px; max-width: 98vw;
   overflow: hidden;
 }
 .rations-header {
@@ -1469,14 +1469,15 @@
   border-bottom: 1px solid #0a1a08;
 }
 .rations-col-label {
-  font-size: 8px; letter-spacing: 3px; text-transform: uppercase;
-  color: #2a6030;
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: #44aa60;
 }
-.rations-col.scott .rations-col-label { color: #6a4010; }
+.rations-col.scott .rations-col-label { color: #cc8822; }
+.rations-col.bier  .rations-col-label { color: #cc9900; }
 .scott-badge {
-  font-size: 7px; letter-spacing: 1px; background: #2a1500;
-  border: 1px solid #4a2800; color: #aa5500;
-  padding: 1px 5px;
+  font-size: 8px; letter-spacing: 1px; background: #2a1500;
+  border: 1px solid #4a2800; color: #cc7711;
+  padding: 2px 6px;
 }
 
 /* Canvas wrap */
@@ -1486,6 +1487,7 @@
   overflow: hidden; min-height: 200px;
 }
 .rations-col.scott .rations-canvas-wrap { background: #080400; }
+.rations-col.bier  .rations-canvas-wrap { background: #060500; }
 
 .rations-canvas {
   display: block; width: 100%; height: 100%;
@@ -1503,8 +1505,12 @@
   transition: color 0.4s;
 }
 .rations-col.scott .rations-count-overlay {
-  color: rgba(255,170,68,0.18);
-  text-shadow: 0 0 30px rgba(255,170,68,0.15);
+  color: rgba(255,170,68,0.22);
+  text-shadow: 0 0 30px rgba(255,170,68,0.18);
+}
+.rations-col.bier .rations-count-overlay {
+  color: rgba(220,170,0,0.22);
+  text-shadow: 0 0 30px rgba(220,170,0,0.18);
 }
 .rations-count-overlay.danger {
   color: rgba(255,68,0,0.25);
@@ -1520,6 +1526,7 @@
   background: #020a04;
 }
 .rations-col.scott .rations-controls { background: #050200; border-color: #1a0a00; }
+.rations-col.bier  .rations-controls { background: #050400; border-color: #1a1400; }
 .rations-adj {
   width: 32px; height: 32px;
   background: transparent; border: 1px solid #0a2515;
@@ -1531,6 +1538,8 @@
 .rations-adj:hover { border-color: #44ff88; color: #44ff88; background: rgba(68,255,136,0.06); }
 .rations-col.scott .rations-adj { border-color: #2a1500; color: #7a4010; }
 .rations-col.scott .rations-adj:hover { border-color: #cc8822; color: #ffaa44; background: rgba(204,136,34,0.08); }
+.rations-col.bier  .rations-adj { border-color: #2a2000; color: #7a6010; }
+.rations-col.bier  .rations-adj:hover { border-color: #cc9900; color: #ffcc44; background: rgba(204,170,0,0.08); }
 
 .rations-count-main {
   flex: 1; text-align: center;
@@ -1538,6 +1547,7 @@
   color: #44ff88; text-shadow: 0 0 14px rgba(68,255,136,0.5); letter-spacing: 2px;
 }
 .rations-col.scott .rations-count-main { color: #ffaa44; text-shadow: 0 0 14px rgba(255,170,68,0.5); }
+.rations-col.bier  .rations-count-main { color: #ffcc44; text-shadow: 0 0 14px rgba(255,204,68,0.5); }
 .rations-count-main.danger { color: #ff4400; text-shadow: 0 0 14px rgba(255,68,0,0.6); }
 
 /* GM set row */
@@ -1552,8 +1562,10 @@
   letter-spacing: 1px; text-align: center; min-width: 0;
 }
 .rations-col.scott .rations-set-input { border-color: #1a0a00; color: #8a5020; }
+.rations-col.bier  .rations-set-input { border-color: #1a1400; color: #8a6010; }
 .rations-set-input:focus { border-color: #44ff88; }
 .rations-col.scott .rations-set-input:focus { border-color: #cc8822; }
+.rations-col.bier  .rations-set-input:focus { border-color: #cc9900; }
 .rations-set-btn {
   background: transparent; border: 1px solid #0a1a08; color: #3a6030;
   font-family: "Share Tech Mono", monospace; font-size: 8px;
@@ -1562,15 +1574,19 @@
 .rations-set-btn:hover { border-color: #44ff88; color: #44ff88; }
 .rations-col.scott .rations-set-btn { border-color: #1a0a00; color: #6a3010; }
 .rations-col.scott .rations-set-btn:hover { border-color: #cc8822; color: #ffaa44; }
+.rations-col.bier  .rations-set-btn { border-color: #1a1400; color: #6a5010; }
+.rations-col.bier  .rations-set-btn:hover { border-color: #cc9900; color: #ffcc44; }
 
-/* Scott quote strip */
-.rations-scott-strip {
-  border-top: 1px solid #1a0a00;
-  padding: 10px 16px;
-  background: #060200;
+/* Quote strip (two rows) */
+.rations-quote-strip {
+  display: flex; border-top: 1px solid #0a1a08;
 }
-.rations-scott-status { font-size: 7px; letter-spacing: 3px; margin-bottom: 4px; }
-.rations-scott-text { font-size: 10px; letter-spacing: 1px; line-height: 1.6; color: #7a5020; }
+.rations-quote-cell {
+  flex: 1; padding: 10px 14px; border-right: 1px solid #0a1a08;
+}
+.rations-quote-cell:last-child { border-right: none; }
+.rations-quote-status { font-size: 9px; letter-spacing: 2px; margin-bottom: 5px; font-weight: bold; }
+.rations-quote-text   { font-size: 11px; letter-spacing: 0.5px; line-height: 1.65; color: #7a5020; }
 
 /* ═══════════════════════════════════════════════════════════════
    CHARACTER SHEET
@@ -8605,7 +8621,7 @@ window.startSupplyPanel = function() {
 // ══════════════════════════════════════════════════════════════════════════════
 (function() {
   const RATIONS_PATH = 'session/rations';
-  let _rationsData = { food: 0, muesli: 0 };
+  let _rationsData = { food: 0, muesli: 0, bier: 0 };
 
   // ── Physics canvas ─────────────────────────────────────────────────────────
   const ITEM_SZ    = 22;   // emoji render size (CSS px)
@@ -8679,8 +8695,19 @@ window.startSupplyPanel = function() {
 
     function fallingCount() { return particles.filter(p => !p.settled).length; }
 
+    // Store pending target so we can retry once canvas is sized
+    let pendingTarget = null;
+
     function setCount(n) {
-      const target = Math.min(Math.max(0, n), DISPLAY_MAX);
+      pendingTarget = Math.min(Math.max(0, n), DISPLAY_MAX);
+      _applyTarget();
+    }
+
+    function _applyTarget() {
+      if (pendingTarget === null) return;
+      if (!cssH) return; // canvas not yet visible — tick() will retry
+      const target = pendingTarget;
+      pendingTarget = null;
       while (settled + fallingCount() < target) spawn();
       while (settled > target) removeOne();
     }
@@ -8710,6 +8737,7 @@ window.startSupplyPanel = function() {
       const resized = syncSize();
       if (!cssW || !cssH) { raf = requestAnimationFrame(tick); return; }
       if (resized) repositionSettled();
+      _applyTarget(); // retry if setCount was called before canvas was sized
 
       ctx.clearRect(0, 0, cssW, cssH);
       ctx.font = ITEM_SZ + 'px serif';
@@ -8760,54 +8788,78 @@ window.startSupplyPanel = function() {
 
   let _physFood  = null;
   let _physMuesli= null;
+  let _physBier  = null;
 
-  // ── Scott quotes ───────────────────────────────────────────────────────────
+  // ── Scott / Müsliriegel quotes ─────────────────────────────────────────────
   const SCOTT_QUOTES = [
-    { min:25, status:'// STATUS: OPTIMAL',             quote:'Müsliriegel-Vorrat gesichert. Scott strahlt. Alles ist gut. Die Welt ist schön.',          color:'#44ff88' },
-    { min:16, status:'// STATUS: ZUFRIEDENSTELLEND',   quote:'"Ich hab noch genug. Nicht anfassen. Nein, wirklich. HÄNDE WEG."',                          color:'#88cc44' },
-    { min:10, status:'// STATUS: BESORGNISERREGEND',   quote:'Scott zählt seine Riegel. Zweimal. Er gibt jemandem böse Blicke.',                          color:'#ffcc00' },
-    { min: 5, status:'// STATUS: KRITISCH',            quote:'"Wer hat meinen Müsliriegel angerührt?! ICH RIECHE ES AN EUCH."',                           color:'#ff8800' },
-    { min: 2, status:'// STATUS: ROT — NOTFALL',       quote:'Scott schläft mit den verbleibenden Riegeln unterm Kopfkissen. Sicherheitsprotokoll aktiv.', color:'#ff4400' },
-    { min: 1, status:'// STATUS: LETZTE RATION',       quote:'"DEN LETZTEN. RÜHRT. KEINER. AN." [Stimme bricht leicht]',                                  color:'#ff2200' },
-    { min: 0, status:'// STATUS: BESTAND ERSCHÖPFT ⚠', quote:'SCOTT OHNE MÜSLIRIEGEL. EVAKUIERUNG EMPFOHLEN. ALLE IN DECKUNG. WIR WIEDERHOLEN: IN DECKUNG.',color:'#ff0000' },
+    { min:25, status:'// SCOTT-STATUS: OPTIMAL',            quote:'Müsliriegel-Vorrat gesichert. Scott strahlt. Alles ist gut. Die Welt ist schön.',           color:'#44ff88' },
+    { min:16, status:'// SCOTT-STATUS: ZUFRIEDEN',          quote:'"Ich hab noch genug. Nicht anfassen. Nein, wirklich. HÄNDE WEG."',                           color:'#88cc44' },
+    { min:10, status:'// SCOTT-STATUS: ANGESPANNT',         quote:'Scott zählt seine Riegel. Zweimal. Er gibt jemandem böse Blicke.',                           color:'#ffcc00' },
+    { min: 5, status:'// SCOTT-STATUS: KRITISCH',           quote:'"Wer hat meinen Müsliriegel angerührt?! ICH RIECHE ES AN EUCH."',                            color:'#ff8800' },
+    { min: 2, status:'// SCOTT-STATUS: NOTFALL',            quote:'Scott schläft mit den verbleibenden Riegeln unterm Kopfkissen. Sicherheitsprotokoll aktiv.', color:'#ff4400' },
+    { min: 1, status:'// SCOTT-STATUS: LETZTE RATION',      quote:'"DEN LETZTEN. RÜHRT. KEINER. AN." [Stimme bricht leicht]',                                   color:'#ff2200' },
+    { min: 0, status:'// SCOTT-STATUS: BESTAND ERSCHÖPFT',  quote:'⚠ SCOTT OHNE MÜSLIRIEGEL. EVAKUIERUNG EMPFOHLEN. ALLE IN DECKUNG. WIR WIEDERHOLEN: IN DECKUNG. ⚠', color:'#ff0000' },
   ];
   function scottQuote(n) {
     return SCOTT_QUOTES.find(q => n >= q.min) || SCOTT_QUOTES[SCOTT_QUOTES.length-1];
+  }
+
+  // ── Bier / Crew-Moral quotes ───────────────────────────────────────────────
+  const BIER_QUOTES = [
+    { min:20, status:'// CREW-MORAL: AUSGEZEICHNET',  quote:'Fässer voll. Crew entspannt. Hudson singt. Alle ignorieren Hudson.',                              color:'#44ff88' },
+    { min:12, status:'// CREW-MORAL: GUT',            quote:'Ausreichend. Hudson zählt heimlich seinen Anteil. Nicht heimlich genug.',                          color:'#88cc44' },
+    { min: 6, status:'// CREW-MORAL: ANGESPANNT',     quote:'Knapp. Vasquez sagt, sie brauche kein Bier. Alle wissen: Lüge.',                                  color:'#ffcc00' },
+    { min: 3, status:'// CREW-MORAL: KRITISCH',       quote:'Letzte Reserven. Keiner spricht. Alle starren die Tür an.',                                        color:'#ff8800' },
+    { min: 1, status:'// CREW-MORAL: ROT',            quote:'"Wer hat das letzte Bier genommen?" — Niemand antwortet. Alle schuldig.',                          color:'#ff4400' },
+    { min: 0, status:'// CREW-MORAL: KOLLAPS',        quote:'KEIN BIER. HUDSON WEINT. VASQUEZ SAGT "SAGT ICH DOCH." DAS HILFT NICHT.',                         color:'#ff0000' },
+  ];
+  function bierQuote(n) {
+    return BIER_QUOTES.find(q => n >= q.min) || BIER_QUOTES[BIER_QUOTES.length-1];
   }
 
   // ── UI update ──────────────────────────────────────────────────────────────
   function _updateUI(data) {
     const food   = Math.max(0, data.food   || 0);
     const muesli = Math.max(0, data.muesli || 0);
+    const bier   = Math.max(0, data.bier   || 0);
 
-    // Numbers
-    const fn = document.getElementById('rationsFoodNum');
-    const mn = document.getElementById('rationsMuesliNum');
-    const fo = document.getElementById('rationsFoodOverlay');
-    const mo = document.getElementById('rationsMuesliOverlay');
-    if (fn) { fn.textContent = food;   fn.className = 'rations-count-main' + (food   === 0 ? ' danger' : ''); }
-    if (mn) { mn.textContent = muesli; mn.className = 'rations-count-main' + (muesli === 0 ? ' danger' : ''); }
-    if (fo) { fo.textContent = food;   fo.className = 'rations-count-overlay' + (food   === 0 ? ' danger' : ''); }
-    if (mo) { mo.textContent = muesli; mo.className = 'rations-count-overlay' + (muesli === 0 ? ' danger' : ''); }
+    function setNum(id, n, cls) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = n; el.className = cls + (n === 0 ? ' danger' : ''); }
+    }
+    setNum('rationsFoodNum',    food,   'rations-count-main');
+    setNum('rationsMuesliNum',  muesli, 'rations-count-main');
+    setNum('rationsBierNum',    bier,   'rations-count-main');
+    setNum('rationsFoodOverlay',   food,   'rations-count-overlay');
+    setNum('rationsMuesliOverlay', muesli, 'rations-count-overlay');
+    setNum('rationsBierOverlay',   bier,   'rations-count-overlay');
 
     // Physics
     if (_physFood)   _physFood.setCount(food);
     if (_physMuesli) _physMuesli.setCount(muesli);
+    if (_physBier)   _physBier.setCount(bier);
 
     // Scott quote
-    const q = scottQuote(muesli);
+    const sq = scottQuote(muesli);
     const qs = document.getElementById('rationsScottStatus');
     const qq = document.getElementById('rationsScottQuote');
-    if (qs) { qs.textContent = q.status; qs.style.color = q.color; }
-    if (qq) { qq.textContent = q.quote;  qq.style.color = q.color; }
+    if (qs) { qs.textContent = sq.status; qs.style.color = sq.color; }
+    if (qq) { qq.textContent = sq.quote;  qq.style.color = sq.color; }
+
+    // Bier quote
+    const bq = bierQuote(bier);
+    const bs = document.getElementById('rationsBierStatus');
+    const bt = document.getElementById('rationsBierQuote');
+    if (bs) { bs.textContent = bq.status; bs.style.color = bq.color; }
+    if (bt) { bt.textContent = bq.quote;  bt.style.color = bq.color; }
 
     // Header button
     const btn = document.getElementById('rationsBtn');
     if (btn) {
       btn.classList.remove('rations-low', 'muesli-crisis');
-      if (muesli === 0)                   { btn.textContent = '🚨 PROVISIONS'; btn.classList.add('muesli-crisis'); }
-      else if (muesli <= 3 || food <= 2)  { btn.textContent = '⚠ PROVISIONS';  btn.classList.add('rations-low'); }
-      else                                { btn.textContent = '🍫 PROVISIONS'; }
+      if (muesli === 0 || bier === 0)        { btn.textContent = '🚨 PROVISIONS'; btn.classList.add('muesli-crisis'); }
+      else if (muesli <= 3 || food <= 2 || bier <= 3) { btn.textContent = '⚠ PROVISIONS'; btn.classList.add('rations-low'); }
+      else                                   { btn.textContent = '🍫 PROVISIONS'; }
     }
   }
 
@@ -8817,15 +8869,23 @@ window.startSupplyPanel = function() {
     if (btn && (myName === 'SCOTT' || isGM)) btn.style.display = 'inline-block';
 
     if (isGM) {
-      const fr = document.getElementById('rationsFoodSetRow');
-      const mr = document.getElementById('rationsMuesliSetRow');
-      if (fr) fr.style.display = 'flex';
-      if (mr) mr.style.display = 'flex';
+      ['rationsFoodSetRow','rationsMuesliSetRow','rationsBierSetRow'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'flex';
+      });
     }
+
+    // Init physics immediately (canvas hidden = 0px, tick retries until visible)
+    const fc = document.getElementById('rationsFoodCanvas');
+    const mc = document.getElementById('rationsMuesliCanvas');
+    const bc = document.getElementById('rationsBierCanvas');
+    if (fc) _physFood   = makePhysics(fc, '🥫');
+    if (mc) _physMuesli = makePhysics(mc, '🍫');
+    if (bc) _physBier   = makePhysics(bc, '🍺');
 
     _authReadyPromise.then(() => {
       onValue(ref(db, RATIONS_PATH), snap => {
-        _rationsData = snap.val() || { food: 0, muesli: 0 };
+        _rationsData = snap.val() || { food: 0, muesli: 0, bier: 0 };
         _updateUI(_rationsData);
       });
     });
@@ -8833,14 +8893,8 @@ window.startSupplyPanel = function() {
 
   window.openRationsPanel = function() {
     document.getElementById('rationsPanel').classList.add('open');
-    // Init physics on first open (canvas needs to be visible for sizing)
-    if (!_physFood) {
-      const fc = document.getElementById('rationsFoodCanvas');
-      const mc = document.getElementById('rationsMuesliCanvas');
-      if (fc) _physFood   = makePhysics(fc, '🥫');
-      if (mc) _physMuesli = makePhysics(mc, '🍫');
-      _updateUI(_rationsData);
-    }
+    // Physics already running; pending targets will resolve once canvas is sized
+    _updateUI(_rationsData);
   };
 
   window.closeRationsPanel = function() {
@@ -8853,11 +8907,13 @@ window.startSupplyPanel = function() {
   };
 
   window.setRation = function(type) {
-    const id  = type === 'food' ? 'rationsFoodInput' : 'rationsMuesliInput';
-    const val = parseInt(document.getElementById(id).value, 10);
+    const ids = { food:'rationsFoodInput', muesli:'rationsMuesliInput', bier:'rationsBierInput' };
+    const el = document.getElementById(ids[type]);
+    if (!el) return;
+    const val = parseInt(el.value, 10);
     if (isNaN(val) || val < 0) return;
     _authReadyPromise.then(() => update(ref(db, RATIONS_PATH), { [type]: val }));
-    document.getElementById(id).value = '';
+    el.value = '';
   };
 })();
 // ── END PROVISIONS TRACKER ────────────────────────────────────────────────────
@@ -8942,12 +8998,38 @@ window.startSupplyPanel = function() {
         </div>
       </div>
 
+      <!-- BIER column -->
+      <div class="rations-col bier" id="rationsBierCol">
+        <div class="rations-col-header">
+          <span class="rations-col-label">🍺 Bier</span>
+        </div>
+        <div class="rations-canvas-wrap" id="rationsBierWrap">
+          <canvas class="rations-canvas" id="rationsBierCanvas"></canvas>
+          <div class="rations-count-overlay" id="rationsBierOverlay">0</div>
+        </div>
+        <div class="rations-controls">
+          <button class="rations-adj" onclick="adjustRation('bier',-1)">−</button>
+          <div class="rations-count-main" id="rationsBierNum">0</div>
+          <button class="rations-adj" onclick="adjustRation('bier',1)">+</button>
+        </div>
+        <div class="rations-set-row" id="rationsBierSetRow" style="display:none">
+          <input class="rations-set-input" id="rationsBierInput" type="number" min="0" placeholder="Setzen...">
+          <button class="rations-set-btn" onclick="setRation('bier')">SET</button>
+        </div>
+      </div>
+
     </div><!-- /.rations-cols -->
 
-    <!-- Scott quote strip -->
-    <div class="rations-scott-strip">
-      <div class="rations-scott-status" id="rationsScottStatus">// STATUS: VERBINDE...</div>
-      <div class="rations-scott-text" id="rationsScottQuote">Weyland-Yutani Versorgungsdatenbank wird abgerufen...</div>
+    <!-- Quote strip: Scott / Müsliriegel + Crew / Bier -->
+    <div class="rations-quote-strip">
+      <div class="rations-quote-cell">
+        <div class="rations-quote-status" id="rationsScottStatus">// SCOTT-STATUS: VERBINDE...</div>
+        <div class="rations-quote-text" id="rationsScottQuote">Weyland-Yutani Versorgungsdatenbank wird abgerufen...</div>
+      </div>
+      <div class="rations-quote-cell">
+        <div class="rations-quote-status" id="rationsBierStatus">// CREW-MORAL: VERBINDE...</div>
+        <div class="rations-quote-text" id="rationsBierQuote">Crew-Stimmungsanalyse läuft...</div>
+      </div>
     </div>
 
   </div>
