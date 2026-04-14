@@ -8608,90 +8608,110 @@ window.startSupplyPanel = function() {
   let _rationsData = { food: 0, muesli: 0 };
 
   // ── Physics canvas ─────────────────────────────────────────────────────────
-  const ITEM_SZ   = 22;   // emoji size px
-  const GRAVITY   = 0.38;
-  const BOUNCE    = 0.28;
-  const DISPLAY_MAX = 60; // max items simulated
+  const ITEM_SZ    = 22;   // emoji render size (CSS px)
+  const STACK_STEP = 18;   // vertical spacing between stacked items
+  const GRAVITY    = 0.42;
+  const DISPLAY_MAX = 60;
 
   function makePhysics(canvasEl, icon) {
     const c   = canvasEl;
     const ctx = c.getContext('2d');
+    let cssW = 0, cssH = 0;        // canvas size in CSS px (used for all math)
     let particles = [];
-    let cols = {};       // colIndex -> stackHeight (in items)
+    let cols = {};                  // colIndex -> number of settled items
     let settled = 0;
     let raf = null;
 
-    function W() { return c.width; }
-    function H() { return c.height; }
-    function colCount() { return Math.max(1, Math.floor(W() / ITEM_SZ)); }
-    function colFloorY(col) {
-      return H() - (cols[col] || 0) * (ITEM_SZ * 0.82);
+    // Resize canvas to match its container, returns true when size changed
+    function syncSize() {
+      const wrap = c.parentElement;
+      if (!wrap) return false;
+      const dpr = window.devicePixelRatio || 1;
+      const ww = wrap.clientWidth  || 300;
+      const wh = wrap.clientHeight || 200;
+      if (ww === cssW && wh === cssH) return false;
+      cssW = ww; cssH = wh;
+      c.width  = Math.round(ww * dpr);
+      c.height = Math.round(wh * dpr);
+      c.style.width  = ww + 'px';
+      c.style.height = wh + 'px';
+      ctx.resetTransform();
+      ctx.scale(dpr, dpr);
+      return true;
     }
 
+    function numCols()        { return Math.max(1, Math.floor(cssW / ITEM_SZ)); }
+    function colCenterX(col)  { return col * ITEM_SZ + ITEM_SZ / 2; }
+    // Y of the CENTER of the next item to land in this column
+    function colFloorY(col)   { return cssH - ITEM_SZ / 2 - (cols[col] || 0) * STACK_STEP; }
+
     function spawn() {
-      const col = Math.floor(Math.random() * colCount());
+      const col = Math.floor(Math.random() * numCols());
       particles.push({
-        x: col * ITEM_SZ + ITEM_SZ/2 + (Math.random()-0.5)*6,
-        y: -ITEM_SZ * (1 + Math.random() * 3),
-        vx: (Math.random()-0.5)*2,
-        vy: 0.5 + Math.random()*2.5,
-        rot: (Math.random()-0.5)*1.2,
-        vrot: (Math.random()-0.5)*0.12,
-        settled: false,
-        col
+        x: colCenterX(col) + (Math.random() - 0.5) * 8,
+        y: -ITEM_SZ * (0.5 + Math.random() * 2),
+        vx: (Math.random() - 0.5) * 1.8,
+        vy: 0.5 + Math.random() * 2,
+        rot: (Math.random() - 0.5) * Math.PI,
+        vrot: (Math.random() - 0.5) * 0.14,
+        col, settled: false
       });
     }
 
     function removeOne() {
-      // Pop from the tallest column
+      // Remove topmost item from the tallest column
       let maxCol = -1, maxH = 0;
       for (const k of Object.keys(cols)) {
         if (cols[k] > maxH) { maxH = cols[k]; maxCol = +k; }
       }
       if (maxCol < 0) return;
-      for (let i = particles.length - 1; i >= 0; i--) {
+      let topIdx = -1, topY = Infinity;
+      for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
-        if (p.settled && p.col === maxCol) {
-          particles.splice(i, 1);
-          cols[maxCol]--;
-          if (!cols[maxCol]) delete cols[maxCol];
-          settled--;
-          return;
-        }
+        if (p.settled && p.col === maxCol && p.y < topY) { topY = p.y; topIdx = i; }
       }
+      if (topIdx < 0) return;
+      particles.splice(topIdx, 1);
+      cols[maxCol]--;
+      if (!cols[maxCol]) delete cols[maxCol];
+      settled--;
     }
 
-    function fallingCount() {
-      return particles.filter(p => !p.settled).length;
-    }
+    function fallingCount() { return particles.filter(p => !p.settled).length; }
 
     function setCount(n) {
-      const clamped = Math.min(n, DISPLAY_MAX);
-      // need to add?
-      while (settled + fallingCount() < clamped) spawn();
-      // need to remove?
-      while (settled > clamped) removeOne();
+      const target = Math.min(Math.max(0, n), DISPLAY_MAX);
+      while (settled + fallingCount() < target) spawn();
+      while (settled > target) removeOne();
+    }
+
+    // After a resize, snap all settled items to their correct positions
+    function repositionSettled() {
+      // Group by column
+      const byCol = {};
+      for (const p of particles) {
+        if (!p.settled) continue;
+        if (!byCol[p.col]) byCol[p.col] = [];
+        byCol[p.col].push(p);
+      }
+      cols = {};
+      for (const [col, items] of Object.entries(byCol)) {
+        // Sort bottom-first (highest y = bottom in canvas coords)
+        items.sort((a, b) => b.y - a.y);
+        items.forEach((item, i) => {
+          item.y = cssH - ITEM_SZ / 2 - i * STACK_STEP;
+          item.x = colCenterX(+col) + (Math.random() - 0.5) * 4;
+        });
+        cols[col] = items.length;
+      }
     }
 
     function tick() {
-      // Sync canvas size to container
-      const wrap = c.parentElement;
-      if (wrap) {
-        const dpr = window.devicePixelRatio || 1;
-        const ww = wrap.clientWidth, wh = wrap.clientHeight;
-        if (c.width !== ww * dpr || c.height !== wh * dpr) {
-          c.width  = ww * dpr;
-          c.height = wh * dpr;
-          c.style.width  = ww + 'px';
-          c.style.height = wh + 'px';
-          ctx.scale(dpr, dpr);
-          // reset columns so items re-settle cleanly
-          cols = {}; settled = 0;
-          particles.forEach(p => { p.settled = false; p.vy = 1; });
-        }
-      }
+      const resized = syncSize();
+      if (!cssW || !cssH) { raf = requestAnimationFrame(tick); return; }
+      if (resized) repositionSettled();
 
-      ctx.clearRect(0, 0, W(), H());
+      ctx.clearRect(0, 0, cssW, cssH);
       ctx.font = ITEM_SZ + 'px serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -8703,28 +8723,29 @@ window.startSupplyPanel = function() {
           p.x   += p.vx;
           p.rot += p.vrot;
 
-          // Wall bounce
-          if (p.x < ITEM_SZ/2)      { p.x = ITEM_SZ/2;      p.vx = Math.abs(p.vx)*BOUNCE; }
-          if (p.x > W()-ITEM_SZ/2)  { p.x = W()-ITEM_SZ/2;  p.vx = -Math.abs(p.vx)*BOUNCE; }
+          // Wall clamp
+          if (p.x < ITEM_SZ / 2)       { p.x = ITEM_SZ / 2;       p.vx =  Math.abs(p.vx) * 0.3; }
+          if (p.x > cssW - ITEM_SZ / 2) { p.x = cssW - ITEM_SZ / 2; p.vx = -Math.abs(p.vx) * 0.3; }
 
-          // Update column
-          p.col = Math.max(0, Math.min(colCount()-1, Math.floor(p.x / ITEM_SZ)));
+          // Column follows current x
+          p.col = Math.max(0, Math.min(numCols() - 1, Math.floor(p.x / ITEM_SZ)));
 
-          // Floor for this column
           const floor = colFloorY(p.col);
           if (p.y >= floor) {
-            p.y = floor;
-            p.vx *= 0.15; p.vy = 0; p.vrot = 0;
+            // Settle
+            p.y   = floor;
+            p.x   = colCenterX(p.col) + (Math.random() - 0.5) * 5;
+            p.rot = (Math.random() - 0.5) * 0.18;
+            p.vx = 0; p.vy = 0; p.vrot = 0;
             p.settled = true;
             cols[p.col] = (cols[p.col] || 0) + 1;
             settled++;
           }
         }
 
-        // Draw
         ctx.save();
         ctx.translate(p.x, p.y);
-        if (!p.settled) ctx.rotate(p.rot);
+        ctx.rotate(p.rot);
         ctx.fillText(icon, 0, 0);
         ctx.restore();
       }
@@ -8732,6 +8753,7 @@ window.startSupplyPanel = function() {
       raf = requestAnimationFrame(tick);
     }
 
+    syncSize();
     raf = requestAnimationFrame(tick);
     return { setCount, destroy() { cancelAnimationFrame(raf); } };
   }
