@@ -1397,6 +1397,166 @@
 
 
 /* ═══════════════════════════════════════════════════════════════
+   PROVISIONS TRACKER (Scott + GM)
+   ═══════════════════════════════════════════════════════════════ */
+#rationsBtn {
+  background: transparent;
+  border: 1px solid #5a3a10;
+  color: #cc8822;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 9px;
+  padding: 4px 12px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+  margin-right: 6px;
+  display: none;
+}
+#rationsBtn:hover { border-color: #cc8822; color: #ffaa44; box-shadow: 0 0 8px rgba(204,136,34,0.3); }
+#rationsBtn.rations-low { border-color: #ff4400; color: #ff4400; animation: rationsBlink 1s infinite; }
+#rationsBtn.muesli-crisis { border-color: #ff0000; color: #ff2200; animation: rationsBlink 0.4s infinite; }
+@keyframes rationsBlink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+#rationsPanel {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,0.95);
+  display: none; align-items: center; justify-content: center;
+  font-family: "Share Tech Mono", monospace;
+  backdrop-filter: blur(4px);
+}
+#rationsPanel.open { display: flex; }
+
+.rations-box {
+  background: #030c0f;
+  border: 1px solid #1a3a10;
+  box-shadow: 0 0 60px rgba(180,120,20,0.15), 0 0 120px rgba(180,120,20,0.06);
+  width: 560px; max-width: 96vw;
+  overflow: hidden;
+}
+.rations-header {
+  background: #050f08;
+  border-bottom: 1px solid #1a3a10;
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rations-title {
+  font-family: "Orbitron", sans-serif; font-size: 11px;
+  letter-spacing: 4px; color: #cc8822;
+  text-shadow: 0 0 12px rgba(204,136,34,0.5);
+  text-transform: uppercase;
+}
+.rations-sub { font-size: 8px; color: #3a5020; letter-spacing: 2px; margin-top: 3px; }
+.rations-close {
+  background: none; border: 1px solid #2a2a2a; color: #444;
+  font-family: "Share Tech Mono", monospace; font-size: 10px;
+  padding: 4px 10px; cursor: pointer; letter-spacing: 1px;
+  transition: all 0.2s;
+}
+.rations-close:hover { border-color: #ff4400; color: #ff4400; }
+
+.rations-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── Food section ── */
+.rations-section {
+  border: 1px solid #0a2515; padding: 14px 16px;
+  background: rgba(0,255,100,0.02);
+}
+.rations-section.scott-section {
+  border-color: #3a2205;
+  background: rgba(204,136,34,0.04);
+}
+.rations-sec-label {
+  font-size: 8px; letter-spacing: 3px;
+  color: #2a6030; text-transform: uppercase; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.rations-section.scott-section .rations-sec-label { color: #6a4010; }
+.scott-badge {
+  font-size: 7px; letter-spacing: 2px;
+  background: #3a2005; border: 1px solid #5a3010;
+  color: #cc7711; padding: 1px 6px; border-radius: 2px;
+}
+
+.rations-counter-row {
+  display: flex; align-items: center; gap: 14px;
+}
+.rations-adj {
+  width: 34px; height: 34px;
+  background: transparent; border: 1px solid #0a2515;
+  color: #4a9040; font-size: 18px; font-family: "Share Tech Mono", monospace;
+  cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.rations-adj:hover { border-color: #44ff88; color: #44ff88; background: rgba(68,255,136,0.06); }
+.scott-section .rations-adj { border-color: #3a2205; color: #8a5020; }
+.scott-section .rations-adj:hover { border-color: #cc8822; color: #ffaa44; background: rgba(204,136,34,0.08); }
+
+.rations-mid { flex: 1; }
+.rations-num-display {
+  font-family: "Orbitron", sans-serif; font-size: 32px; font-weight: 900;
+  color: #44ff88; text-shadow: 0 0 18px rgba(68,255,136,0.5);
+  line-height: 1; letter-spacing: 2px; text-align: center;
+  margin-bottom: 8px;
+}
+.scott-section .rations-num-display { color: #ffaa44; text-shadow: 0 0 18px rgba(255,170,68,0.5); }
+.rations-num-display.danger { color: #ff4400; text-shadow: 0 0 18px rgba(255,68,0,0.6); animation: rationsBlink 0.8s infinite; }
+
+.rations-icons-grid {
+  display: flex; flex-wrap: wrap; gap: 3px; justify-content: center;
+  min-height: 22px; max-height: 66px; overflow: hidden;
+}
+.rations-icon { font-size: 14px; line-height: 1; }
+.rations-icon.depleted { opacity: 0.1; filter: grayscale(1); }
+.rations-overflow { font-size: 9px; color: #4a9040; letter-spacing: 1px; align-self: center; padding-left: 4px; }
+.scott-section .rations-overflow { color: #8a5020; }
+
+/* Progress bar */
+.rations-bar-track {
+  height: 4px; background: #0a1a0a; border: 1px solid #0a2515;
+  margin-top: 10px; position: relative; overflow: hidden;
+}
+.scott-section .rations-bar-track { border-color: #2a1a05; background: #100800; }
+.rations-bar-fill {
+  height: 100%; background: linear-gradient(to right, #1a6030, #44ff88);
+  transition: width 0.5s ease;
+}
+.scott-section .rations-bar-fill { background: linear-gradient(to right, #6a3010, #ffaa44); }
+.rations-bar-fill.danger { background: linear-gradient(to right, #660000, #ff4400); }
+
+/* Scott quote */
+.scott-quote-box {
+  background: #0a0500; border: 1px solid #2a1800;
+  padding: 8px 12px; margin-bottom: 10px;
+  font-size: 9px; letter-spacing: 1px; line-height: 1.6;
+  min-height: 36px; position: relative;
+}
+.scott-quote-status { font-size: 7px; letter-spacing: 2px; margin-bottom: 3px; }
+.scott-quote-text { color: #8a6030; font-style: italic; }
+
+/* Set button */
+.rations-set-row {
+  display: flex; gap: 6px; margin-top: 12px;
+}
+.rations-set-input {
+  flex: 1; background: rgba(0,229,255,0.03); border: 1px solid #0a2515;
+  color: #88bb66; font-family: "Share Tech Mono", monospace;
+  font-size: 11px; padding: 5px 8px; outline: none; letter-spacing: 1px;
+  text-align: center;
+}
+.scott-section .rations-set-input { border-color: #2a1800; color: #cc8822; }
+.rations-set-input:focus { border-color: #44ff88; }
+.scott-section .rations-set-input:focus { border-color: #cc8822; }
+.rations-set-btn {
+  background: transparent; border: 1px solid #0a3020; color: #4a8040;
+  font-family: "Share Tech Mono", monospace; font-size: 9px;
+  padding: 5px 12px; cursor: pointer; letter-spacing: 2px;
+  transition: all 0.15s; text-transform: uppercase;
+}
+.rations-set-btn:hover { border-color: #44ff88; color: #44ff88; }
+.scott-section .rations-set-btn { border-color: #3a2005; color: #8a5020; }
+.scott-section .rations-set-btn:hover { border-color: #cc8822; color: #ffaa44; }
+
+/* ═══════════════════════════════════════════════════════════════
    CHARACTER SHEET
    ═══════════════════════════════════════════════════════════════ */
 #charSheetBtn {
@@ -2680,6 +2840,7 @@
     <button id="initViewBtn" onclick="openInitiative()" style="display:none;background:transparent;border:1px solid #553388;color:#aa66dd;font-family:'Share Tech Mono',monospace;font-size:9px;padding:4px 12px;cursor:pointer;letter-spacing:2px;transition:all 0.2s;" onmouseover="this.style.borderColor='#cc88ff';this.style.color='#cc88ff'" onmouseout="this.style.borderColor='#553388';this.style.color='#aa66dd'">⚡ INITIATIVE</button>
     <button id="bvBtn" onclick="openBVPanel()">🧬 BLACK VEIL</button>
     <button id="charSheetBtn" onclick="openCharSheet()">📋 CHARACTER</button>
+    <button id="rationsBtn" onclick="openRationsPanel()">🍫 PROVISIONS</button>
     <button id="supplyBtn" onclick="openSupplyPanel()">📦 SUPPLY</button>
     <div class="user-badge">
       <div class="user-dot" id="myDot" style="background:#00e5ff"></div>
@@ -2989,7 +3150,7 @@ function _doLogin(nameUpper) {
   screen.style.transition = 'opacity 0.6s ease';
   screen.style.opacity = '0';
   _authReadyPromise.then(() => {
-    setTimeout(() => { screen.remove(); scans.remove(); _loggedIn = true; heartbeat(); renderDate(); applySessionGateAfterLogin(); updateSessionBtn(); bvInit(); startGlobalIbWatcher(); startHandoutWatcher(); startSupplyPanel(); startXPChestWatcher(); }, 300);
+    setTimeout(() => { screen.remove(); scans.remove(); _loggedIn = true; heartbeat(); renderDate(); applySessionGateAfterLogin(); updateSessionBtn(); bvInit(); startGlobalIbWatcher(); startHandoutWatcher(); startSupplyPanel(); startRationsPanel(); startXPChestWatcher(); }, 300);
   });
 }
 
@@ -8423,6 +8584,160 @@ window.startSupplyPanel = function() {
 };
 // ── END SUPPLY ROLL PANEL ─────────────────────────────────────────────────────
 
+// ══════════════════════════════════════════════════════════════════════════════
+// PROVISIONS TRACKER — Rations + Scott's Müsliriegel Obsession
+// ══════════════════════════════════════════════════════════════════════════════
+(function() {
+  const RATIONS_REF_PATH = 'session/rations';
+  let _rationsData = { food: 0, muesli: 0 };
+  let _rationsMaxFood  = 20;   // baseline max for bar display
+  let _rationsMaxMuesli = 30;  // Scott needs a LOT
+
+  const SCOTT_QUOTES = [
+    { min: 25, status: '// STATUS: OPTIMAL', quote: 'Müsliriegel-Vorrat gesichert. Scott strahlt. Alles ist gut. Die Welt ist schön.', color: '#44ff88' },
+    { min: 16, status: '// STATUS: ZUFRIEDENSTELLEND', quote: '"Ich hab noch genug. Nicht anfassen. Nein, wirklich. HÄNDE WEG."', color: '#88cc44' },
+    { min: 10, status: '// STATUS: BESORGNISERREGEND', quote: 'Scott zählt seine Riegel. Zweimal. Er gibt jemandem böse Blicke.', color: '#ffcc00' },
+    { min: 5,  status: '// STATUS: KRITISCH', quote: '"Wer hat meinen Müsliriegel angerührt?! ICH RIECHE ES AN EUCH."', color: '#ff8800' },
+    { min: 2,  status: '// STATUS: ROT — NOTFALL', quote: 'Scott schläft mit den verbleibenden Riegeln unterm Kopfkissen. Sicherheitsprotokoll aktiv.', color: '#ff4400' },
+    { min: 1,  status: '// STATUS: LETZTE RATION', quote: '"DEN LETZTEN. RÜHRT. KEINER. AN." [Stimme bricht leicht]', color: '#ff2200' },
+    { min: 0,  status: '// STATUS: BESTAND ERSCHÖPFT — ALARM', quote: '⚠ SCOTT OHNE MÜSLIRIEGEL. EVAKUIERUNG EMPFOHLEN. ALLE IN DECKUNG. WIR WIEDERHOLEN: ALLE IN DECKUNG. ⚠', color: '#ff0000' },
+  ];
+
+  function _getScottQuote(n) {
+    for (const q of SCOTT_QUOTES) {
+      if (n >= q.min) return q;
+    }
+    return SCOTT_QUOTES[SCOTT_QUOTES.length - 1];
+  }
+
+  function _renderIcons(containerId, count, maxDisplay, icon, depleted) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = '';
+    const show = Math.min(count, maxDisplay);
+    const empty = Math.max(0, maxDisplay - show);
+    for (let i = 0; i < show; i++) {
+      const s = document.createElement('span');
+      s.className = 'rations-icon'; s.textContent = icon;
+      el.appendChild(s);
+    }
+    if (depleted && empty > 0) {
+      for (let i = 0; i < Math.min(empty, 10); i++) {
+        const s = document.createElement('span');
+        s.className = 'rations-icon depleted'; s.textContent = icon;
+        el.appendChild(s);
+      }
+    }
+    if (count > maxDisplay) {
+      const ov = document.createElement('span');
+      ov.className = 'rations-overflow'; ov.textContent = '+' + (count - maxDisplay);
+      el.appendChild(ov);
+    }
+  }
+
+  function _updateRationsUI(data) {
+    const food  = Math.max(0, data.food  || 0);
+    const muesli= Math.max(0, data.muesli|| 0);
+
+    // ── Food ──
+    const foodNum = document.getElementById('rationsFoodNum');
+    const foodBar = document.getElementById('rationsFoodBar');
+    if (foodNum) {
+      foodNum.textContent = food;
+      foodNum.className = 'rations-num-display' + (food === 0 ? ' danger' : '');
+    }
+    if (foodBar) {
+      const pct = Math.min(100, (food / _rationsMaxFood) * 100);
+      foodBar.style.width = pct + '%';
+      foodBar.className = 'rations-bar-fill' + (food <= 2 ? ' danger' : '');
+    }
+    _renderIcons('rationsFoodIcons', food, 15, '🥫', true);
+
+    // ── Muesli ──
+    const muesliNum = document.getElementById('rationsMuesliNum');
+    const muesliBar = document.getElementById('rationsMuesliBar');
+    if (muesliNum) {
+      muesliNum.textContent = muesli;
+      muesliNum.className = 'rations-num-display' + (muesli === 0 ? ' danger' : '');
+    }
+    if (muesliBar) {
+      const pct = Math.min(100, (muesli / _rationsMaxMuesli) * 100);
+      muesliBar.style.width = pct + '%';
+      muesliBar.className = 'rations-bar-fill' + (muesli <= 3 ? ' danger' : '');
+    }
+    _renderIcons('rationsMuesliIcons', muesli, 18, '🍫', false);
+
+    // ── Scott quote ──
+    const q = _getScottQuote(muesli);
+    const statusEl = document.getElementById('rationsScottStatus');
+    const quoteEl  = document.getElementById('rationsScottQuote');
+    if (statusEl) { statusEl.textContent = q.status; statusEl.style.color = q.color; }
+    if (quoteEl)  { quoteEl.textContent  = q.quote;  quoteEl.style.color = q.color; }
+
+    // ── Header button state ──
+    const btn = document.getElementById('rationsBtn');
+    if (btn) {
+      btn.classList.remove('rations-low', 'muesli-crisis');
+      if (muesli === 0) {
+        btn.textContent = '🚨 PROVISIONS';
+        btn.classList.add('muesli-crisis');
+      } else if (muesli <= 3 || food <= 2) {
+        btn.textContent = '⚠ PROVISIONS';
+        btn.classList.add('rations-low');
+      } else {
+        btn.textContent = '🍫 PROVISIONS';
+      }
+    }
+  }
+
+  window.startRationsPanel = function() {
+    // Show button only for Scott and GM
+    const btn = document.getElementById('rationsBtn');
+    if (btn && (myName === 'SCOTT' || isGM)) btn.style.display = 'inline-block';
+
+    // Show GM set rows
+    if (isGM) {
+      const fr = document.getElementById('rationsFoodSetRow');
+      const mr = document.getElementById('rationsMuesliSetRow');
+      if (fr) fr.style.display = 'flex';
+      if (mr) mr.style.display = 'flex';
+    }
+
+    // Listen for changes
+    _authReadyPromise.then(() => {
+      onValue(ref(db, RATIONS_REF_PATH), snap => {
+        _rationsData = snap.val() || { food: 0, muesli: 0 };
+        _updateRationsUI(_rationsData);
+      });
+    });
+  };
+
+  window.openRationsPanel = function() {
+    document.getElementById('rationsPanel').classList.add('open');
+  };
+  window.closeRationsPanel = function() {
+    document.getElementById('rationsPanel').classList.remove('open');
+  };
+
+  window.adjustRation = function(type, delta) {
+    const cur = Math.max(0, (_rationsData[type] || 0) + delta);
+    _authReadyPromise.then(() => {
+      update(ref(db, RATIONS_REF_PATH), { [type]: cur });
+    });
+  };
+
+  window.setRation = function(type) {
+    const inputId = type === 'food' ? 'rationsFoodInput' : 'rationsMuesliInput';
+    const val = parseInt(document.getElementById(inputId).value, 10);
+    if (isNaN(val) || val < 0) return;
+    _authReadyPromise.then(() => {
+      update(ref(db, RATIONS_REF_PATH), { [type]: val });
+    });
+    document.getElementById(inputId).value = '';
+  };
+})();
+// ── END PROVISIONS TRACKER ────────────────────────────────────────────────────
+
 </script>
 <!-- SUPPLY ROLL PANEL -->
 <div id="supplyPanel">
@@ -8445,6 +8760,62 @@ window.startSupplyPanel = function() {
         <div class="sp-rating-picker" id="spRatingPicker"></div>
         <button class="sp-add-btn" onclick="spAddItem()">+ ADD</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROVISIONS / RATIONS PANEL -->
+<div id="rationsPanel">
+  <div class="rations-box">
+    <div class="rations-header">
+      <div>
+        <div class="rations-title">// CREW PROVISIONS LOG</div>
+        <div class="rations-sub">W-Y CORP — INTERNAL USE ONLY — AUTHORIZED PERSONNEL</div>
+      </div>
+      <button class="rations-close" onclick="closeRationsPanel()">✕ CLOSE</button>
+    </div>
+    <div class="rations-body">
+
+      <!-- FOOD RATIONS -->
+      <div class="rations-section" id="rationsFoodSection">
+        <div class="rations-sec-label">🥫 STANDARD FIELD RATIONS</div>
+        <div class="rations-counter-row">
+          <button class="rations-adj" onclick="adjustRation('food', -1)">−</button>
+          <div class="rations-mid">
+            <div class="rations-num-display" id="rationsFoodNum">0</div>
+            <div class="rations-icons-grid" id="rationsFoodIcons"></div>
+          </div>
+          <button class="rations-adj" onclick="adjustRation('food', 1)">+</button>
+        </div>
+        <div class="rations-bar-track"><div class="rations-bar-fill" id="rationsFoodBar" style="width:0%"></div></div>
+        <div class="rations-set-row" id="rationsFoodSetRow" style="display:none">
+          <input class="rations-set-input" id="rationsFoodInput" type="number" min="0" placeholder="Anzahl setzen...">
+          <button class="rations-set-btn" onclick="setRation('food')">SET</button>
+        </div>
+      </div>
+
+      <!-- MÜSLIRIEGEL — SCOTT SECTION -->
+      <div class="rations-section scott-section">
+        <div class="rations-sec-label">🍫 MÜSLIRIEGEL-VORRAT <span class="scott-badge">⚠ SCOTT KRITISCH</span></div>
+        <div class="scott-quote-box">
+          <div class="scott-quote-status" id="rationsScottStatus">// STATUS: LADEN...</div>
+          <div class="scott-quote-text" id="rationsScottQuote">Verbinde mit Weyland-Yutani Versorgungsdatenbank...</div>
+        </div>
+        <div class="rations-counter-row">
+          <button class="rations-adj" onclick="adjustRation('muesli', -1)">−</button>
+          <div class="rations-mid">
+            <div class="rations-num-display" id="rationsMuesliNum">0</div>
+            <div class="rations-icons-grid" id="rationsMuesliIcons"></div>
+          </div>
+          <button class="rations-adj" onclick="adjustRation('muesli', 1)">+</button>
+        </div>
+        <div class="rations-bar-track"><div class="rations-bar-fill" id="rationsMuesliBar" style="width:0%"></div></div>
+        <div class="rations-set-row" id="rationsMuesliSetRow" style="display:none">
+          <input class="rations-set-input scott-section" id="rationsMuesliInput" type="number" min="0" placeholder="Anzahl setzen...">
+          <button class="rations-set-btn" onclick="setRation('muesli')">SET</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
