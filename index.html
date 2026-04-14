@@ -1419,24 +1419,24 @@
 
 #rationsPanel {
   position: fixed; inset: 0; z-index: 1100;
-  background: rgba(0,0,0,0.95);
+  background: rgba(0,0,0,0.96);
   display: none; align-items: center; justify-content: center;
   font-family: "Share Tech Mono", monospace;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
 }
 #rationsPanel.open { display: flex; }
 
 .rations-box {
-  background: #030c0f;
+  background: #020a06;
   border: 1px solid #1a3a10;
-  box-shadow: 0 0 60px rgba(180,120,20,0.15), 0 0 120px rgba(180,120,20,0.06);
-  width: 560px; max-width: 96vw;
+  box-shadow: 0 0 80px rgba(180,120,20,0.12), 0 0 160px rgba(180,120,20,0.05);
+  width: 720px; max-width: 96vw;
   overflow: hidden;
 }
 .rations-header {
-  background: #050f08;
+  background: #030d06;
   border-bottom: 1px solid #1a3a10;
-  padding: 14px 20px;
+  padding: 12px 18px;
   display: flex; align-items: center; justify-content: space-between;
 }
 .rations-title {
@@ -1445,116 +1445,132 @@
   text-shadow: 0 0 12px rgba(204,136,34,0.5);
   text-transform: uppercase;
 }
-.rations-sub { font-size: 8px; color: #3a5020; letter-spacing: 2px; margin-top: 3px; }
+.rations-sub { font-size: 8px; color: #2a4018; letter-spacing: 2px; margin-top: 3px; }
 .rations-close {
-  background: none; border: 1px solid #2a2a2a; color: #444;
+  background: none; border: 1px solid #1a1a1a; color: #333;
   font-family: "Share Tech Mono", monospace; font-size: 10px;
-  padding: 4px 10px; cursor: pointer; letter-spacing: 1px;
-  transition: all 0.2s;
+  padding: 4px 10px; cursor: pointer; letter-spacing: 1px; transition: all 0.2s;
 }
 .rations-close:hover { border-color: #ff4400; color: #ff4400; }
 
-.rations-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+/* Two-column layout */
+.rations-cols {
+  display: flex; gap: 0;
+}
+.rations-col {
+  flex: 1; display: flex; flex-direction: column;
+  border-right: 1px solid #0a2010;
+}
+.rations-col:last-child { border-right: none; }
 
-/* ── Food section ── */
-.rations-section {
-  border: 1px solid #0a2515; padding: 14px 16px;
-  background: rgba(0,255,100,0.02);
+.rations-col-header {
+  padding: 10px 14px 6px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #0a1a08;
 }
-.rations-section.scott-section {
-  border-color: #3a2205;
-  background: rgba(204,136,34,0.04);
+.rations-col-label {
+  font-size: 8px; letter-spacing: 3px; text-transform: uppercase;
+  color: #2a6030;
 }
-.rations-sec-label {
-  font-size: 8px; letter-spacing: 3px;
-  color: #2a6030; text-transform: uppercase; margin-bottom: 10px;
-  display: flex; align-items: center; gap: 8px;
-}
-.rations-section.scott-section .rations-sec-label { color: #6a4010; }
+.rations-col.scott .rations-col-label { color: #6a4010; }
 .scott-badge {
-  font-size: 7px; letter-spacing: 2px;
-  background: #3a2005; border: 1px solid #5a3010;
-  color: #cc7711; padding: 1px 6px; border-radius: 2px;
+  font-size: 7px; letter-spacing: 1px; background: #2a1500;
+  border: 1px solid #4a2800; color: #aa5500;
+  padding: 1px 5px;
 }
 
-.rations-counter-row {
-  display: flex; align-items: center; gap: 14px;
+/* Canvas wrap */
+.rations-canvas-wrap {
+  position: relative; flex: 1;
+  background: #010805;
+  overflow: hidden; min-height: 200px;
 }
+.rations-col.scott .rations-canvas-wrap { background: #080400; }
+
+.rations-canvas {
+  display: block; width: 100%; height: 100%;
+}
+
+/* Big number overlay */
+.rations-count-overlay {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: "Orbitron", sans-serif; font-size: 56px; font-weight: 900;
+  color: rgba(68,255,136,0.18);
+  text-shadow: 0 0 30px rgba(68,255,136,0.15);
+  letter-spacing: 4px; pointer-events: none;
+  user-select: none; line-height: 1;
+  transition: color 0.4s;
+}
+.rations-col.scott .rations-count-overlay {
+  color: rgba(255,170,68,0.18);
+  text-shadow: 0 0 30px rgba(255,170,68,0.15);
+}
+.rations-count-overlay.danger {
+  color: rgba(255,68,0,0.25);
+  text-shadow: 0 0 30px rgba(255,68,0,0.2);
+  animation: rationsBlink 0.8s infinite;
+}
+
+/* Controls row */
+.rations-controls {
+  padding: 8px 12px;
+  display: flex; align-items: center; gap: 8px;
+  border-top: 1px solid #0a1a08;
+  background: #020a04;
+}
+.rations-col.scott .rations-controls { background: #050200; border-color: #1a0a00; }
 .rations-adj {
-  width: 34px; height: 34px;
+  width: 32px; height: 32px;
   background: transparent; border: 1px solid #0a2515;
-  color: #4a9040; font-size: 18px; font-family: "Share Tech Mono", monospace;
-  cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+  color: #3a7030; font-size: 20px; cursor: pointer;
+  transition: all 0.15s; flex-shrink: 0; line-height: 1;
   display: flex; align-items: center; justify-content: center;
+  font-family: "Share Tech Mono", monospace;
 }
 .rations-adj:hover { border-color: #44ff88; color: #44ff88; background: rgba(68,255,136,0.06); }
-.scott-section .rations-adj { border-color: #3a2205; color: #8a5020; }
-.scott-section .rations-adj:hover { border-color: #cc8822; color: #ffaa44; background: rgba(204,136,34,0.08); }
+.rations-col.scott .rations-adj { border-color: #2a1500; color: #7a4010; }
+.rations-col.scott .rations-adj:hover { border-color: #cc8822; color: #ffaa44; background: rgba(204,136,34,0.08); }
 
-.rations-mid { flex: 1; }
-.rations-num-display {
-  font-family: "Orbitron", sans-serif; font-size: 32px; font-weight: 900;
-  color: #44ff88; text-shadow: 0 0 18px rgba(68,255,136,0.5);
-  line-height: 1; letter-spacing: 2px; text-align: center;
-  margin-bottom: 8px;
+.rations-count-main {
+  flex: 1; text-align: center;
+  font-family: "Orbitron", sans-serif; font-size: 22px; font-weight: 900;
+  color: #44ff88; text-shadow: 0 0 14px rgba(68,255,136,0.5); letter-spacing: 2px;
 }
-.scott-section .rations-num-display { color: #ffaa44; text-shadow: 0 0 18px rgba(255,170,68,0.5); }
-.rations-num-display.danger { color: #ff4400; text-shadow: 0 0 18px rgba(255,68,0,0.6); animation: rationsBlink 0.8s infinite; }
+.rations-col.scott .rations-count-main { color: #ffaa44; text-shadow: 0 0 14px rgba(255,170,68,0.5); }
+.rations-count-main.danger { color: #ff4400; text-shadow: 0 0 14px rgba(255,68,0,0.6); }
 
-.rations-icons-grid {
-  display: flex; flex-wrap: wrap; gap: 3px; justify-content: center;
-  min-height: 22px; max-height: 66px; overflow: hidden;
-}
-.rations-icon { font-size: 14px; line-height: 1; }
-.rations-icon.depleted { opacity: 0.1; filter: grayscale(1); }
-.rations-overflow { font-size: 9px; color: #4a9040; letter-spacing: 1px; align-self: center; padding-left: 4px; }
-.scott-section .rations-overflow { color: #8a5020; }
-
-/* Progress bar */
-.rations-bar-track {
-  height: 4px; background: #0a1a0a; border: 1px solid #0a2515;
-  margin-top: 10px; position: relative; overflow: hidden;
-}
-.scott-section .rations-bar-track { border-color: #2a1a05; background: #100800; }
-.rations-bar-fill {
-  height: 100%; background: linear-gradient(to right, #1a6030, #44ff88);
-  transition: width 0.5s ease;
-}
-.scott-section .rations-bar-fill { background: linear-gradient(to right, #6a3010, #ffaa44); }
-.rations-bar-fill.danger { background: linear-gradient(to right, #660000, #ff4400); }
-
-/* Scott quote */
-.scott-quote-box {
-  background: #0a0500; border: 1px solid #2a1800;
-  padding: 8px 12px; margin-bottom: 10px;
-  font-size: 9px; letter-spacing: 1px; line-height: 1.6;
-  min-height: 36px; position: relative;
-}
-.scott-quote-status { font-size: 7px; letter-spacing: 2px; margin-bottom: 3px; }
-.scott-quote-text { color: #8a6030; font-style: italic; }
-
-/* Set button */
+/* GM set row */
 .rations-set-row {
-  display: flex; gap: 6px; margin-top: 12px;
+  padding: 6px 12px; border-top: 1px solid #050e05;
+  display: flex; gap: 5px;
 }
 .rations-set-input {
-  flex: 1; background: rgba(0,229,255,0.03); border: 1px solid #0a2515;
-  color: #88bb66; font-family: "Share Tech Mono", monospace;
-  font-size: 11px; padding: 5px 8px; outline: none; letter-spacing: 1px;
-  text-align: center;
+  flex: 1; background: transparent; border: 1px solid #0a1a08;
+  color: #4a8040; font-family: "Share Tech Mono", monospace;
+  font-size: 10px; padding: 4px 6px; outline: none;
+  letter-spacing: 1px; text-align: center; min-width: 0;
 }
-.scott-section .rations-set-input { border-color: #2a1800; color: #cc8822; }
+.rations-col.scott .rations-set-input { border-color: #1a0a00; color: #8a5020; }
 .rations-set-input:focus { border-color: #44ff88; }
-.scott-section .rations-set-input:focus { border-color: #cc8822; }
+.rations-col.scott .rations-set-input:focus { border-color: #cc8822; }
 .rations-set-btn {
-  background: transparent; border: 1px solid #0a3020; color: #4a8040;
-  font-family: "Share Tech Mono", monospace; font-size: 9px;
-  padding: 5px 12px; cursor: pointer; letter-spacing: 2px;
-  transition: all 0.15s; text-transform: uppercase;
+  background: transparent; border: 1px solid #0a1a08; color: #3a6030;
+  font-family: "Share Tech Mono", monospace; font-size: 8px;
+  padding: 4px 8px; cursor: pointer; letter-spacing: 2px; transition: all 0.15s;
 }
 .rations-set-btn:hover { border-color: #44ff88; color: #44ff88; }
-.scott-section .rations-set-btn { border-color: #3a2005; color: #8a5020; }
-.scott-section .rations-set-btn:hover { border-color: #cc8822; color: #ffaa44; }
+.rations-col.scott .rations-set-btn { border-color: #1a0a00; color: #6a3010; }
+.rations-col.scott .rations-set-btn:hover { border-color: #cc8822; color: #ffaa44; }
+
+/* Scott quote strip */
+.rations-scott-strip {
+  border-top: 1px solid #1a0a00;
+  padding: 10px 16px;
+  background: #060200;
+}
+.rations-scott-status { font-size: 7px; letter-spacing: 3px; margin-bottom: 4px; }
+.rations-scott-text { font-size: 10px; letter-spacing: 1px; line-height: 1.6; color: #7a5020; }
 
 /* ═══════════════════════════════════════════════════════════════
    CHARACTER SHEET
@@ -8585,117 +8601,199 @@ window.startSupplyPanel = function() {
 // ── END SUPPLY ROLL PANEL ─────────────────────────────────────────────────────
 
 // ══════════════════════════════════════════════════════════════════════════════
-// PROVISIONS TRACKER — Rations + Scott's Müsliriegel Obsession
+// PROVISIONS TRACKER — Raining Physics Simulation
 // ══════════════════════════════════════════════════════════════════════════════
 (function() {
-  const RATIONS_REF_PATH = 'session/rations';
+  const RATIONS_PATH = 'session/rations';
   let _rationsData = { food: 0, muesli: 0 };
-  let _rationsMaxFood  = 20;   // baseline max for bar display
-  let _rationsMaxMuesli = 30;  // Scott needs a LOT
 
-  const SCOTT_QUOTES = [
-    { min: 25, status: '// STATUS: OPTIMAL', quote: 'Müsliriegel-Vorrat gesichert. Scott strahlt. Alles ist gut. Die Welt ist schön.', color: '#44ff88' },
-    { min: 16, status: '// STATUS: ZUFRIEDENSTELLEND', quote: '"Ich hab noch genug. Nicht anfassen. Nein, wirklich. HÄNDE WEG."', color: '#88cc44' },
-    { min: 10, status: '// STATUS: BESORGNISERREGEND', quote: 'Scott zählt seine Riegel. Zweimal. Er gibt jemandem böse Blicke.', color: '#ffcc00' },
-    { min: 5,  status: '// STATUS: KRITISCH', quote: '"Wer hat meinen Müsliriegel angerührt?! ICH RIECHE ES AN EUCH."', color: '#ff8800' },
-    { min: 2,  status: '// STATUS: ROT — NOTFALL', quote: 'Scott schläft mit den verbleibenden Riegeln unterm Kopfkissen. Sicherheitsprotokoll aktiv.', color: '#ff4400' },
-    { min: 1,  status: '// STATUS: LETZTE RATION', quote: '"DEN LETZTEN. RÜHRT. KEINER. AN." [Stimme bricht leicht]', color: '#ff2200' },
-    { min: 0,  status: '// STATUS: BESTAND ERSCHÖPFT — ALARM', quote: '⚠ SCOTT OHNE MÜSLIRIEGEL. EVAKUIERUNG EMPFOHLEN. ALLE IN DECKUNG. WIR WIEDERHOLEN: ALLE IN DECKUNG. ⚠', color: '#ff0000' },
-  ];
+  // ── Physics canvas ─────────────────────────────────────────────────────────
+  const ITEM_SZ   = 22;   // emoji size px
+  const GRAVITY   = 0.38;
+  const BOUNCE    = 0.28;
+  const DISPLAY_MAX = 60; // max items simulated
 
-  function _getScottQuote(n) {
-    for (const q of SCOTT_QUOTES) {
-      if (n >= q.min) return q;
+  function makePhysics(canvasEl, icon) {
+    const c   = canvasEl;
+    const ctx = c.getContext('2d');
+    let particles = [];
+    let cols = {};       // colIndex -> stackHeight (in items)
+    let settled = 0;
+    let raf = null;
+
+    function W() { return c.width; }
+    function H() { return c.height; }
+    function colCount() { return Math.max(1, Math.floor(W() / ITEM_SZ)); }
+    function colFloorY(col) {
+      return H() - (cols[col] || 0) * (ITEM_SZ * 0.82);
     }
-    return SCOTT_QUOTES[SCOTT_QUOTES.length - 1];
-  }
 
-  function _renderIcons(containerId, count, maxDisplay, icon, depleted) {
-    const el = document.getElementById(containerId);
-    if (!el) return;
-    el.innerHTML = '';
-    const show = Math.min(count, maxDisplay);
-    const empty = Math.max(0, maxDisplay - show);
-    for (let i = 0; i < show; i++) {
-      const s = document.createElement('span');
-      s.className = 'rations-icon'; s.textContent = icon;
-      el.appendChild(s);
+    function spawn() {
+      const col = Math.floor(Math.random() * colCount());
+      particles.push({
+        x: col * ITEM_SZ + ITEM_SZ/2 + (Math.random()-0.5)*6,
+        y: -ITEM_SZ * (1 + Math.random() * 3),
+        vx: (Math.random()-0.5)*2,
+        vy: 0.5 + Math.random()*2.5,
+        rot: (Math.random()-0.5)*1.2,
+        vrot: (Math.random()-0.5)*0.12,
+        settled: false,
+        col
+      });
     }
-    if (depleted && empty > 0) {
-      for (let i = 0; i < Math.min(empty, 10); i++) {
-        const s = document.createElement('span');
-        s.className = 'rations-icon depleted'; s.textContent = icon;
-        el.appendChild(s);
+
+    function removeOne() {
+      // Pop from the tallest column
+      let maxCol = -1, maxH = 0;
+      for (const k of Object.keys(cols)) {
+        if (cols[k] > maxH) { maxH = cols[k]; maxCol = +k; }
+      }
+      if (maxCol < 0) return;
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        if (p.settled && p.col === maxCol) {
+          particles.splice(i, 1);
+          cols[maxCol]--;
+          if (!cols[maxCol]) delete cols[maxCol];
+          settled--;
+          return;
+        }
       }
     }
-    if (count > maxDisplay) {
-      const ov = document.createElement('span');
-      ov.className = 'rations-overflow'; ov.textContent = '+' + (count - maxDisplay);
-      el.appendChild(ov);
+
+    function fallingCount() {
+      return particles.filter(p => !p.settled).length;
     }
+
+    function setCount(n) {
+      const clamped = Math.min(n, DISPLAY_MAX);
+      // need to add?
+      while (settled + fallingCount() < clamped) spawn();
+      // need to remove?
+      while (settled > clamped) removeOne();
+    }
+
+    function tick() {
+      // Sync canvas size to container
+      const wrap = c.parentElement;
+      if (wrap) {
+        const dpr = window.devicePixelRatio || 1;
+        const ww = wrap.clientWidth, wh = wrap.clientHeight;
+        if (c.width !== ww * dpr || c.height !== wh * dpr) {
+          c.width  = ww * dpr;
+          c.height = wh * dpr;
+          c.style.width  = ww + 'px';
+          c.style.height = wh + 'px';
+          ctx.scale(dpr, dpr);
+          // reset columns so items re-settle cleanly
+          cols = {}; settled = 0;
+          particles.forEach(p => { p.settled = false; p.vy = 1; });
+        }
+      }
+
+      ctx.clearRect(0, 0, W(), H());
+      ctx.font = ITEM_SZ + 'px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (const p of particles) {
+        if (!p.settled) {
+          p.vy  += GRAVITY;
+          p.y   += p.vy;
+          p.x   += p.vx;
+          p.rot += p.vrot;
+
+          // Wall bounce
+          if (p.x < ITEM_SZ/2)      { p.x = ITEM_SZ/2;      p.vx = Math.abs(p.vx)*BOUNCE; }
+          if (p.x > W()-ITEM_SZ/2)  { p.x = W()-ITEM_SZ/2;  p.vx = -Math.abs(p.vx)*BOUNCE; }
+
+          // Update column
+          p.col = Math.max(0, Math.min(colCount()-1, Math.floor(p.x / ITEM_SZ)));
+
+          // Floor for this column
+          const floor = colFloorY(p.col);
+          if (p.y >= floor) {
+            p.y = floor;
+            p.vx *= 0.15; p.vy = 0; p.vrot = 0;
+            p.settled = true;
+            cols[p.col] = (cols[p.col] || 0) + 1;
+            settled++;
+          }
+        }
+
+        // Draw
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        if (!p.settled) ctx.rotate(p.rot);
+        ctx.fillText(icon, 0, 0);
+        ctx.restore();
+      }
+
+      raf = requestAnimationFrame(tick);
+    }
+
+    raf = requestAnimationFrame(tick);
+    return { setCount, destroy() { cancelAnimationFrame(raf); } };
   }
 
-  function _updateRationsUI(data) {
-    const food  = Math.max(0, data.food  || 0);
-    const muesli= Math.max(0, data.muesli|| 0);
+  let _physFood  = null;
+  let _physMuesli= null;
 
-    // ── Food ──
-    const foodNum = document.getElementById('rationsFoodNum');
-    const foodBar = document.getElementById('rationsFoodBar');
-    if (foodNum) {
-      foodNum.textContent = food;
-      foodNum.className = 'rations-num-display' + (food === 0 ? ' danger' : '');
-    }
-    if (foodBar) {
-      const pct = Math.min(100, (food / _rationsMaxFood) * 100);
-      foodBar.style.width = pct + '%';
-      foodBar.className = 'rations-bar-fill' + (food <= 2 ? ' danger' : '');
-    }
-    _renderIcons('rationsFoodIcons', food, 15, '🥫', true);
+  // ── Scott quotes ───────────────────────────────────────────────────────────
+  const SCOTT_QUOTES = [
+    { min:25, status:'// STATUS: OPTIMAL',             quote:'Müsliriegel-Vorrat gesichert. Scott strahlt. Alles ist gut. Die Welt ist schön.',          color:'#44ff88' },
+    { min:16, status:'// STATUS: ZUFRIEDENSTELLEND',   quote:'"Ich hab noch genug. Nicht anfassen. Nein, wirklich. HÄNDE WEG."',                          color:'#88cc44' },
+    { min:10, status:'// STATUS: BESORGNISERREGEND',   quote:'Scott zählt seine Riegel. Zweimal. Er gibt jemandem böse Blicke.',                          color:'#ffcc00' },
+    { min: 5, status:'// STATUS: KRITISCH',            quote:'"Wer hat meinen Müsliriegel angerührt?! ICH RIECHE ES AN EUCH."',                           color:'#ff8800' },
+    { min: 2, status:'// STATUS: ROT — NOTFALL',       quote:'Scott schläft mit den verbleibenden Riegeln unterm Kopfkissen. Sicherheitsprotokoll aktiv.', color:'#ff4400' },
+    { min: 1, status:'// STATUS: LETZTE RATION',       quote:'"DEN LETZTEN. RÜHRT. KEINER. AN." [Stimme bricht leicht]',                                  color:'#ff2200' },
+    { min: 0, status:'// STATUS: BESTAND ERSCHÖPFT ⚠', quote:'SCOTT OHNE MÜSLIRIEGEL. EVAKUIERUNG EMPFOHLEN. ALLE IN DECKUNG. WIR WIEDERHOLEN: IN DECKUNG.',color:'#ff0000' },
+  ];
+  function scottQuote(n) {
+    return SCOTT_QUOTES.find(q => n >= q.min) || SCOTT_QUOTES[SCOTT_QUOTES.length-1];
+  }
 
-    // ── Muesli ──
-    const muesliNum = document.getElementById('rationsMuesliNum');
-    const muesliBar = document.getElementById('rationsMuesliBar');
-    if (muesliNum) {
-      muesliNum.textContent = muesli;
-      muesliNum.className = 'rations-num-display' + (muesli === 0 ? ' danger' : '');
-    }
-    if (muesliBar) {
-      const pct = Math.min(100, (muesli / _rationsMaxMuesli) * 100);
-      muesliBar.style.width = pct + '%';
-      muesliBar.className = 'rations-bar-fill' + (muesli <= 3 ? ' danger' : '');
-    }
-    _renderIcons('rationsMuesliIcons', muesli, 18, '🍫', false);
+  // ── UI update ──────────────────────────────────────────────────────────────
+  function _updateUI(data) {
+    const food   = Math.max(0, data.food   || 0);
+    const muesli = Math.max(0, data.muesli || 0);
 
-    // ── Scott quote ──
-    const q = _getScottQuote(muesli);
-    const statusEl = document.getElementById('rationsScottStatus');
-    const quoteEl  = document.getElementById('rationsScottQuote');
-    if (statusEl) { statusEl.textContent = q.status; statusEl.style.color = q.color; }
-    if (quoteEl)  { quoteEl.textContent  = q.quote;  quoteEl.style.color = q.color; }
+    // Numbers
+    const fn = document.getElementById('rationsFoodNum');
+    const mn = document.getElementById('rationsMuesliNum');
+    const fo = document.getElementById('rationsFoodOverlay');
+    const mo = document.getElementById('rationsMuesliOverlay');
+    if (fn) { fn.textContent = food;   fn.className = 'rations-count-main' + (food   === 0 ? ' danger' : ''); }
+    if (mn) { mn.textContent = muesli; mn.className = 'rations-count-main' + (muesli === 0 ? ' danger' : ''); }
+    if (fo) { fo.textContent = food;   fo.className = 'rations-count-overlay' + (food   === 0 ? ' danger' : ''); }
+    if (mo) { mo.textContent = muesli; mo.className = 'rations-count-overlay' + (muesli === 0 ? ' danger' : ''); }
 
-    // ── Header button state ──
+    // Physics
+    if (_physFood)   _physFood.setCount(food);
+    if (_physMuesli) _physMuesli.setCount(muesli);
+
+    // Scott quote
+    const q = scottQuote(muesli);
+    const qs = document.getElementById('rationsScottStatus');
+    const qq = document.getElementById('rationsScottQuote');
+    if (qs) { qs.textContent = q.status; qs.style.color = q.color; }
+    if (qq) { qq.textContent = q.quote;  qq.style.color = q.color; }
+
+    // Header button
     const btn = document.getElementById('rationsBtn');
     if (btn) {
       btn.classList.remove('rations-low', 'muesli-crisis');
-      if (muesli === 0) {
-        btn.textContent = '🚨 PROVISIONS';
-        btn.classList.add('muesli-crisis');
-      } else if (muesli <= 3 || food <= 2) {
-        btn.textContent = '⚠ PROVISIONS';
-        btn.classList.add('rations-low');
-      } else {
-        btn.textContent = '🍫 PROVISIONS';
-      }
+      if (muesli === 0)                   { btn.textContent = '🚨 PROVISIONS'; btn.classList.add('muesli-crisis'); }
+      else if (muesli <= 3 || food <= 2)  { btn.textContent = '⚠ PROVISIONS';  btn.classList.add('rations-low'); }
+      else                                { btn.textContent = '🍫 PROVISIONS'; }
     }
   }
 
+  // ── Public API ─────────────────────────────────────────────────────────────
   window.startRationsPanel = function() {
-    // Show button only for Scott and GM
     const btn = document.getElementById('rationsBtn');
     if (btn && (myName === 'SCOTT' || isGM)) btn.style.display = 'inline-block';
 
-    // Show GM set rows
     if (isGM) {
       const fr = document.getElementById('rationsFoodSetRow');
       const mr = document.getElementById('rationsMuesliSetRow');
@@ -8703,37 +8801,41 @@ window.startSupplyPanel = function() {
       if (mr) mr.style.display = 'flex';
     }
 
-    // Listen for changes
     _authReadyPromise.then(() => {
-      onValue(ref(db, RATIONS_REF_PATH), snap => {
+      onValue(ref(db, RATIONS_PATH), snap => {
         _rationsData = snap.val() || { food: 0, muesli: 0 };
-        _updateRationsUI(_rationsData);
+        _updateUI(_rationsData);
       });
     });
   };
 
   window.openRationsPanel = function() {
     document.getElementById('rationsPanel').classList.add('open');
+    // Init physics on first open (canvas needs to be visible for sizing)
+    if (!_physFood) {
+      const fc = document.getElementById('rationsFoodCanvas');
+      const mc = document.getElementById('rationsMuesliCanvas');
+      if (fc) _physFood   = makePhysics(fc, '🥫');
+      if (mc) _physMuesli = makePhysics(mc, '🍫');
+      _updateUI(_rationsData);
+    }
   };
+
   window.closeRationsPanel = function() {
     document.getElementById('rationsPanel').classList.remove('open');
   };
 
   window.adjustRation = function(type, delta) {
     const cur = Math.max(0, (_rationsData[type] || 0) + delta);
-    _authReadyPromise.then(() => {
-      update(ref(db, RATIONS_REF_PATH), { [type]: cur });
-    });
+    _authReadyPromise.then(() => update(ref(db, RATIONS_PATH), { [type]: cur }));
   };
 
   window.setRation = function(type) {
-    const inputId = type === 'food' ? 'rationsFoodInput' : 'rationsMuesliInput';
-    const val = parseInt(document.getElementById(inputId).value, 10);
+    const id  = type === 'food' ? 'rationsFoodInput' : 'rationsMuesliInput';
+    const val = parseInt(document.getElementById(id).value, 10);
     if (isNaN(val) || val < 0) return;
-    _authReadyPromise.then(() => {
-      update(ref(db, RATIONS_REF_PATH), { [type]: val });
-    });
-    document.getElementById(inputId).value = '';
+    _authReadyPromise.then(() => update(ref(db, RATIONS_PATH), { [type]: val }));
+    document.getElementById(id).value = '';
   };
 })();
 // ── END PROVISIONS TRACKER ────────────────────────────────────────────────────
@@ -8774,49 +8876,58 @@ window.startSupplyPanel = function() {
       </div>
       <button class="rations-close" onclick="closeRationsPanel()">✕ CLOSE</button>
     </div>
-    <div class="rations-body">
 
-      <!-- FOOD RATIONS -->
-      <div class="rations-section" id="rationsFoodSection">
-        <div class="rations-sec-label">🥫 STANDARD FIELD RATIONS</div>
-        <div class="rations-counter-row">
-          <button class="rations-adj" onclick="adjustRation('food', -1)">−</button>
-          <div class="rations-mid">
-            <div class="rations-num-display" id="rationsFoodNum">0</div>
-            <div class="rations-icons-grid" id="rationsFoodIcons"></div>
-          </div>
-          <button class="rations-adj" onclick="adjustRation('food', 1)">+</button>
+    <div class="rations-cols">
+
+      <!-- FOOD RATIONS column -->
+      <div class="rations-col" id="rationsFoodCol">
+        <div class="rations-col-header">
+          <span class="rations-col-label">🥫 Standard Rations</span>
         </div>
-        <div class="rations-bar-track"><div class="rations-bar-fill" id="rationsFoodBar" style="width:0%"></div></div>
+        <div class="rations-canvas-wrap" id="rationsFoodWrap">
+          <canvas class="rations-canvas" id="rationsFoodCanvas"></canvas>
+          <div class="rations-count-overlay" id="rationsFoodOverlay">0</div>
+        </div>
+        <div class="rations-controls">
+          <button class="rations-adj" onclick="adjustRation('food',-1)">−</button>
+          <div class="rations-count-main" id="rationsFoodNum">0</div>
+          <button class="rations-adj" onclick="adjustRation('food',1)">+</button>
+        </div>
         <div class="rations-set-row" id="rationsFoodSetRow" style="display:none">
-          <input class="rations-set-input" id="rationsFoodInput" type="number" min="0" placeholder="Anzahl setzen...">
+          <input class="rations-set-input" id="rationsFoodInput" type="number" min="0" placeholder="Setzen...">
           <button class="rations-set-btn" onclick="setRation('food')">SET</button>
         </div>
       </div>
 
-      <!-- MÜSLIRIEGEL — SCOTT SECTION -->
-      <div class="rations-section scott-section">
-        <div class="rations-sec-label">🍫 MÜSLIRIEGEL-VORRAT <span class="scott-badge">⚠ SCOTT KRITISCH</span></div>
-        <div class="scott-quote-box">
-          <div class="scott-quote-status" id="rationsScottStatus">// STATUS: LADEN...</div>
-          <div class="scott-quote-text" id="rationsScottQuote">Verbinde mit Weyland-Yutani Versorgungsdatenbank...</div>
+      <!-- MÜSLIRIEGEL column -->
+      <div class="rations-col scott" id="rationsMuesliCol">
+        <div class="rations-col-header">
+          <span class="rations-col-label">🍫 Müsliriegel</span>
+          <span class="scott-badge">SCOTT ONLY</span>
         </div>
-        <div class="rations-counter-row">
-          <button class="rations-adj" onclick="adjustRation('muesli', -1)">−</button>
-          <div class="rations-mid">
-            <div class="rations-num-display" id="rationsMuesliNum">0</div>
-            <div class="rations-icons-grid" id="rationsMuesliIcons"></div>
-          </div>
-          <button class="rations-adj" onclick="adjustRation('muesli', 1)">+</button>
+        <div class="rations-canvas-wrap" id="rationsMuesliWrap">
+          <canvas class="rations-canvas" id="rationsMuesliCanvas"></canvas>
+          <div class="rations-count-overlay" id="rationsMuesliOverlay">0</div>
         </div>
-        <div class="rations-bar-track"><div class="rations-bar-fill" id="rationsMuesliBar" style="width:0%"></div></div>
+        <div class="rations-controls">
+          <button class="rations-adj" onclick="adjustRation('muesli',-1)">−</button>
+          <div class="rations-count-main" id="rationsMuesliNum">0</div>
+          <button class="rations-adj" onclick="adjustRation('muesli',1)">+</button>
+        </div>
         <div class="rations-set-row" id="rationsMuesliSetRow" style="display:none">
-          <input class="rations-set-input scott-section" id="rationsMuesliInput" type="number" min="0" placeholder="Anzahl setzen...">
+          <input class="rations-set-input" id="rationsMuesliInput" type="number" min="0" placeholder="Setzen...">
           <button class="rations-set-btn" onclick="setRation('muesli')">SET</button>
         </div>
       </div>
 
+    </div><!-- /.rations-cols -->
+
+    <!-- Scott quote strip -->
+    <div class="rations-scott-strip">
+      <div class="rations-scott-status" id="rationsScottStatus">// STATUS: VERBINDE...</div>
+      <div class="rations-scott-text" id="rationsScottQuote">Weyland-Yutani Versorgungsdatenbank wird abgerufen...</div>
     </div>
+
   </div>
 </div>
 
