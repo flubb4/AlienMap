@@ -8806,12 +8806,16 @@ window.startSupplyPanel = function() {
 
   // ── Bier / Crew-Moral quotes ───────────────────────────────────────────────
   const BIER_QUOTES = [
-    { min:20, status:'// CREW-MORAL: AUSGEZEICHNET',  quote:'Fässer voll. Crew entspannt. Hudson singt. Alle ignorieren Hudson.',                              color:'#44ff88' },
-    { min:12, status:'// CREW-MORAL: GUT',            quote:'Ausreichend. Hudson zählt heimlich seinen Anteil. Nicht heimlich genug.',                          color:'#88cc44' },
-    { min: 6, status:'// CREW-MORAL: ANGESPANNT',     quote:'Knapp. Vasquez sagt, sie brauche kein Bier. Alle wissen: Lüge.',                                  color:'#ffcc00' },
-    { min: 3, status:'// CREW-MORAL: KRITISCH',       quote:'Letzte Reserven. Keiner spricht. Alle starren die Tür an.',                                        color:'#ff8800' },
-    { min: 1, status:'// CREW-MORAL: ROT',            quote:'"Wer hat das letzte Bier genommen?" — Niemand antwortet. Alle schuldig.',                          color:'#ff4400' },
-    { min: 0, status:'// CREW-MORAL: KOLLAPS',        quote:'KEIN BIER. HUDSON WEINT. VASQUEZ SAGT "SAGT ICH DOCH." DAS HILFT NICHT.',                         color:'#ff0000' },
+    { min:20, status:'// CREW-MORAL: AUSGEZEICHNET',  quote:'Vorräte voll. Gustav hat bereits drei. Scott erklärt das mit "Akklimatisierung". Keiner widerspricht.',                     color:'#44ff88' },
+    { min:16, status:'// CREW-MORAL: SEHR GUT',       quote:'Silas schlägt Trinkspiele vor. Julian sagt nein. Silas macht es trotzdem. Julian macht mit.',                              color:'#66ee66' },
+    { min:12, status:'// CREW-MORAL: GUT',            quote:'Ausreichend. Mae zählt heimlich ihren Anteil. Nicht heimlich genug. Isabella hat es gesehen.',                             color:'#88cc44' },
+    { min: 8, status:'// CREW-MORAL: ANGESPANNT',     quote:'Knapp. Gustav sagt, er brauche kein Bier. Alle wissen: Lüge. Gustav weiß es auch.',                                       color:'#ccaa00' },
+    { min: 6, status:'// CREW-MORAL: ANGESPANNT',     quote:'Silas ist still. Das ist schlimmer als wenn Silas redet. Scott beobachtet Silas besorgt.',                                 color:'#ffcc00' },
+    { min: 4, status:'// CREW-MORAL: KRITISCH',       quote:'Letzte Reserven. Julian erstellt eine Rationierungstabelle. Niemand befolgt sie. Julian auch nicht.',                      color:'#ff9900' },
+    { min: 3, status:'// CREW-MORAL: KRITISCH',       quote:'Mae hat das letzte Bier "sichergestellt". Für medizinische Zwecke. Niemand glaubt ihr. Isabella notiert es.',              color:'#ff8800' },
+    { min: 2, status:'// CREW-MORAL: KRITISCH',       quote:'Scott schaut wehmütig in eine leere Flasche. Gustav fragt ob er das braucht. Scott sagt "Ja."',                            color:'#ff6600' },
+    { min: 1, status:'// CREW-MORAL: ROT',            quote:'"Wer hat das letzte Bier?" — Alle zeigen auf Silas. Silas zeigt auf Gustav. Gustav zeigt auf Mae.',                        color:'#ff4400' },
+    { min: 0, status:'// CREW-MORAL: KOLLAPS',        quote:'KEIN BIER. Gustav weint. Silas weint anders. Mae "weint nicht", trinkt Desinfektionsmittel. Isabella schreibt Protokoll.', color:'#ff0000' },
   ];
   function bierQuote(n) {
     return BIER_QUOTES.find(q => n >= q.min) || BIER_QUOTES[BIER_QUOTES.length-1];
