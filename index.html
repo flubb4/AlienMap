@@ -2531,6 +2531,10 @@
     display:none;
     user-select:none; pointer-events:none;
   }
+  #ibCoverCanvas {
+    position:absolute; inset:0;
+    pointer-events:none;
+  }
   #ibCanvas {
     position:absolute; inset:0;
     cursor:crosshair;
@@ -3221,7 +3225,9 @@ const auth = getAuth(app);
 const markersRef     = ref(db, 'markers');
 const usersRef       = ref(db, 'users');
 const imageBoardRef  = ref(db, 'session/imageBoard');
-const ibStrokesRef   = ref(db, 'session/imageBoard/strokes');
+const ibStrokesRef       = ref(db, 'session/imageBoard/strokes');
+const ibRevealStrokesRef = ref(db, 'session/imageBoard/revealStrokes');
+const ibCoverDataRef     = ref(db, 'session/imageBoard/coverImageData');
 
 // ── Anonymous auth ─────────────────────────────────────────────
 // Firebase rules require auth != null for all writes.
@@ -7669,19 +7675,64 @@ var ibErasing      = false;
 var ibLocalStrokes = new Set();
 var ibIsOpen       = false;   // tracks whether overlay is currently visible
 var ibLastOpenTs   = 0;       // timestamp of last GM-triggered open
+var ibRevealMode   = false;
+var ibCoverDataUrl = null;
+var ibLocalRevealStrokes = new Set();
+var ibAllRevealStrokes   = [];
 
-function ibGetOverlay()  { return document.getElementById('imageBoardOverlay'); }
-function ibGetCanvas()   { return document.getElementById('ibCanvas'); }
-function ibGetImage()    { return document.getElementById('ibImage'); }
-function ibGetCtx()      { return ibGetCanvas().getContext('2d'); }
-function ibGetWrap()     { return document.getElementById('ibCanvasWrap'); }
-function ibGetPH()       { return document.getElementById('ibPlaceholder'); }
+function ibGetOverlay()      { return document.getElementById('imageBoardOverlay'); }
+function ibGetCanvas()       { return document.getElementById('ibCanvas'); }
+function ibGetCoverCanvas()  { return document.getElementById('ibCoverCanvas'); }
+function ibGetImage()        { return document.getElementById('ibImage'); }
+function ibGetCtx()          { return ibGetCanvas().getContext('2d'); }
+function ibGetCoverCtx()     { return ibGetCoverCanvas().getContext('2d'); }
+function ibGetWrap()         { return document.getElementById('ibCanvasWrap'); }
+function ibGetPH()           { return document.getElementById('ibPlaceholder'); }
 
 function ibResizeCanvas() {
   var wrap = ibGetWrap();
   var c = ibGetCanvas();
   c.width  = wrap.clientWidth;
   c.height = wrap.clientHeight;
+  var cc = ibGetCoverCanvas();
+  cc.width  = wrap.clientWidth;
+  cc.height = wrap.clientHeight;
+  ibDrawCoverImage(function() {
+    ibAllRevealStrokes.forEach(function(s) { ibDrawRevealStroke(s); });
+  });
+}
+
+function ibDrawCoverImage(callback) {
+  var cc = ibGetCoverCanvas();
+  var ctx = ibGetCoverCtx();
+  ctx.clearRect(0, 0, cc.width, cc.height);
+  if (!ibCoverDataUrl) { if (callback) callback(); return; }
+  var r = ibImageRect();
+  if (!r) { if (callback) callback(); return; }
+  var img = new Image();
+  img.onload = function() { ctx.drawImage(img, r.x, r.y, r.w, r.h); if (callback) callback(); };
+  img.src = ibCoverDataUrl;
+}
+
+function ibDrawRevealStroke(stroke) {
+  if (!stroke || !stroke.points || stroke.points.length < 1) return;
+  var ctx = ibGetCoverCtx();
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.strokeStyle = 'rgba(0,0,0,1)';
+  ctx.lineWidth = stroke.size || 40;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  var first = ibToPix(stroke.points[0].nx, stroke.points[0].ny);
+  ctx.moveTo(first.px, first.py);
+  for (var i = 1; i < stroke.points.length; i++) {
+    var p = ibToPix(stroke.points[i].nx, stroke.points[i].ny);
+    ctx.lineTo(p.px, p.py);
+  }
+  if (stroke.points.length === 1) ctx.lineTo(first.px + 0.1, first.py);
+  ctx.stroke();
+  ctx.restore();
 }
 
 function ibImageRect() {
@@ -7737,6 +7788,8 @@ function ibStopListeners() {
 function ibStartListeners() {
   ibStopListeners();
   ibLocalStrokes.clear();
+  ibLocalRevealStrokes.clear();
+  ibAllRevealStrokes = [];
 
   // Image data
   ibListeners.push(onValue(ref(db, 'session/imageBoard/imageData'), function(snap) {
@@ -7773,6 +7826,35 @@ function ibStartListeners() {
     if (!snap.exists()) {
       ibGetCtx().clearRect(0, 0, ibGetCanvas().width, ibGetCanvas().height);
       ibLocalStrokes.clear();
+    }
+  }));
+
+  // Cover image loaded by GM
+  ibListeners.push(onValue(ibCoverDataRef, function(snap) {
+    if (!ibIsOpen) return;
+    var data = snap.val();
+    ibCoverDataUrl = data || null;
+    ibAllRevealStrokes = [];
+    ibLocalRevealStrokes.clear();
+    ibDrawCoverImage();
+  }));
+
+  // Reveal strokes added
+  ibListeners.push(onChildAdded(ibRevealStrokesRef, function(snap) {
+    if (!ibIsOpen) return;
+    var stroke = snap.val();
+    ibAllRevealStrokes.push(stroke);
+    if (ibLocalRevealStrokes.has(snap.key)) return;
+    ibDrawRevealStroke(stroke);
+  }));
+
+  // Reveal strokes cleared
+  ibListeners.push(onValue(ibRevealStrokesRef, function(snap) {
+    if (!ibIsOpen) return;
+    if (!snap.exists()) {
+      ibAllRevealStrokes = [];
+      ibLocalRevealStrokes.clear();
+      ibDrawCoverImage();
     }
   }));
 }
@@ -7826,6 +7908,12 @@ window.closeImageBoard = function() {
   ibStopListeners();
   ibDrawing = false;
   ibCurrentStroke = null;
+  ibRevealMode = false;
+  ibCoverDataUrl = null;
+  ibAllRevealStrokes = [];
+  ibLocalRevealStrokes.clear();
+  var revBtn = document.getElementById('ibRevealBtn');
+  if (revBtn) { revBtn.classList.remove('active'); revBtn.textContent = '👁 Reveal'; }
   // GM closing resets the open flag so late-joining players don't auto-open
   if (isGM) set(ref(db, 'session/imageBoard/open'), 0);
 };
@@ -7871,6 +7959,42 @@ window.ibToggleEraser = function() {
   ibGetCanvas().style.cursor = ibErasing ? 'cell' : 'crosshair';
 };
 
+window.ibToggleRevealMode = function() {
+  ibRevealMode = !ibRevealMode;
+  var btn = document.getElementById('ibRevealBtn');
+  btn.classList.toggle('active', ibRevealMode);
+  btn.textContent = ibRevealMode ? '✏ Draw' : '👁 Reveal';
+  ibGetCanvas().style.cursor = ibRevealMode ? 'cell' : (ibErasing ? 'cell' : 'crosshair');
+};
+
+window.handleCoverImageSelect = function(input) {
+  if (!isGM) return;
+  var file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var srcImg = new Image();
+    srcImg.onload = function() {
+      var MAX = 1920;
+      var w = srcImg.naturalWidth, h = srcImg.naturalHeight;
+      if (w > MAX || h > MAX) {
+        if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      var off = document.createElement('canvas');
+      off.width = w; off.height = h;
+      off.getContext('2d').drawImage(srcImg, 0, 0, w, h);
+      var compressed = off.toDataURL('image/jpeg', 0.92);
+      remove(ibRevealStrokesRef).then(function() {
+        set(ibCoverDataRef, compressed);
+      });
+    };
+    srcImg.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
 function ibEventPos(e) {
   var c = ibGetCanvas();
   var rect = c.getBoundingClientRect();
@@ -7885,16 +8009,27 @@ function ibPointerDown(e) {
   if (!img.src || img.style.display === 'none') return;
   ibDrawing = true;
   var pos = ibEventPos(e);
-  var color = document.getElementById('ibColorPicker').value;
-  var size  = parseInt(document.getElementById('ibSizeSlider').value, 10);
-  ibCurrentStroke = { color: color, size: size, erase: ibErasing, points: [ibToNorm(pos.x, pos.y)] };
-  var ctx = ibGetCtx();
-  ctx.save();
-  ctx.globalCompositeOperation = ibErasing ? 'destination-out' : 'source-over';
-  ctx.strokeStyle = ibErasing ? 'rgba(0,0,0,1)' : color;
-  ctx.lineWidth = size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
-  ctx.restore();
+  var size = parseInt(document.getElementById('ibSizeSlider').value, 10);
+  if (ibRevealMode) {
+    ibCurrentStroke = { size: size * 5, reveal: true, points: [ibToNorm(pos.x, pos.y)] };
+    var cctx = ibGetCoverCtx();
+    cctx.save();
+    cctx.globalCompositeOperation = 'destination-out';
+    cctx.strokeStyle = 'rgba(0,0,0,1)';
+    cctx.lineWidth = ibCurrentStroke.size; cctx.lineCap = 'round'; cctx.lineJoin = 'round';
+    cctx.beginPath(); cctx.moveTo(pos.x, pos.y);
+    cctx.restore();
+  } else {
+    var color = document.getElementById('ibColorPicker').value;
+    ibCurrentStroke = { color: color, size: size, erase: ibErasing, points: [ibToNorm(pos.x, pos.y)] };
+    var ctx = ibGetCtx();
+    ctx.save();
+    ctx.globalCompositeOperation = ibErasing ? 'destination-out' : 'source-over';
+    ctx.strokeStyle = ibErasing ? 'rgba(0,0,0,1)' : color;
+    ctx.lineWidth = size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+    ctx.restore();
+  }
 }
 
 function ibPointerMove(e) {
@@ -7904,14 +8039,25 @@ function ibPointerMove(e) {
   ibCurrentStroke.points.push(norm);
   var pts = ibCurrentStroke.points;
   var prev = ibToPix(pts[pts.length-2].nx, pts[pts.length-2].ny);
-  var ctx = ibGetCtx();
-  ctx.save();
-  ctx.globalCompositeOperation = ibCurrentStroke.erase ? 'destination-out' : 'source-over';
-  ctx.strokeStyle = ibCurrentStroke.erase ? 'rgba(0,0,0,1)' : ibCurrentStroke.color;
-  ctx.lineWidth = ibCurrentStroke.size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.beginPath(); ctx.moveTo(prev.px, prev.py); ctx.lineTo(pos.x, pos.y);
-  ctx.stroke();
-  ctx.restore();
+  if (ibCurrentStroke.reveal) {
+    var cctx = ibGetCoverCtx();
+    cctx.save();
+    cctx.globalCompositeOperation = 'destination-out';
+    cctx.strokeStyle = 'rgba(0,0,0,1)';
+    cctx.lineWidth = ibCurrentStroke.size; cctx.lineCap = 'round'; cctx.lineJoin = 'round';
+    cctx.beginPath(); cctx.moveTo(prev.px, prev.py); cctx.lineTo(pos.x, pos.y);
+    cctx.stroke();
+    cctx.restore();
+  } else {
+    var ctx = ibGetCtx();
+    ctx.save();
+    ctx.globalCompositeOperation = ibCurrentStroke.erase ? 'destination-out' : 'source-over';
+    ctx.strokeStyle = ibCurrentStroke.erase ? 'rgba(0,0,0,1)' : ibCurrentStroke.color;
+    ctx.lineWidth = ibCurrentStroke.size; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(prev.px, prev.py); ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    ctx.restore();
+  }
 }
 
 function ibPointerUp() {
@@ -7920,10 +8066,15 @@ function ibPointerUp() {
   var stroke = ibCurrentStroke;
   ibCurrentStroke = null;
   if (stroke.points.length === 0) return;
-  var newRef = push(ibStrokesRef, stroke);
-  ibLocalStrokes.add(newRef.key);
-  // Auto-detect inappropriate content after short delay (allow stroke to register locally)
-  setTimeout(ibCheckForPenis, 150);
+  if (stroke.reveal) {
+    var newRevRef = push(ibRevealStrokesRef, stroke);
+    ibLocalRevealStrokes.add(newRevRef.key);
+  } else {
+    var newRef = push(ibStrokesRef, stroke);
+    ibLocalStrokes.add(newRef.key);
+    // Auto-detect inappropriate content after short delay (allow stroke to register locally)
+    setTimeout(ibCheckForPenis, 150);
+  }
 }
 
 function ibCheckForPenis() {
@@ -9312,6 +9463,7 @@ window.startSupplyPanel = function() {
 
 <!-- IMAGE BOARD OVERLAY -->
 <input type="file" id="imageBoardFileInput" accept="image/*" style="display:none" onchange="handleImageSelect(this)">
+<input type="file" id="coverImageFileInput" accept="image/*" style="display:none" onchange="handleCoverImageSelect(this)">
 <div id="imageBoardOverlay">
   <div class="ib-header">
     <span class="ib-title">// Image Board</span>
@@ -9320,6 +9472,8 @@ window.startSupplyPanel = function() {
       <input type="range" id="ibSizeSlider" min="2" max="20" value="4" title="Pen size">
       <button class="ib-tool-btn" id="ibEraserBtn" onclick="ibToggleEraser()">⬜ Eraser</button>
       <button class="ib-tool-btn ib-gm-only" onclick="document.getElementById('imageBoardFileInput').click()">📁 Load Image</button>
+      <button class="ib-tool-btn ib-gm-only" onclick="document.getElementById('coverImageFileInput').click()">🗺 Load Cover</button>
+      <button class="ib-tool-btn ib-gm-only" id="ibRevealBtn" onclick="ibToggleRevealMode()">👁 Reveal</button>
       <button class="ib-tool-btn ib-gm-only" onclick="clearImageBoard()">🗑 Clear</button>
       <button class="ib-tool-btn ib-gm-only" onclick="openInitiative()">⚡ Initiative</button>
       <button class="ib-tool-btn" onclick="openCharSheet()">📋 Character</button>
@@ -9328,6 +9482,7 @@ window.startSupplyPanel = function() {
   </div>
   <div class="ib-canvas-wrap" id="ibCanvasWrap">
     <img id="ibImage" alt="">
+    <canvas id="ibCoverCanvas"></canvas>
     <canvas id="ibCanvas"></canvas>
     <div class="ib-placeholder" id="ibPlaceholder">Waiting for GM to load an image...</div>
   </div>
