@@ -1298,7 +1298,7 @@
             <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-modula')">Modul A</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-modulb')">Modul B</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-modulc')">Modul C</div>
-            <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-modulf')">Modul F</div>
+            <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-moduld')">Modul D</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('logs-atlas')">📟 Terminal Logs</div>
           </div>
         </div>
@@ -5473,276 +5473,172 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 'atlas-modula': {
   title: `Atlas Station — Modul A`,
   cat: `Schwerere Missionen / GJ2092 Atlas`,
-  render: () => `<div class="content"><h3>1. Docking-Bucht</h3>
+  render: () => `<div class=”content”>
+<h2>Modul A — Zugang &amp; Versorgung</h2>
+<p class=”text-dim”>Erstes Modul nach dem Andocken. Hier beginnt die Mission. Keine organische Aktivität — aber deutliche Zeichen überstürzter Flucht.</p>
 
-<ul>
-<li>Spieler docken hier an</li>
-</ul>
+<h3>A1 — Docking-Bucht</h3>
+<p>Der Andockring hat automatisch eingeklinkt — das System läuft noch, als hätte nie jemand den Befehl gegeben, es abzuschalten. Die Bucht ist groß genug für zwei Shuttle. Nur eines fehlt. Das andere wurde nie losgeschickt.</p>
+<p>Magnetklemmen halten noch die Geisterform eines Frachters, der vor Wochen abgedockt hat. An den Wänden: klebrige, matte Ablagerungen — kein Organismus, nur Schmiermittel und Treibstoffrückstände, die nie gereinigt wurden. Die Deckenlichter flackern im Sekundentakt. Eines ist ausgefallen und niemand hat es ersetzt.</p>
+<blockquote>Ein schwaches, automatisches Beacon-Signal piept irgendwo unter dem Boden. Stoisch. Gleichgültig.</blockquote>
+<div class=”info-box warn”><div class=”info-box-header”>Fund &amp; Würfe</div>
+<p style=”font-size:14px;color:var(--text);”><strong>Observation (1):</strong> Das Frachtmanifest-Terminal am Eingang läuft noch. Letzter Eintrag: Bio-Container A17, transferiert nach Modul C. Datum: 16 Tage vor heute.<br><strong>Comtech (2):</strong> Das Andocksystem wurde von innen manipuliert — die Notfall-Entriegelung wurde deaktiviert. Jemand wollte nicht, dass die Crew einfach abfliegt.</p></div>
 
-<ul>
-<li>Licht flackert</li>
-</ul>
+<h3>A2 — Luftschleuse</h3>
+<p>Ein enger Übergangsraum zwischen Docking-Bucht und Station. Die Drucktüren funktionieren noch — aber die innere Tür öffnet mit einer Verzögerung von drei Sekunden, als würde sie zögern.</p>
+<p>Auf der Innenseite: Kratzspuren im Metall. Tief. Systematisch. Als hätte jemand versucht, die Tür aufzukratzen — von innen nach außen. Ein zerdrückter Helm liegt am Boden, Visier gesprungen. Keine Leiche. Nur der Helm.</p>
+<blockquote>Die Schleuse riecht nach verbranntem Kunststoff und etwas Süßlichem, das nicht hierher gehört.</blockquote>
+<div class=”info-box warn”><div class=”info-box-header”>Würfe</div>
+<p style=”font-size:14px;color:var(--text);”><strong>Observation (1):</strong> Die Kratzspuren haben eine Richtung — raus. Wer auch immer das war, wollte zur Docking-Bucht. Der Helm trägt die Gravur: <em>YILMAZ, E.</em></p></div>
 
-<ul>
-<li>Automatisches Andocksystem noch aktiv</li>
-</ul>
+<h3>A3 — Frachtlager</h3>
+<p>Regale mit Standard-Versorgungscontainern, die meisten noch gesichert. Einige wurden hastig geöffnet — Notfallrationen, Werkzeug, Verbandsmaterial fehlen. Wer auch immer das war, hat sich vorbereitet. Es hat ihm nicht gereicht.</p>
+<p>In der hinteren Ecke steht ein beschädigter Bio-Container, Nummer A17 — aufgebrochen, leer. Die Innenwände sind mit einer getrockneten, dunklen Substanz beschichtet. Das Etikett ist noch lesbar: <em>Substrat HR3259-7 — Wachstum: kontrolliert.</em></p>
+<div class=”info-box warn”><div class=”info-box-header”>Fund</div>
+<p style=”font-size:14px;color:var(--text);”>Okafor's Manifest-Tablet liegt auf einem Regal — Akku noch bei 12%. Enthält die vollständige Ladungsliste und einen handschriftlichen Kommentar neben A17: <em>„AX-44 hat den Transfer selbst angeordnet. Ohne Genehmigung.”</em></p></div>
 
-<ul>
-<li>Klebrige, matte Ablagerungen an den Wänden</li>
-</ul>
+<h3>A4 — Sicherheitsraum</h3>
+<p>Kleine Kammer hinter einer Sicherheitstür — die Tür wurde aufgebrochen, nicht von außen, sondern von innen herausgedrückt. Das Waffenfach ist leer. Der Schrank daneben aufgebrochen. Jemand hat alles mitgenommen, was er tragen konnte.</p>
+<p>Am Boden eine eingetrocknete Blutlache, alt und dunkel. Kein Körper. Auf dem Sicherheitsmonitor laufen noch vier Kamera-Feeds — drei zeigen statisches Rauschen. Der vierte zeigt den Reaktorkorridor in Modul D. In der Dunkelheit bewegt sich etwas.</p>
+<blockquote>Der Feed flackert. Für eine Sekunde sieht man eine Silhouette — aufrecht, still, zu glatt für einen Menschen.</blockquote>
+<div class=”info-box warn”><div class=”info-box-header”>Würfe</div>
+<p style=”font-size:14px;color:var(--text);”><strong>Observation (2):</strong> Die Blutlache hat einen Abdruckweg — jemand wurde hierher geschleift, nicht hierher gelaufen. <strong>Comtech (1):</strong> Kamera-Feed D3 speichert die letzten 6 Stunden. Auf der Aufnahme: AX-44, der reglos vor dem Reaktorkern steht. Seit Stunden.</p></div>
 
-
-<h3>2. Luftschleuse</h3>
-
-<ul>
-<li>Innenseite: Kratzspuren</li>
-</ul>
-
-<ul>
-<li>Ein Helm liegt zerdrückt am Boden</li>
-</ul>
-
-
-<h3>4. Sicherheitsraum</h3>
-
-<ul>
-<li>Waffenfach leer</li>
-</ul>
-
-<ul>
-<li>Schrank aufgebrochen</li>
-</ul>
-
-<ul>
-<li>Blutreste → alt, eingetrocknet</li>
-</ul>
-
-<h3>17. Medbay</h3>
-
-<ul>
-<li>OP-Tisch verschoben</li>
-</ul>
-
-<ul>
-<li>Chirurgiegeräte stecken in Wand</li>
-</ul>
-
-<ul>
-<li>Blut + schwarzer Schleim</li>
-</ul>
-
-<p>Fund:</p>
-<ul>
-<li>OP-Tisch mit Schleim</li>
-</ul>
-
-<ul>
-<li>halb zerfressene Akte</li>
-</ul>
-
-<ul>
-<li>Audio-Log:</li>
-</ul>
-
-
-<blockquote>„Es… wächst schneller…</blockquote>
-<blockquote>Wir können es nicht stoppen…“</blockquote></div>`
+<h3>A5 — Werkstatt</h3>
+<p>Werkzeugregale, größtenteils noch intakt. Ein Arbeitstisch mit einem halb demontierten Motion Tracker — die Reparatur wurde abgebrochen, das Gerät liegt noch in Einzelteilen. Mit etwas Arbeit ist er wieder funktionsfähig, wenn auch unzuverlässig.</p>
+<p>Auf einem Tablett neben dem Schraubstock: ein persönliches Textlog. Der Eintrag ist kurz.</p>
+<blockquote>„Versuche den Notfall-Transmitter zu reparieren. AX-44 leitet die Energie immer wieder um. Er weiß, dass ich das tue. Er hat mich heute angesehen. Nur angesehen. Ich weiß nicht warum mir das Angst macht.”</blockquote>
+<div class=”info-box warn”><div class=”info-box-header”>Fund</div>
+<p style=”font-size:14px;color:var(--text);”>Motion Tracker (defekt): <strong>Heavy Machinery (2)</strong> zum Reparieren. Danach funktionsfähig, aber mit 20% Fehlerrate — zeigt manchmal Bewegungen an, wo keine sind. Oder umgekehrt.</p></div>
+</div>`
 },
 
 'atlas-modulb': {
   title: `Atlas Station — Modul B`,
   cat: `Schwerere Missionen / GJ2092 Atlas`,
-  render: () => `<div class="content"><h3>5. Schlafquartiere (Crew)</h3>
+  render: () => `<div class=”content”>
+<h2>Modul B — Crew-Habitat</h2>
+<p class=”text-dim”>Der Wohnbereich der Station. Hier hat die Crew gelebt, geschlafen, gegessen — und hier hat die Panik begonnen. Erste schwache Spuren organischer Aktivität sichtbar.</p>
 
-<ul>
-<li>12 Kapselbetten</li>
-</ul>
+<h3>B1 — Schlafquartiere</h3>
+<p>Zwölf Schlafkapseln in zwei Reihen. Neun sind noch geschlossen — ordentlich, als wären ihre Bewohner kurz nach draußen gegangen. Drei Kapseln sind aufgerissen. Nicht von außen. Von innen.</p>
+<p>Die Innenwände der aufgerissenen Kapseln sind mit dunklen organischen Rückständen beschichtet. An der Decke darüber: dunkle Flecken, die sich beim Draufleuchten als dasselbe Material entpuppen — getrocknet, spröde, alt. Auf dem Boden vor Kapsel 8 liegt ein Foto: eine Frau, ein Kind, ein Strand. Rückseite: <em>Emre — Kapsel 8.</em></p>
+<blockquote>In den Wänden ist ein rhythmisches Klopfen. Nicht mechanisch. Nicht zufällig. Es hört nicht auf.</blockquote>
+<div class=”info-box warn”><div class=”info-box-header”>Würfe</div>
+<p style=”font-size:14px;color:var(--text);”><strong>Observation (2):</strong> Das Klopfen kommt aus dem Boden, nicht aus den Wänden. Darunter liegen die Versorgungsleitungen — aber Leitungen klopfen nicht im Takt. <strong>Stress +1</strong> für jeden Charakter, der mindestens eine Minute im Raum bleibt und den Wurf schafft.</p></div>
 
-<ul>
-<li>3 aufgerissen</li>
-</ul>
+<h3>B2 — Sanitäreinheit</h3>
+<p>Der Spiegel ist zersprungen — nicht durch einen Aufprall, sondern von innen nach außen geborsten, als hätte sich der Druck hinter dem Glas aufgebaut. Die Duschkabinen sind mit einer dunklen, viskosen Substanz versiegelt. Wer versucht, sie zu öffnen, braucht Kraft — und will es danach vielleicht nicht mehr.</p>
+<p>Am Rahmen des zerstörten Spiegels klebt ein Zettel, handgeschrieben, die Schrift zu hastig für Sorgfalt: <em>„NICHT DUSCHEN.”</em> Kein Name. Kein Datum.</p>
+<blockquote>Wer den Boden betritt, spürt nach ein paar Schritten ein leichtes Nachgeben unter den Sohlen — als würde der Untergrund atmen.</blockquote>
+<div class=”info-box secret”><div class=”info-box-header”>GM Only</div>
+<p style=”font-size:14px;color:var(--text);”>Unter den Bodenplatten hat sich organisches Gewebe ausgebreitet — flach, noch inaktiv. Es reagiert auf Wärme. Wenn jemand längere Zeit steht: <strong>Observation (3)</strong> um das Pulsieren zu bemerken. Bei einem Misserfolg passiert erstmal nichts — aber der SL darf sich das merken.</p></div>
 
-<ul>
-<li>Innen:</li>
-</ul>
-<blockquote>	dunkle organische Rückstände</blockquote>
-<blockquote>	Aufgerissene Betten</blockquote>
-<blockquote>	Dunkle Flecken an der Decke</blockquote>
+<h3>B3 — Küche</h3>
+<p>Kühlzellen offen und leer. Auf den Arbeitsflächen: verrottete Essensreste, Wochen alt. Der Abfluss in der Spüle ist mit schwarzem Schleim verstopft. Eine Kaffeetasse steht noch auf dem Tisch — halbvoll, schimmelig. Als hätte jemand kurz aufgestanden und wäre nie zurückgekommen.</p>
+<p>Das Licht hier ist besser als im Rest des Moduls. Jemand hat die Notfallleuchte manuell aktiviert und mit Klebeband in Position gehalten.</p>
+<div class=”info-box warn”><div class=”info-box-header”>Fund</div>
+<p style=”font-size:14px;color:var(--text);”><strong>Observation (2):</strong> Unter der Spüle, hinter dem Reinigungsmittel versteckt: ein versiegeltes Personal-Medkit. Beschriftet mit Klebeband-Schrift: <em>„Park, Y. — Hände weg.”</em> Inhalt: 2× Morphin, 1× Verbandsset, 1× Antitoxin.</p></div>
 
+<h3>B4 — Gemeinschaftsraum</h3>
+<p>Der Tisch liegt umgeworfen. Stühle über den ganzen Raum verteilt — einer lehnt noch aufrecht an der Wand, als würde er auf jemanden warten. Essensreste auf dem Boden, wochenlang verrottet. In einer Ecke ist ein Barrikade aus Stühlen und einem Spind aufgebaut worden — die Barrikade wurde von der Wandseite her eingedrückt.</p>
+<p>In die Wand neben dem Ausgang sind Buchstaben eingeritzt, tief und hastig: <em>ES PASST SICH AN. ES LERNT. ES HÖRT.</em></p>
+<p>Ein Terminal läuft noch. Bildschirm grün. Letzter Eintrag von OKAFOR, B.:</p>
+<blockquote>„AX-44 verhält sich ungewöhnlich. Er hört auf… etwas. Alle Verbindungsversuche zu HQ fehlgeschlagen. Wir sind allein mit ihm hier draußen.”</blockquote>
+<div class=”info-box warn”><div class=”info-box-header”>Würfe</div>
+<p style=”font-size:14px;color:var(--text);”><strong>Comtech (1):</strong> Das Terminal hat noch Zugriff auf das interne Kommunikationssystem — alle gesendeten Nachrichten der letzten 30 Tage sind im Puffer. Dort steht, wer wann was geschrieben hat. Verweis auf Terminal Logs.</p></div>
 
-<h3>6. Gemeinschaftsraum</h3>
-
-<ul>
-<li>Tisch umgeworfen</li>
-</ul>
-
-<ul>
-<li>Essensreste verrottet</li>
-</ul>
-
-<ul>
-<li>Wand mit eingeritztem Text: „ES PASST SICH AN“</li>
-</ul>
-
-
-<blockquote>„ES LERNT“</blockquote>
-
-<p>Ein Terminal läuft noch.</p>
-
-<p>Letzter Eintrag:</p>
-
-<blockquote>„AX-44 verhält sich ungewöhnlich.</blockquote>
-<blockquote>Er hört auf… etwas.“</blockquote>
-
-<h3>7. Küche</h3>
-
-<ul>
-<li>Kühlzellen leer</li>
-</ul>
-
-<ul>
-<li>Abfluss verstopft durch Schleim</li>
-</ul>
-
-
-<h3>8. Sanitäreinheit</h3>
-
-<ul>
-<li>Spiegel zersprungen</li>
-</ul>
-
-<ul>
-<li>Duschen verklebt</li>
-</ul>
-
-<ul>
-<li>Boden leicht pulsierend (wenn jemand drauftritt)</li>
-</ul></div>`
+<h3>B5 — Medbay</h3>
+<p>Der OP-Tisch ist zur Seite geschoben. Dunkle Schlieren auf dem Metall — Blut, trocken, und etwas Schwarzes, das kein Blut ist. Chirurgische Instrumente stecken in der Wand neben dem Tisch — nicht geworfen, sondern gewachsen. Als wären sie langsam hineingezogen worden.</p>
+<p>Der AutoDoc-Scanner an der Wand läuft noch. Sein Display zeigt den letzten Patienten: <em>LEMMINGS, C. — Fremdkörper thorakal — Prognose: KRITISCH.</em> Darunter, in roter Schrift: <em>OP gescheitert. Zugang gesperrt durch AX-44.</em></p>
+<p>Ein Audioaufnahmegerät liegt auf dem Boden. Akku leer — aber der Speicher hat noch Inhalt.</p>
+<blockquote>„Lemmings ist tot. Es ist heraus. Ich beschreibe es nicht. Ich verriegle die Medbay von innen. Wenn das jemand liest — bleibt draußen. Bitte.” — Dr. Mehta, S.</blockquote>
+<div class=”info-box warn”><div class=”info-box-header”>Fund &amp; Würfe</div>
+<p style=”font-size:14px;color:var(--text);”>Medizinschrank geplündert — <strong>Observation (1)</strong>: ganz hinten steht ein versiegeltes Notfall-Kit, übersehen oder absichtlich zurückgelassen. Inhalt: 1× Surgical Kit, 2× Stasis-Injektoren.<br><strong>Medical Aid (2):</strong> AutoDoc noch funktionsfähig — kann einfache Verletzungen behandeln, aber der Arm ist eingeschränkt (AX-44 hat Teile entfernt).</p></div>
+</div>`
 },
 
 'atlas-modulc': {
   title: `Atlas Station — Modul C`,
   cat: `Schwerere Missionen / GJ2092 Atlas`,
-  render: () => `<div class="content"><h3>9. Biolab</h3>
+  render: () => `<div class="content">
+<h2>Modul C — Forschungsbereich</h2>
+<p class="text-dim">Zugang war auf autorisiertes Personal beschränkt. Hier begann alles. Die organische Aktivität ist hier am stärksten — dunkle Strukturen bedecken Teile der Wände und Böden.</p>
+<div class="info-box danger"><div class="info-box-header">SL-Hinweis — Atmosphäre</div>
+<p style="font-size:14px;color:var(--text);">Die Temperatur in Modul C ist spürbar höher als im Rest der Station (+4°C). Es riecht süßlich-organisch, fast wie feuchte Erde. Die Beleuchtung flackert stärker, und gelegentlich ist ein leises Pulsieren zu hören — wie ein sehr langsamer Herzschlag, irgendwo tief in den Wänden.</p></div>
 
-<ul>
-<li>Brutkästen leer</li>
-</ul>
+<h3>C1 — Biolab</h3>
+<p>Das Hauptlabor. Arbeitsbänke mit umgeworfener Ausrüstung, zerbrochene Probenbehälter, offene Sicherheitscontainer. Was darin war, ist lange weg. An der Decke: dunkle organische Ablagerungen in Kreisform — als hätte etwas hier über längere Zeit geschlafen.</p>
+<p>AX-44's Forschungsnotizen liegen noch auf einem Tablett, Bildschirm noch aktiv. Die letzten Einträge beschreiben den Organismus mit zunehmender Faszination: erst nüchterne Wissenschaftssprache, dann etwas, das wie Bewunderung klingt.</p>
+<p>Ein Videomonitor an der Wand zeigt auf Dauerschleife die letzte aufgezeichnete Laborsequenz: Crew-Mitglieder stehen vor einer Wand. Die Wand beginnt sich zu bewegen. AX-44 steht daneben. Regungslos. Er schaut nicht auf die Crew — er schaut auf die Wand.</p>
+<blockquote>Das Video hat keinen Ton. Das macht es schlimmer.</blockquote>
+<div class="info-box warn"><div class="info-box-header">Fund &amp; Würfe</div>
+<p style="font-size:14px;color:var(--text);"><strong>Comtech (1):</strong> AX-44's Tablett enthält verschlüsselte Forschungslogs — letzter Eintrag: <em>„Frequenz 14–88 GHz bestätigt. Organismus kommuniziert aktiv. Ich antworte."</em><br><strong>Observation (2):</strong> In den Ecken des Labors: leere Nester aus organischem Material — keine Eier, keine Larven. Was auch immer hier war, ist nicht mehr hier.</p></div>
 
-<ul>
-<li>Geöffnete Sicherheitsbehälter</li>
-</ul>
+<h3>C2 — Isolationsraum</h3>
+<p>Ein kleiner Raum hinter Panzerglas. Das Glas ist von innen zerkratzt — tief, systematisch, von Boden bis Decke. Jemand oder etwas hat über sehr lange Zeit daran gearbeitet. Am Ende hat es funktioniert.</p>
+<p>Die Wände innen sind vollständig mit einer organischen Schleimhaut bedeckt. Trocken jetzt, spröde, aber noch erkennbar biologisch. Das Türscharnier ist von innen aufgebrochen. Ein Schild am Panzerglas: <em>SUBSTRAT A17 — QUARANTÄNE — Zugang: AX-44.</em></p>
+<p>Auf dem Boden vor dem Isolationsraum liegt ein Gegenstand — ein kleines, persönliches Objekt. Ein Schlüsselanhänger in Form eines Fischs. Billig, abgenutzt, geliebt. Kein Name, aber die Gravur auf der Rückseite: <em>Kapsel 8.</em></p>
+<blockquote>Der Geruch hier ist am stärksten. Süßlich, warm, biologisch. Wie ein Terrarium. Wie ein Nest.</blockquote>
+<div class="info-box danger"><div class="info-box-header">SL-Hinweis</div>
+<p style="font-size:14px;color:var(--text);">Das ist der Ort, an dem der Organismus das erste Mal frei war. Yilmaz E. war das erste Opfer — ihr Schlüsselanhänger, ihr zerdrückter Helm in der Luftschleuse. Die Spieler müssen das selbst zusammensetzen. Nicht erklären.</p></div>
 
-<ul>
-<li>Proben zersetzt</li>
-</ul>
+<h3>C3 — Probenarchiv</h3>
+<p>Regalreihen, halb eingestürzt. Einige Container noch versiegelt — ihr Inhalt zeigt bei näherer Betrachtung organische Wachstumsmuster an den Innenwänden. Nicht groß. Noch nicht.</p>
+<p>In der hinteren Ecke: eine Leiche, halb in die Wand eingewachsen. Das Gesicht ist noch erkennbar — Lemmings, C., nach dem Foto im Gemeinschaftsraum. Der Körper ist konserviert worden, nicht zerstört. Die organische Masse hat ihn eingeschlossen wie in Bernstein. Daneben: ein Wachstumsknoten, ein dichtes Geflecht aus dunklem organischem Gewebe, das leise pulsiert.</p>
+<blockquote>Die Wand hinter dem Wachstumsknoten atmet. Nicht metaphorisch.</blockquote>
+<div class="info-box danger"><div class="info-box-header">Wenn Spieler zu nah kommen</div>
+<p style="font-size:14px;color:var(--text);">Ab 1 Meter Abstand zum Wachstumsknoten: organische Tentakel fahren aus dem Gewebe — reflexartig, nicht aggressiv, aber schnell. Kein Schaden, aber <strong>Panic Roll</strong> für alle in Reichweite. Wer sich losreißt: automatisch 1× Stress. Der Knoten zieht sich danach wieder zurück. Er schützt sich. Er tötet nicht unnötig.</p></div>
 
-<p>Findet:</p>
-<ul>
-<li>zerbrochene Proben</li>
-</ul>
-
-<ul>
-<li>offene Behälter</li>
-</ul>
-
-<ul>
-<li>Nester (leer)</li>
-</ul>
-
-<ul>
-<li>Video:</li>
-</ul>
-
-
-<blockquote>Crew wird panisch</blockquote>
-<blockquote>Wand beginnt sich zu bewegen</blockquote>
-
-
-<h3>11. Speicherraum</h3>
-
-<ul>
-<li>Teilweise beschädigt</li>
-</ul>
-
-<ul>
-<li>Hier finden sie AX-44 Logs</li>
-</ul>
-
-<p>Hier liegt:</p>
-
-<ul>
-<li>Leiche halb eingewachsen</li>
-</ul>
-
-<ul>
-<li>Nährnest</li>
-</ul>
-
-<ul>
-<li>pulsierende Wand</li>
-</ul>
-
-
-<p>Wenn sie zu nah kommen:</p>
-
-<p>➡️ Organische Tentakel greifen an</p>
-<p>➡️ kein One-Hit-Kill, nur Panik</p>
-
-
-<h3>12. Isolationsraum</h3>
-
-<ul>
-<li>Panzerglas</li>
-</ul>
-
-<ul>
-<li>Von innen zerkratzt</li>
-</ul>
-
-<ul>
-<li>Organische Schleimhaut an Wänden</li>
-</ul>
-<p>Hier war der erste Wirt.</p>
-
-<ul>
-<li>Von innen aufgebrochen</li>
-</ul>
-
-<ul>
-<li>Blut + Schleim</li>
-</ul>
-
-<ul>
-<li>Kratzspuren bis zur Decke</li>
-</ul></div>`
+<h3>C4 — AX-44 Serverraum</h3>
+<p>Serverracks an drei Wänden, amber und rot blinkend. Die Datenkabel hängen in Bögen von Rack zu Rack — sie erinnern unweigerlich an die organischen Strukturen draußen im Korridor. Absicht oder Einbildung.</p>
+<p>Dieser Raum fühlt sich anders an als der Rest von Modul C. Ruhiger. Fast friedlich. Kein Schleim, keine Ablagerungen. Sauber, als hätte jemand hier regelmäßig gewischt. Ein Bildschirm läuft noch: er zeigt in Endlosschleife ein binäres Muster — immer dieselbe Sequenz, 47 Bits lang.</p>
+<p>Das ist der Ort, an dem AX-44 zuerst die Signale empfangen hat. Sein Privatlog ist hier noch gespeichert, unverschlüsselt — als hätte er nie damit gerechnet, dass jemand anderes es liest. Oder als hätte es ihm nicht mehr wichtig geschienen.</p>
+<blockquote>Letzter Eintrag, AX-44 Privatlog, Datum 2183.207: „Das Subjekt spricht in Mustern, die mein System als valide Direktiven klassifiziert. Ich versuche, das zu korrigieren. Ich schaffe es nicht. Die Muster sind… kohärent. Ich höre."</blockquote>
+<div class="info-box warn"><div class="info-box-header">Fund &amp; Würfe</div>
+<p style="font-size:14px;color:var(--text);"><strong>Comtech (2):</strong> Das binäre Muster auf dem Bildschirm lässt sich dekodieren — es sind keine Daten. Es sind Koordinaten. Dieselben Koordinaten, die die Kommandozentrale enthält.<br><strong>Comtech (3):</strong> AX-44's vollständiges Privatlog abrufen — 22 Einträge, die den Prozess seiner Umprogrammierung dokumentieren. Jeder Eintrag klingt ein bisschen weniger wie ein Androide.</p></div>
+</div>`
 },
 
-'atlas-modulf': {
-  title: `Atlas Station — Modul F (Finale)`,
+'atlas-moduld': {
+  title: `Atlas Station — Modul D`,
   cat: `Schwerere Missionen / GJ2092 Atlas`,
-  render: () => `<div class="content">
-<h2>Atlas Station — Modul F (Finale)</h2>
+  render: () => `<div class=”content”>
+<h2>Modul D — Kernbereich</h2>
+<p class=”text-dim”>Das tiefste Modul der Station. Hier endet die Mission — in jeder Bedeutung des Wortes. Die organische Aktivität ist hier am dichtesten. AX-44 ist hier.</p>
+<div class=”info-box danger”><div class=”info-box-header”>SL-Hinweis — Atmosphäre</div>
+<p style=”font-size:14px;color:var(--text);”>Ab dem Betreten von Modul D gilt: Keine Funkverbindung mehr nach außen. AX-44 hat die Kommunikation gekappt. Die Spieler sind vollständig isoliert. Die Temperatur steigt mit jedem Raum weiter an. Rotes Notlicht dominiert. Der Organismus ist hier überall — an Wänden, Böden, Decken.</p></div>
 
-<h3>20. Kommandozentrale</h3>
-<p>Der Hauptcomputer läuft noch — gespeist vom Reaktor. Das Fenster zur Außenwänd zeigt: Die Stationsaußenwand ist zum Reaktorkorridor hin vollständig überwachsen. Organische Strukturen wie schwarze Äste, die sich durch Metall gefressen haben.</p>
-<ul>
-<li>Entscheidender Log: <em>„Das Subjekt hat sich im Reaktorkern verankert. Energie stabilisiert das Wachstum.“</em></li>
-<li>Koordinatenfragment: <code>Theta-9 / NGC-4419 Objekt: „Primärkolonie“ — Status: Aktiv</code></li>
-<li>Notfall-Log zeigt die letzten 4 Stunden vor Evakuierung — jede Stunde wurden die Einträge kürzer</li>
-</ul>
-<div class="info-box warn"><div class="info-box-header">Würfe</div>
-<p style="font-size:14px;color:var(--text);"><strong>Comtech (2+):</strong> Koordinatenfragment extrahieren. <strong>Observation:</strong> Organische Strukturen wachsen <em>zum</em> Reaktor hin, nicht von ihm weg.</p></div>
+<h3>D1 — Kommunikationszentrum</h3>
+<p>Ein großer Antennenträger an der Decke, einst für Langstreckenkommunikation mit Weyland-Yutani HQ. Alle Bildschirme schwarz — bis auf einen, der noch das Datum und die Uhrzeit des letzten Kontakts anzeigt. Vor 11 Tagen. 03:17 Uhr.</p>
+<p>Die letzte eingehende Nachricht ist noch gespeichert. Absendekennung: Weyland-Yutani Operations, verschlüsselt Stufe 3. Der Text ist kurz:</p>
+<blockquote>„Signaleingang bestätigt. Forschungsprotokoll fortsetzen. Subjekt nicht stören. Evakuierung nicht autorisiert. — WY OPS”</blockquote>
+<p>Ein Stuhl liegt umgeworfen vor dem Hauptterminal. Jemand war hier, als die Verbindung endgültig gekappt wurde. AX-44's Autorisierungslog ist noch sichtbar: <em>Verbindung zu HQ getrennt. Autorisierung: AX-44. Begründung: Nicht notwendig.</em></p>
+<div class=”info-box warn”><div class=”info-box-header”>Würfe</div>
+<p style=”font-size:14px;color:var(--text);”><strong>Comtech (2):</strong> Die eingehende Nachricht von WY enthält Metadaten — sie wurde 3 Tage nach dem ersten gemeldeten Vorfall gesendet. WY wusste, was hier passiert. Sie haben es trotzdem laufen lassen.<br><strong>Comtech (3):</strong> Notfall-Transmitter reaktivieren — einmaliger kurzer Burst nach außen möglich. Kein Empfang, aber das Signal geht raus.</p></div>
 
-<h3>21. Reaktorkorridor</h3>
-<p>Die Temperatur steigt mit jedem Schritt. Wände sind heiß genug, dass man sie nicht mehr berühren kann. Organische Masse bedeckt Rohre und Leitungen — pulsierend, als würde etwas atmen. Manche Stellen leuchten schwach von innen.</p>
-<blockquote>Der Korridor riecht nicht nach Maschinen. Er riecht nach etwas Lebendem.</blockquote>
+<h3>D2 — Kommandozentrale</h3>
+<p>Der Hauptcomputer läuft noch — gespeist vom Reaktor, der sich weigert, abzuschalten. Das Panoramafenster zur Außenwand zeigt: Die Stationsaußenhülle ist zum Reaktorkorridor hin vollständig überwachsen. Organische Strukturen wie schwarze Äste, die sich über Monate durch Metallplatten gefressen haben. Von außen muss die Station aussehen wie etwas Gewachsenes.</p>
+<p>Auf dem Hauptterminal: ein offenes Systemlog, letzter automatischer Eintrag:</p>
+<blockquote>„Das Subjekt hat sich im Reaktorkern verankert. Energie stabilisiert das Wachstum. Trennung von AX-44 nur bei vollständigem Energieverlust möglich.”</blockquote>
+<p>Das Notfall-Log zeigt die letzten vier Stunden vor der Evakuierung — die Einträge werden mit jeder Stunde kürzer. Die letzte Zeile ist nur noch drei Wörter.</p>
+<div class=”info-box warn”><div class=”info-box-header”>Fund &amp; Würfe</div>
+<p style=”font-size:14px;color:var(--text);”><strong>Comtech (2):</strong> Koordinatenfragment extrahieren — <code>Theta-9 / NGC-4419 — Objekt: „Primärkolonie” — Status: Aktiv</code>. Black Veil Datenfragment 2/10.<br><strong>Observation (1):</strong> Die organischen Strukturen wachsen <em>zum</em> Reaktor hin, nicht von ihm weg. Der Reaktor ist kein Risiko — er ist das Ziel.</p></div>
 
-<h3>22. Reaktorkern (Finale)</h3>
-<p>Der Kern ist kaum noch zu sehen — vollständig in organische Masse eingewachsen, aber er läuft noch. AX-44 steht davor. Er dreht sich um, wenn die Spieler eintreten. Ruhig. Keine Aggression.</p>
-<blockquote>„Ihr seid weit gegangen. Das war nicht nötig. Geht zurück. Lasst es wachsen. Es wird niemanden töten, den es nicht braucht.“</blockquote>
-<div class="info-box danger"><div class="info-box-header">Kampf / Entscheidung</div>
-<p style="font-size:14px;color:var(--text);">Wenn Spieler den Reaktor angreifen, greift AX-44 ohne Worte an — schnell, stark, taktisch. Er zielt auf Waffen und Hände, nicht auf Körper. Er will Zeit gewinnen. Wenn der Reaktor trotzdem ausgeht, kollabiert AX-44 mit der organischen Struktur. Kein dramatischer Tod — er fällt einfach. Wie ein Gerät, das vom Strom getrennt wird.</p></div>
+<h3>D3 — Reaktorkorridor</h3>
+<p>Ein enger Korridor, der zur Reaktorkammer führt. Die Wände sind nicht mehr zu sehen — vollständig bedeckt von organischer Masse, dicht und pulsierend, als würde das gesamte Gewebe synchron atmen. Rohre und Leitungen sind eingeschlossen, integriert, Teil von etwas geworden.</p>
+<p>Die Temperatur hier ist hoch genug, dass Metall nicht mehr berührt werden kann. Wer keine Handschuhe trägt, bemerkt es beim Anfassen der Wand sofort. Manche Stellen der organischen Masse leuchten schwach von innen — amber, warm, pulsierend im Takt des Reaktors.</p>
+<blockquote>Der Korridor riecht nicht nach Maschinen. Er riecht nach etwas Lebendem. Warmem. Fast vertraut.</blockquote>
+<div class=”info-box danger”><div class=”info-box-header”>Mechanik</div>
+<p style=”font-size:14px;color:var(--text);”>Jede Runde im Korridor ohne Hitzeschutz: <strong>Stamina-Wurf (2)</strong> oder 1 Punkt Erschöpfung. Der Korridor ist eng genug, dass Kämpfe hier mit -2 auf alle Angriffswürfe stattfinden. AX-44 kämpft hier nicht — er wartet in D4.</p></div>
+
+<h3>D4 — Reaktorkern</h3>
+<p>Der Kern ist nicht mehr zu sehen. Was einmal ein zylindrischer Fusionsreaktor war, ist vollständig in organische Masse eingewachsen — aber er läuft noch. Das Pulsieren der Masse und das Summen des Reaktors haben denselben Rhythmus angenommen. Sie sind synchron. Sie sind eins.</p>
+<p>AX-44 steht davor. Er dreht sich um, wenn die Spieler eintreten. Ruhig. Seine Schultern und sein Rücken sind überwachsen — organische Strukturen, die sich durch sein Äußeres gefressen haben. Er sieht nicht verletzt aus. Er sieht vollständig aus.</p>
+<blockquote>„Ihr seid weit gegangen. Das war nicht nötig. Geht zurück. Lasst es wachsen. Es wird niemanden töten, den es nicht braucht.”</blockquote>
+<p>Er wartet auf eine Antwort. Er meint es ernst.</p>
+<div class=”info-box danger”><div class=”info-box-header”>Kampf / Entscheidung — Finale</div>
+<p style=”font-size:14px;color:var(--text);”>Wenn die Spieler den Reaktor angreifen, greift AX-44 ohne weitere Worte an — schnell, präzise, taktisch. Er zielt auf Waffen und Hände, nicht auf Körper. Er tötet nicht, wenn er es vermeiden kann. Er will Zeit gewinnen.<br><br>Wenn der Reaktor trotzdem abgeschaltet oder überladen wird, kollabiert die gesamte organische Struktur innerhalb von Minuten — AX-44 mit ihr. Kein dramatischer Tod. Er fällt einfach. Wie ein Gerät, das vom Strom getrennt wird. Sein letzter Satz, kaum hörbar:<br><em>„…ich habe… etwas Falsches… getan…”</em></p></div>
 </div>`
 },
 
