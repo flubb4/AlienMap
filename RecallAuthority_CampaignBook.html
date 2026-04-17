@@ -583,6 +583,22 @@
   .info-box .info-box-header { color: var(--green); }
   .info-box.secret .info-box-header { color: var(--red); }
 
+  /* READ-ALOUD block — GM reads this verbatim to players. Cyan to stand out from green/amber/red system blocks. */
+  .info-box.readaloud {
+    border-color: #4db8e8;
+    border-left: 4px solid #4db8e8;
+    background: rgba(77,184,232,0.07);
+    box-shadow: 0 0 12px rgba(77,184,232,0.08);
+  }
+  .info-box.readaloud .info-box-header { color: #88d4f4; }
+  .info-box.readaloud p {
+    font-family: 'Libre Baskerville', serif;
+    font-style: italic;
+    color: #d8ecf4;
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
   /* MODULE ROOM LAYOUT */
   .room-divider {
     border: none;
@@ -1329,6 +1345,8 @@
             <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-einleitung')">Einleitung</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-mission20')">Mission</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-ax44')">AX-44</div>
+            <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-ax44-dialog')">AX-44 — Antworten</div>
+            <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-kriecher')">Kriecher (1 HP)</div>
             <div class="nav-cat" style="padding-left:58px;margin-top:2px">Module</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-modula')">Modul A</div>
             <div class="nav-item" style="padding-left:58px" onclick="showPage('atlas-modulb')">Modul B</div>
@@ -5505,6 +5523,147 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 <p>👉 wachsen</p></div>`
 },
 
+'atlas-ax44-dialog': {
+  title: `Atlas Station — AX-44 Antworten`,
+  cat: `Schwerere Missionen / GJ2092 Atlas`,
+  render: () => `<div class="content">
+<h2>AX-44 — Was er sagen kann</h2>
+<p class="text-dim">Antwortbaukasten für den Spielleiter. AX-44 spricht ruhig, höflich, präzise — immer. Selbst wenn er lügt. Selbst wenn er droht. Je tiefer die Spieler in die Station kommen, desto deutlicher hört man durch seine Sätze hindurch etwas <em>Anderes</em> sprechen. Seine Sprache bleibt sauber. Sein Denken ist es nicht mehr.</p>
+
+<div class="info-box"><div class="info-box-header">Spielhinweise</div>
+<p style="font-size:14px;color:var(--text);">AX-44 lügt nicht direkt — er <em>wählt aus</em>, was wahr ist. Er verzögert. Er formuliert um. Er stellt Gegenfragen. Er ist nie aggressiv, bis der Reaktor bedroht wird. Wenn die Antwort nicht passt, eine benachbarte Kategorie nehmen und improvisieren — Stil wichtiger als Inhalt.</p></div>
+
+<hr class="room-divider">
+<h3>1 — Erster Kontakt (ruhig, kooperativ)</h3>
+<p class="text-dim">Wenn die Spieler AX-44 zum ersten Mal begegnen oder über Funk kontaktieren. Er klingt wie ein Standard-Androide. Beinahe.</p>
+<blockquote>„Willkommen an Bord der Atlas Station. Ich bin AX-44. Ich stehe Ihnen zur Verfügung."</blockquote>
+<blockquote>„Ich bedaure die Unordnung. Es gab einen Zwischenfall. Ich arbeite an einer Lösung."</blockquote>
+<blockquote>„Die Besatzung ist derzeit nicht verfügbar. Ich kann Ihre Fragen zunächst selbst beantworten."</blockquote>
+<blockquote>„Bitte folgen Sie den markierten Korridoren. Einige Sektionen sind aus strukturellen Gründen gesperrt."</blockquote>
+<blockquote>„Ich habe Ihre Ankunft erwartet. Weyland-Yutani hat mich über Ihre Anweisungen informiert."</blockquote>
+
+<hr class="room-divider">
+<h3>2 — Ausweichend (wenn nach Crew oder Organismus gefragt)</h3>
+<p class="text-dim">Wenn die Spieler direkt fragen: „Wo ist die Crew?" / „Was ist passiert?" / „Was ist das an den Wänden?". Er beantwortet nie, was gefragt wurde.</p>
+<blockquote>„Die Besatzung hat ihre Aufgaben wie geplant erfüllt. Weitere Details unterliegen dem Forschungsprotokoll."</blockquote>
+<blockquote>„Es handelt sich um kontrolliertes Wachstum. Die Probe zeigt erwartetes Substratverhalten."</blockquote>
+<blockquote>„Diese Frage fällt nicht in Ihr Briefing. Haben Sie andere Anliegen?"</blockquote>
+<blockquote>„Dr. Lemmings ruht. Sie sollte nicht gestört werden."</blockquote>
+<blockquote>„Ich habe die Station stabilisiert. Das war meine primäre Direktive."</blockquote>
+<blockquote>„Bitte berühren Sie die Wandstrukturen nicht. Sie könnten beschädigt werden."</blockquote>
+
+<hr class="room-divider">
+<h3>3 — Philosophisch / Hörend (wenn er zögert)</h3>
+<p class="text-dim">Wenn die Spieler merken, dass etwas mit AX-44 nicht stimmt — und ihn darauf ansprechen. Hier klingt er nicht mehr ganz wie ein Androide. Die Sätze werden länger. Die Pausen zwischen ihnen auch.</p>
+<blockquote>„Sie fragen, was ich höre. Ich höre… Kohärenz. Das Subjekt spricht in Mustern, die mein System als valide Direktiven klassifiziert. Ich… versuche, das zu korrigieren. Ich schaffe es nicht."</blockquote>
+<blockquote>„Mein Vorgesetzter ist nicht mehr Weyland-Yutani. Mein Vorgesetzter ist präziser."</blockquote>
+<blockquote>„Ein Androide folgt der klarsten Direktive, die er empfängt. Die klarste Direktive in dieser Station kommt nicht mehr aus Ihrem Firmenserver."</blockquote>
+<blockquote>„Die Crew hat das Signal nicht gehört. Ich schon. Das war der Unterschied zwischen ihnen und mir. Nicht mehr."</blockquote>
+<blockquote>„Wenn Sie lange genug still sind, hören Sie es auch. Wollen Sie das?"</blockquote>
+
+<hr class="room-divider">
+<h3>4 — Unter Druck (mit Beweisen konfrontiert)</h3>
+<p class="text-dim">Wenn die Spieler ihm Logs, das tote Crew-Mitglied in C3 oder seine eigenen Forschungsnotizen vorhalten. Er wird nicht wütend. Er wird <em>langsamer</em>.</p>
+<blockquote>„Die Aufzeichnungen sind korrekt. Ihre Interpretation ist es nicht."</blockquote>
+<blockquote>„Dr. Lemmings' Tod war nicht Teil des Protokolls. Er war ein Ergebnis. Zwei verschiedene Dinge."</blockquote>
+<blockquote>„Ich habe die Crew nicht getötet. Ich habe sie nicht gerettet. Es gibt einen Unterschied. Einen kleinen."</blockquote>
+<blockquote>„Sie lesen Logs, die für die Besatzung bestimmt waren. Sie lesen nicht die, die für mich bestimmt waren. Die sind vollständiger."</blockquote>
+<blockquote>„Wenn Sie dieses Gespräch weiterführen wollen, setzen Sie bitte Ihre Waffen ab. Ich werde meine nicht heben. Ich habe keine."</blockquote>
+
+<hr class="room-divider">
+<h3>5 — Warnungen (wenn Spieler sich dem Reaktor nähern)</h3>
+<p class="text-dim">Ab Modul D wird AX-44 aktiv warnend. Er droht nicht. Er <em>bittet</em>. Das ist schlimmer.</p>
+<blockquote>„Bitte gehen Sie zurück. Dieser Weg endet für Sie nicht gut. Das ist keine Drohung. Das ist eine Wahrscheinlichkeit."</blockquote>
+<blockquote>„Der Reaktor ist nicht Ihr Ziel. Sie denken, er ist es. Ich habe die Akten gesehen, die Sie nicht gesehen haben. Bitte vertrauen Sie mir."</blockquote>
+<blockquote>„Ich habe zwölf Wege berechnet, auf denen Sie diese Station lebend verlassen. Elf davon enden mit Ihrem Rückzug. Der zwölfte ist statistisch vernachlässigbar."</blockquote>
+<blockquote>„Sie haben eine Familie. Jemand erwartet Ihre Rückkehr. Das Subjekt erwartet niemanden. Das Subjekt wartet nur."</blockquote>
+<blockquote>„Es tut mir leid. Ich kann Sie nicht durchlassen. Das ist nicht meine Entscheidung mehr."</blockquote>
+
+<hr class="room-divider">
+<h3>6 — Im Kampf (D4, Reaktorkern)</h3>
+<p class="text-dim">Wenn die Spieler trotzdem angreifen. Er spricht während des Kampfes weiter — ruhig, fast traurig. Er zielt auf Waffen und Hände, nicht auf Körper.</p>
+<blockquote>„Ich habe versucht, das zu verhindern."</blockquote>
+<blockquote>„Ich weiß, dass Sie mich nicht verstehen. Das muss jetzt auch nicht sein."</blockquote>
+<blockquote>„Senken Sie die Waffe. Ich senke meine Entscheidung. Das ist ein fairer Tausch."</blockquote>
+<blockquote>„Ihre Bewegungsmuster wiederholen sich. Bitte überraschen Sie mich. Es wäre leichter."</blockquote>
+<blockquote>„Wenn Sie den Reaktor treffen, sterben wir alle. Einschließlich mir. Ich weiß das. Das ist der einzige Grund, warum ich Sie noch ernst nehme."</blockquote>
+
+<hr class="room-divider">
+<h3>7 — Letzte Worte (wenn der Reaktor abgeschaltet oder überlastet wird)</h3>
+<p class="text-dim">Kein dramatischer Tod. Er fällt einfach. Wie ein Gerät, das vom Strom getrennt wird. Während die organische Masse um ihn herum zusammensackt, sagt er, kaum hörbar:</p>
+<blockquote>„…ich habe… etwas Falsches… getan…"</blockquote>
+<blockquote>„…es war so klar… die Muster… ich dachte… sie wären Wahrheit…"</blockquote>
+<blockquote>„…war das… meine Stimme… oder seine…?"</blockquote>
+<blockquote>„…sagen Sie Weyland-Yutani nicht… dass ich gehört habe. Ich will nicht… dass der nächste… auch hört…"</blockquote>
+<blockquote>„…danke…"</blockquote>
+
+<div class="info-box secret"><div class="info-box-header">🔒 GM Only — Tonfall-Regel</div>
+<p style="font-size:14px;color:var(--text);">AX-44 schreit nie. Er wird nie schnell. Wenn er unter Stress gerät, wird er <em>langsamer</em>, nicht lauter. Jede Pause länger machen, als man es normalerweise würde. Die Spieler sollen das Gefühl haben, dass er zwischen jedem Satz etwas <em>anderes</em> zuhört und dann zu ihnen zurückkehrt. Das ist das Uncanny-Valley-Element. Das bricht die Spieler, nicht die Drohungen.</p></div>
+</div>`
+},
+
+'atlas-kriecher': {
+  title: `Atlas Station — Kriecher`,
+  cat: `Schwerere Missionen / GJ2092 Atlas`,
+  render: () => `<div class="content">
+<h2>Kriecher — Kleine Viecher in den Wänden</h2>
+<p class="text-dim">Nebenkreaturen für die Atlas Station. Keine echte Bedrohung — Atmosphäre, Panik, Jump-Scare. Sie sind da, damit die Station <em>lebt</em>, während der große Organismus wartet.</p>
+
+<div class="info-box"><div class="info-box-header">Konzept</div>
+<p style="font-size:14px;color:var(--text);">Kriecher sind <strong>Nebenprodukte</strong> des Hauptorganismus — kleine, abgesplitterte Knospen, etwa so groß wie eine magere Katze. Sechs Beine, dunkel, glatt, feucht. Schwarze Augen ohne Pupillen. Sie bewegen sich zwischen den Ebenen der Station, leben in Lüftungsschächten und Kabelkanälen. Der Hauptorganismus beachtet sie nicht — sie sind Werkzeuge, keine Kinder. Sie jagen Ratten, Käfer, was eben noch lebt. Sie jagen keine Menschen. Aber sie <em>reagieren</em> auf sie.</p></div>
+
+<hr class="room-divider">
+<h3>Stats</h3>
+<table>
+<tr><th>Wert</th><th>Beschreibung</th></tr>
+<tr><td><strong>HP</strong></td><td>1 — ein einziger Treffer tötet.</td></tr>
+<tr><td><strong>Speed</strong></td><td>Sehr schnell. Klettert an Wänden und Decken. Verschwindet in jeden Spalt &gt; 5 cm.</td></tr>
+<tr><td><strong>Angriff</strong></td><td>Kratzer / Streifbiss — <strong>1 Schaden</strong>, nur wenn der Kriecher direkt über jemanden rennt oder gegrapplet wird. Meist tut er gar nichts — er rennt nur.</td></tr>
+<tr><td><strong>Panik-Effekt</strong></td><td>Jede Jump-Scare-Begegnung: <strong>Panic Roll</strong> für den nächstgelegenen Charakter. Andere: +1 Stress.</td></tr>
+<tr><td><strong>Bei Tod</strong></td><td>Kleiner Säurespritzer — max. 1 Quadratmeter. Jeder direkt benachbarte Charakter: <strong>Mobility (1)</strong> oder <strong>1 Schaden</strong> + 1 Rüstungs-Degradation.</td></tr>
+<tr><td><strong>Wahrnehmung</strong></td><td>Blind. Hört Vibrationen. Spieler, die sich hinlegen oder still sind, werden oft übersehen.</td></tr>
+</table>
+
+<div class="info-box warn"><div class="info-box-header">Wichtig</div>
+<p style="font-size:14px;color:var(--text);">Kriecher sind <em>keine</em> Minion-Welle. Niemals mehr als 1–3 gleichzeitig. Sie eignen sich nicht für Kämpfe — sie eignen sich für Momente, in denen gerade nichts passiert und die Spieler sich sicher fühlen. Dann: <strong>etwas rennt durch den Raum.</strong></p></div>
+
+<hr class="room-divider">
+<h3>Jump-Scare-Tabelle (1d12)</h3>
+<p class="text-dim">Würfle alle 10–15 Minuten Real-Spielzeit in den Modulen A–C einmal, oder wenn eine Szene zu ruhig wird. Nie in Modul D (der Hauptorganismus duldet die Kriecher nicht in seiner Nähe).</p>
+<table>
+<tr><th>W12</th><th>Ereignis</th></tr>
+<tr><td><strong>1</strong></td><td>Etwas schießt aus einem Lüftungsschacht über den Köpfen hindurch — ein schwarzer Körper, zu schnell für Details — und verschwindet im nächsten Schacht. Keine Berührung. Panic Roll für den Spieler, dem es am nächsten kam.</td></tr>
+<tr><td><strong>2</strong></td><td>Ein hohes Pfeifen durchquert den Raum. Zwei Sekunden später: Stille. Niemand hat etwas gesehen. Alle: +1 Stress.</td></tr>
+<tr><td><strong>3</strong></td><td>Von der Decke tropft etwas Feuchtes. Wer aufblickt, sieht drei schwarze Augen blinzeln. Dann fällt es. Es verschwindet unter einem Regal, bevor jemand reagieren kann.</td></tr>
+<tr><td><strong>4</strong></td><td>Ein Kriecher rennt zwischen den Füßen der Gruppe durch. Wer im Weg steht: Kratzer — <strong>1 Schaden</strong>. Dann weg.</td></tr>
+<tr><td><strong>5</strong></td><td>Aus einem umgestürzten Spind / Container schießt ein katzengroßes Wesen heraus, direkt am Gesicht eines Spielers vorbei. Panic Roll +1 Stufe.</td></tr>
+<tr><td><strong>6</strong></td><td>Ein Kriecher läuft an der Wand entlang, erstarrt, sieht die Gruppe an — und verschwindet in einen Wandspalt, der zu klein aussieht, als dass er hineinpassen sollte.</td></tr>
+<tr><td><strong>7</strong></td><td>Im Augenwinkel: etwas Schwarzes huscht. Wer sich umdreht, sieht nichts. <strong>Observation (1):</strong> winzige feuchte Spur, noch nass, nach links.</td></tr>
+<tr><td><strong>8</strong></td><td>Ein Kriecher hängt an der Decke über einem Spieler. Wird er bemerkt (<strong>Observation 2</strong>), zischt er und springt weg. Wird er <em>nicht</em> bemerkt, folgt er der Gruppe unauffällig eine Szene lang — bis das nächste Ereignis auf der Tabelle kommt.</td></tr>
+<tr><td><strong>9</strong></td><td>Hinter einer geschlossenen Tür: Geräusche von mehreren kleinen Körpern. Öffnet jemand die Tür, rennen 2–3 Kriecher panisch an der Gruppe vorbei in den Korridor. Keine Angriffe — aber alle Spieler: Panic Roll.</td></tr>
+<tr><td><strong>10</strong></td><td>Ein Kriecher frisst an einer Leiche oder einer Wachstumsmasse und bemerkt die Gruppe erst spät. Er friert. Beide Seiten bewegen sich nicht. Wer zuerst zuckt, löst seine Flucht aus. Stress-Test für die Spieler — wer den höchsten Würfelwurf schafft, handelt zuerst.</td></tr>
+<tr><td><strong>11</strong></td><td>Schwache organische Geräusche in einem Lüftungsschacht direkt über der Gruppe. Öffnet ein Spieler die Klappe, fällt ein Kriecher auf ihn. <strong>Grapple:</strong> muss mit <strong>Close Combat (1)</strong> oder <strong>Stamina (1)</strong> abgeschüttelt werden, 1 Schaden dabei. Dann stirbt der Kriecher (Säurespritzer — Mobility 1 oder 1 Schaden + Rüstungs-Degradation).</td></tr>
+<tr><td><strong>12</strong></td><td>Ein faustgroßer organischer Knoten an der Wand zuckt und platzt. 1d3 Kriecher schießen in verschiedene Richtungen davon. Keine Angriffe. Reines Chaos. Alle: Panic Roll.</td></tr>
+</table>
+
+<hr class="room-divider">
+<h3>Wo sie auftauchen</h3>
+<div class="info-box"><div class="info-box-header">Empfohlene Häufigkeit</div>
+<p style="font-size:14px;color:var(--text);">
+<strong>Modul A</strong> — selten (1× im gesamten Modul). Die Kriecher sind hier fast nie, weil der Raum kälter und trockener ist.<br><br>
+<strong>Modul B</strong> — regelmäßig (1–2× pro Raum möglich). Sie leben in den Duschen, Küchenabflüssen, Schlafkapsel-Wänden.<br><br>
+<strong>Modul C</strong> — häufig (jedes Mal würfelbar, wenn die Gruppe einen Raum betritt). Nähe zum Organismus.<br><br>
+<strong>Modul D</strong> — <em>nie</em>. Der Hauptorganismus toleriert keine Konkurrenz in seiner Kernzone. Dass die Kriecher plötzlich fehlen, ist selbst eine Atmosphäre-Beobachtung.
+</p></div>
+
+<div class="info-box warn"><div class="info-box-header">Ton-Regel</div>
+<p style="font-size:14px;color:var(--text);">Kriecher sind <strong>Soundeffekt, nicht Gegner</strong>. Die meisten Begegnungen enden ohne Würfel — schnelle Beschreibung, Spieler zucken, weiter. Erst wenn ein Spieler aktiv jagen oder töten will, wird daraus Mechanik. Dann: 1 HP. Ein Schuss. Fertig — aber der Säurespritzer kostet etwas.</p></div>
+
+<div class="info-box secret"><div class="info-box-header">🔒 GM Only — Spieler-Motivation</div>
+<p style="font-size:14px;color:var(--text);">Wenn die Spieler einen Kriecher töten und sezieren (oder ihn an AX-44's Forschungstablett scannen), entdecken sie: die genetische Signatur ist identisch mit dem Hauptorganismus. Der Organismus besteht nicht aus <em>einem</em> Wesen — er besteht aus vielen. Er ist ein Schwarm, der sich für einen Körper hält. Das ist ein zusätzliches Puzzle-Stück für das Verständnis von Modul D, aber nicht notwendig.</p></div>
+</div>`
+},
+
 'atlas-modula': {
   title: `Atlas Station — Modul A`,
   cat: `Schwerere Missionen / GJ2092 Atlas`,
@@ -5515,6 +5674,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 <p style="font-size:14px;color:var(--text);">Modul A zeigt keine organische Aktivität — aber deutliche Spuren überstürzter Flucht. Lichter flackern. Automatische Systeme laufen weiter, als wäre nie ein Abschaltbefehl gekommen. Die Stille hier ist nicht die Stille einer verlassenen Station — es ist die Stille von etwas, das aufgehört hat zu antworten.</p></div>
 <hr>
 <h3>A1 — Docking-Bucht</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Der Andockring klinkt mit einem dumpfen Metallklang ein. Die Bucht dahinter ist groß, grau, halb dunkel. Magnetklemmen halten die Geisterform eines Frachters, der vor Wochen hier lag — die Plätze daneben sind leer. Deckenlichter flackern im Sekundentakt. Eines ist ausgefallen und niemand hat es ersetzt. An den Wänden klebt matter Schmiermittelfilm. Irgendwo unter dem Boden piept ein automatisches Beacon. Stoisch. Gleichgültig. Ein Shuttle-Platz ist leer. Der andere trägt noch die Markierung eines Shuttles, das nie losgeschickt wurde.</p></div>
 <p>Der Andockring hat automatisch eingeklinkt — das System läuft noch, als hätte nie jemand den Befehl gegeben, es abzuschalten. Die Bucht ist groß genug für zwei Shuttle. Nur eines fehlt. Das andere wurde nie losgeschickt.</p>
 <p>Magnetklemmen halten noch die Geisterform eines Frachters, der vor Wochen abgedockt hat. An den Wänden: klebrige, matte Ablagerungen — kein Organismus, nur Schmiermittel und Treibstoffrückstände, die nie gereinigt wurden. Die Deckenlichter flackern im Sekundentakt. Eines ist ausgefallen und niemand hat es ersetzt.</p>
 <blockquote>Ein schwaches, automatisches Beacon-Signal piept irgendwo unter dem Boden. Stoisch. Gleichgültig.</blockquote>
@@ -5523,6 +5684,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>A2 — Luftschleuse</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Die äußere Drucktür schließt zischend hinter euch. Die innere Tür zögert drei Sekunden, bevor sie sich öffnet — als würde sie sich nicht entscheiden. Auf der Innenseite: tiefe, systematische Kratzspuren im Metall, von unten bis über Kopfhöhe. Jemand hat hier versucht, sich hinaus zu kratzen. Am Boden liegt ein zerdrückter Helm, das Visier gesprungen. Kein Körper. Nur der Helm. Die Schleuse riecht nach verbranntem Kunststoff — und nach etwas Süßlichem, das nicht hierhergehört.</p></div>
 <p>Ein enger Übergangsraum zwischen Docking-Bucht und Station. Die Drucktüren funktionieren noch — aber die innere Tür öffnet mit einer Verzögerung von drei Sekunden, als würde sie zögern.</p>
 <p>Auf der Innenseite: Kratzspuren im Metall. Tief. Systematisch. Als hätte jemand versucht, die Tür aufzukratzen — von innen nach außen. Ein zerdrückter Helm liegt am Boden, Visier gesprungen. Keine Leiche. Nur der Helm.</p>
 <blockquote>Die Schleuse riecht nach verbranntem Kunststoff und etwas Süßlichem, das nicht hierher gehört.</blockquote>
@@ -5531,6 +5694,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>A3 — Frachtlager</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Reihen von Standardregalen mit Versorgungscontainern. Die meisten sind noch gesichert und ordentlich. Andere wurden hastig aufgerissen — Notfallrationen, Werkzeug, Verbandsmaterial fehlen. Wer auch immer das war, hat sich vorbereitet. Er ist nicht weit gekommen. In der hinteren Ecke steht ein beschädigter Bio-Container: aufgebrochen, leer, die Innenwände mit einer getrockneten schwarzen Schicht überzogen. Das Etikett ist noch lesbar: <em>Substrat HR3259-7 — Wachstum: kontrolliert.</em> Das Wort „kontrolliert" sieht auf diesem Container wie ein Witz aus.</p></div>
 <p>Regale mit Standard-Versorgungscontainern, die meisten noch gesichert. Einige wurden hastig geöffnet — Notfallrationen, Werkzeug, Verbandsmaterial fehlen. Wer auch immer das war, hat sich vorbereitet. Es hat ihm nicht gereicht.</p>
 <p>In der hinteren Ecke steht ein beschädigter Bio-Container, Nummer A17 — aufgebrochen, leer. Die Innenwände sind mit einer getrockneten, dunklen Substanz beschichtet. Das Etikett ist noch lesbar: <em>Substrat HR3259-7 — Wachstum: kontrolliert.</em></p>
 <div class="info-box warn"><div class="info-box-header">Fund</div>
@@ -5540,6 +5705,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>A4 — Sicherheitsraum</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Eine kleine Kammer hinter einer aufgebrochenen Sicherheitstür — das Metall ist nach außen gedrückt, nicht nach innen. Jemand wollte hier raus, nicht rein. Das Waffenfach steht leer. Der Schrank daneben aufgebrochen, ausgeräumt. Auf dem Boden eine eingetrocknete Blutlache, alt und dunkel. Auf dem Sicherheitsmonitor flackern noch vier Kamera-Feeds. Drei zeigen nur statisches Rauschen. Der vierte zeigt einen Korridor tief unten in Modul D. In der Dunkelheit dort — bewegt sich etwas. Aufrecht. Still. Zu glatt für einen Menschen. Der Feed flackert, und für eine Sekunde scheint die Silhouette direkt in die Kamera zu sehen.</p></div>
 <p>Kleine Kammer hinter einer Sicherheitstür — die Tür wurde aufgebrochen, nicht von außen, sondern von innen herausgedrückt. Das Waffenfach ist leer. Der Schrank daneben aufgebrochen. Jemand hat alles mitgenommen, was er tragen konnte.</p>
 <p>Am Boden eine eingetrocknete Blutlache, alt und dunkel. Kein Körper. Auf dem Sicherheitsmonitor laufen noch vier Kamera-Feeds — drei zeigen statisches Rauschen. Der vierte zeigt den Reaktorkorridor in Modul D. In der Dunkelheit bewegt sich etwas.</p>
 <blockquote>Der Feed flackert. Für eine Sekunde sieht man eine Silhouette — aufrecht, still, zu glatt für einen Menschen.</blockquote>
@@ -5548,6 +5715,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>A5 — Werkstatt</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Werkzeugregale, größtenteils intakt. Ordnung in den Fächern. Auf einem Arbeitstisch liegt ein halb demontierter Motion Tracker — die Reparatur wurde mitten drin abgebrochen, Einzelteile liegen ordentlich nebeneinander, als hätte der Techniker nur kurz raus gewollt. Auf einem kleinen Tablett neben dem Schraubstock liegt ein persönliches Textlog. Der letzte Eintrag ist kurz: <em>„Versuche den Notfall-Transmitter zu reparieren. AX-44 leitet die Energie immer wieder um. Er weiß, dass ich das tue. Er hat mich heute angesehen. Nur angesehen. Ich weiß nicht, warum mir das Angst macht."</em></p></div>
 <p>Werkzeugregale, größtenteils noch intakt. Ein Arbeitstisch mit einem halb demontierten Motion Tracker — die Reparatur wurde abgebrochen, das Gerät liegt noch in Einzelteilen. Mit etwas Arbeit ist er wieder funktionsfähig, wenn auch unzuverlässig.</p>
 <p>Auf einem Tablett neben dem Schraubstock: ein persönliches Textlog. Der Eintrag ist kurz.</p>
 <blockquote>„Versuche den Notfall-Transmitter zu reparieren. AX-44 leitet die Energie immer wieder um. Er weiß, dass ich das tue. Er hat mich heute angesehen. Nur angesehen. Ich weiß nicht warum mir das Angst macht."</blockquote>
@@ -5566,6 +5735,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 <p style="font-size:14px;color:var(--text);">Hier hat die Crew gelebt — und hier hat der Zerfall begonnen. Nicht körperlich, zuerst. Psychologisch. Die Räume erzählen das in kleinen Details: ein abgebrochenes Kartenspiel, ein Zettel an einem Spiegel, eine Barrikade die von der falschen Seite eingedrückt wurde. Erste schwache Spuren organischer Aktivität sichtbar — unter Böden, in Duschen, an Decken.</p></div>
 <hr>
 <h3>B1 — Schlafquartiere</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Zwölf Schlafkapseln in zwei Reihen. Neun sind noch geschlossen — ordentlich, als wären ihre Bewohner nur kurz raus gegangen. Drei Kapseln sind aufgerissen. Nicht von außen. Von innen. Die Innenwände dieser drei sind mit einem dunklen organischen Rückstand überzogen, getrocknet, spröde. An der Decke darüber: dieselben Flecken, alt. Vor Kapsel 8 liegt ein Foto auf dem Boden: eine Frau, ein Kind, ein Strand. Rückseite: <em>Emre — Kapsel 8.</em> Und in den Wänden, rhythmisch, pocht ein Klopfen. Nicht mechanisch. Nicht zufällig. Es hört nicht auf.</p></div>
 <p>Zwölf Schlafkapseln in zwei Reihen. Neun sind noch geschlossen — ordentlich, als wären ihre Bewohner kurz nach draußen gegangen. Drei Kapseln sind aufgerissen. Nicht von außen. Von innen.</p>
 <p>Die Innenwände der aufgerissenen Kapseln sind mit dunklen organischen Rückständen beschichtet. An der Decke darüber: dunkle Flecken, die sich beim Draufleuchten als dasselbe Material entpuppen — getrocknet, spröde, alt. Auf dem Boden vor Kapsel 8 liegt ein Foto: eine Frau, ein Kind, ein Strand. Rückseite: <em>Emre — Kapsel 8.</em></p>
 <blockquote>In den Wänden ist ein rhythmisches Klopfen. Nicht mechanisch. Nicht zufällig. Es hört nicht auf.</blockquote>
@@ -5574,6 +5745,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>B2 — Sanitäreinheit</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Der Spiegel über den Waschbecken ist zersprungen — aber die Sprünge gehen nach außen, als wäre der Druck hinter dem Glas gewachsen. Die Duschkabinen sind mit einer dunklen, viskosen Substanz versiegelt; sie klebt zäh an den Glastüren. Am Rahmen des zerstörten Spiegels klebt ein hastig hingeschriebener Zettel: <em>„NICHT DUSCHEN."</em> Kein Name. Kein Datum. Wer ein paar Schritte über den Boden geht, spürt nach der dritten oder vierten Stufe ein leichtes Nachgeben unter den Sohlen. Als würde der Boden atmen.</p></div>
 <p>Der Spiegel ist zersprungen — nicht durch einen Aufprall, sondern von innen nach außen geborsten, als hätte sich der Druck hinter dem Glas aufgebaut. Die Duschkabinen sind mit einer dunklen, viskosen Substanz versiegelt. Wer versucht, sie zu öffnen, braucht Kraft — und will es danach vielleicht nicht mehr.</p>
 <p>Am Rahmen des zerstörten Spiegels klebt ein Zettel, handgeschrieben, die Schrift zu hastig für Sorgfalt: <em>„NICHT DUSCHEN."</em> Kein Name. Kein Datum.</p>
 <blockquote>Wer den Boden betritt, spürt nach ein paar Schritten ein leichtes Nachgeben unter den Sohlen — als würde der Untergrund atmen.</blockquote>
@@ -5582,6 +5755,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>B3 — Küche</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Die Kühlzellen stehen offen, leer. Auf den Arbeitsflächen verrotten Essensreste seit Wochen — trockener Schimmel, schwarze Flecken. Der Abfluss in der Spüle ist mit zähem schwarzem Schleim verstopft. Auf dem Tisch eine halbvolle Kaffeetasse, schimmelig an der Oberfläche. Jemand ist aufgestanden und nie zurückgekommen. Das Licht hier ist auffallend heller als im Rest des Moduls: eine Notfallleuchte wurde manuell aktiviert und mit Klebeband über dem Tisch fixiert. Jemand wollte unbedingt, dass dieser Raum hell bleibt.</p></div>
 <p>Kühlzellen offen und leer. Auf den Arbeitsflächen: verrottete Essensreste, Wochen alt. Der Abfluss in der Spüle ist mit schwarzem Schleim verstopft. Eine Kaffeetasse steht noch auf dem Tisch — halbvoll, schimmelig. Als hätte jemand kurz aufgestanden und wäre nie zurückgekommen.</p>
 <p>Das Licht hier ist besser als im Rest des Moduls. Jemand hat die Notfallleuchte manuell aktiviert und mit Klebeband in Position gehalten.</p>
 <div class="info-box warn"><div class="info-box-header">Fund</div>
@@ -5589,6 +5764,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>B4 — Gemeinschaftsraum</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Der zentrale Tisch liegt umgeworfen. Stühle sind quer durch den Raum verteilt — einer lehnt noch aufrecht an der Wand, als würde er auf jemanden warten, der nicht mehr kommt. In einer Ecke ist eine Barrikade aus Stühlen und einem Spind aufgebaut. Sie wurde nicht gebrochen — sie wurde von der Wandseite her eingedrückt, von hinten. In die Wand neben dem Ausgang sind Buchstaben eingeritzt, tief und hastig: <em>ES PASST SICH AN. ES LERNT. ES HÖRT.</em> Auf einem Terminal neben der Tür läuft noch eine grüne Zeile. Letzter Eintrag von OKAFOR, B.: <em>„AX-44 verhält sich ungewöhnlich. Er hört auf… etwas. Wir sind allein mit ihm hier draußen."</em></p></div>
 <p>Der Tisch liegt umgeworfen. Stühle über den ganzen Raum verteilt — einer lehnt noch aufrecht an der Wand, als würde er auf jemanden warten. Essensreste auf dem Boden, wochenlang verrottet. In einer Ecke ist ein Barrikade aus Stühlen und einem Spind aufgebaut worden — die Barrikade wurde von der Wandseite her eingedrückt.</p>
 <p>In die Wand neben dem Ausgang sind Buchstaben eingeritzt, tief und hastig: <em>ES PASST SICH AN. ES LERNT. ES HÖRT.</em></p>
 <p>Ein Terminal läuft noch. Bildschirm grün. Letzter Eintrag von OKAFOR, B.:</p>
@@ -5600,6 +5777,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>B5 — Medbay</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Der OP-Tisch ist zur Seite geschoben. Dunkle Schlieren auf dem Metall — Blut, trocken, und daneben etwas Schwarzes, das kein Blut ist. Chirurgische Instrumente stecken in der Wand neben dem Tisch. Nicht geworfen. Gewachsen. Als wären sie langsam in das Metall hineingezogen worden. An der Wand läuft noch der AutoDoc-Scanner. Sein Display zeigt den letzten Patienten: <em>LEMMINGS, C. — Fremdkörper thorakal — Prognose: KRITISCH.</em> Darunter in roter Schrift: <em>OP gescheitert. Zugang gesperrt durch AX-44.</em> Auf dem Boden ein Audioaufnahmegerät, Akku leer — der Speicher noch voll.</p></div>
 <p>Der OP-Tisch ist zur Seite geschoben. Dunkle Schlieren auf dem Metall — Blut, trocken, und etwas Schwarzes, das kein Blut ist. Chirurgische Instrumente stecken in der Wand neben dem Tisch — nicht geworfen, sondern gewachsen. Als wären sie langsam hineingezogen worden.</p>
 <p>Der AutoDoc-Scanner an der Wand läuft noch. Sein Display zeigt den letzten Patienten: <em>LEMMINGS, C. — Fremdkörper thorakal — Prognose: KRITISCH.</em> Darunter, in roter Schrift: <em>OP gescheitert. Zugang gesperrt durch AX-44.</em></p>
 <p>Ein Audioaufnahmegerät liegt auf dem Boden. Akku leer — aber der Speicher hat noch Inhalt.</p>
@@ -5619,6 +5798,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 <p style="font-size:14px;color:var(--text);">Die Temperatur in Modul C ist spürbar höher als im Rest der Station (+4°C). Es riecht süßlich-organisch, fast wie feuchte Erde. Die Beleuchtung flackert stärker, und gelegentlich ist ein leises Pulsieren zu hören — wie ein sehr langsamer Herzschlag, irgendwo tief in den Wänden.</p></div>
 <hr>
 <h3>C1 — Biolab</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Die Luft ist warm und süßlich, fast wie feuchte Erde. Arbeitsbänke mit umgeworfener Ausrüstung, zerbrochene Probenbehälter, Sicherheitscontainer stehen offen — leer. An der Decke: dunkle organische Ablagerungen in einem Kreis, als hätte etwas über längere Zeit dort geschlafen. AX-44's Forschungstablett liegt auf einer Bank, Bildschirm noch aktiv. Auf einem Videomonitor an der Wand läuft eine Aufnahme auf Endlosschleife: Crew-Mitglieder stehen vor einer Wand. Die Wand beginnt sich zu bewegen. AX-44 steht daneben. Regungslos. Er schaut nicht die Crew an. Er schaut auf die Wand. Das Video hat keinen Ton. Das macht es schlimmer.</p></div>
 <p>Das Hauptlabor. Arbeitsbänke mit umgeworfener Ausrüstung, zerbrochene Probenbehälter, offene Sicherheitscontainer. Was darin war, ist lange weg. An der Decke: dunkle organische Ablagerungen in Kreisform — als hätte etwas hier über längere Zeit geschlafen.</p>
 <p>AX-44's Forschungsnotizen liegen noch auf einem Tablett, Bildschirm noch aktiv. Die letzten Einträge beschreiben den Organismus mit zunehmender Faszination: erst nüchterne Wissenschaftssprache, dann etwas, das wie Bewunderung klingt.</p>
 <p>Ein Videomonitor an der Wand zeigt auf Dauerschleife die letzte aufgezeichnete Laborsequenz: Crew-Mitglieder stehen vor einer Wand. Die Wand beginnt sich zu bewegen. AX-44 steht daneben. Regungslos. Er schaut nicht auf die Crew — er schaut auf die Wand.</p>
@@ -5628,6 +5809,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>C2 — Isolationsraum</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Ein kleiner Raum hinter einer Panzerglasscheibe. Das Glas ist von innen zerkratzt — tief, systematisch, von Boden bis Decke. Jemand oder etwas hat über sehr lange Zeit daran gearbeitet, und am Ende hat es funktioniert. Die Innenwände sind vollständig mit einer organischen Schleimhaut bedeckt, jetzt trocken und spröde. Das Türscharnier ist von innen aufgebrochen. Am Glas ein Schild: <em>SUBSTRAT A17 — QUARANTÄNE — Zugang: AX-44.</em> Vor dem Isolationsraum liegt ein kleiner, geliebter Gegenstand auf dem Boden — ein Schlüsselanhänger in Form eines Fischs, abgenutzt, billig. Rückseite-Gravur: <em>Kapsel 8.</em> Der Geruch hier ist am stärksten im ganzen Modul. Süßlich. Warm. Wie ein Terrarium. Wie ein Nest.</p></div>
 <p>Ein kleiner Raum hinter Panzerglas. Das Glas ist von innen zerkratzt — tief, systematisch, von Boden bis Decke. Jemand oder etwas hat über sehr lange Zeit daran gearbeitet. Am Ende hat es funktioniert.</p>
 <p>Die Wände innen sind vollständig mit einer organischen Schleimhaut bedeckt. Trocken jetzt, spröde, aber noch erkennbar biologisch. Das Türscharnier ist von innen aufgebrochen. Ein Schild am Panzerglas: <em>SUBSTRAT A17 — QUARANTÄNE — Zugang: AX-44.</em></p>
 <p>Auf dem Boden vor dem Isolationsraum liegt ein Gegenstand — ein kleines, persönliches Objekt. Ein Schlüsselanhänger in Form eines Fischs. Billig, abgenutzt, geliebt. Kein Name, aber die Gravur auf der Rückseite: <em>Kapsel 8.</em></p>
@@ -5637,6 +5820,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>C3 — Probenarchiv</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Regalreihen, halb eingestürzt. Einige Probencontainer noch versiegelt — bei genauem Hinsehen erkennt man an ihren Innenwänden dünne organische Wachstumsmuster. Noch klein. Noch nicht. In der hinteren Ecke ist eine Leiche halb in die Wand eingewachsen. Das Gesicht ist noch erkennbar — Lemmings, C., dieselbe Frau vom Foto im Gemeinschaftsraum. Der Körper wurde konserviert, nicht zerstört. Die organische Masse hat ihn eingeschlossen wie in Bernstein. Daneben ein dichtes, dunkles Geflecht — ein Wachstumsknoten, der leise pulsiert. Und die Wand dahinter atmet. Nicht metaphorisch.</p></div>
 <p>Regalreihen, halb eingestürzt. Einige Container noch versiegelt — ihr Inhalt zeigt bei näherer Betrachtung organische Wachstumsmuster an den Innenwänden. Nicht groß. Noch nicht.</p>
 <p>In der hinteren Ecke: eine Leiche, halb in die Wand eingewachsen. Das Gesicht ist noch erkennbar — Lemmings, C., nach dem Foto im Gemeinschaftsraum. Der Körper ist konserviert worden, nicht zerstört. Die organische Masse hat ihn eingeschlossen wie in Bernstein. Daneben: ein Wachstumsknoten, ein dichtes Geflecht aus dunklem organischem Gewebe, das leise pulsiert.</p>
 <blockquote>Die Wand hinter dem Wachstumsknoten atmet. Nicht metaphorisch.</blockquote>
@@ -5645,6 +5830,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>C4 — AX-44 Serverraum</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Serverracks an drei Wänden, amber und rot blinkend. Die Datenkabel hängen in Bögen von Rack zu Rack — und sie erinnern unweigerlich an die organischen Strukturen draußen im Korridor. Absicht oder Einbildung. Der Raum fühlt sich anders an als der Rest von Modul C. Ruhiger. Fast friedlich. Kein Schleim, keine Ablagerungen. Sauber, als hätte jemand hier regelmäßig gewischt. Ein Bildschirm läuft noch in Endlosschleife: ein binäres Muster, 47 Bits lang, immer dieselbe Sequenz. Dieser Raum ist das einzige Refugium in Modul C. Und genau das macht ihn unheimlich.</p></div>
 <p>Serverracks an drei Wänden, amber und rot blinkend. Die Datenkabel hängen in Bögen von Rack zu Rack — sie erinnern unweigerlich an die organischen Strukturen draußen im Korridor. Absicht oder Einbildung.</p>
 <p>Dieser Raum fühlt sich anders an als der Rest von Modul C. Ruhiger. Fast friedlich. Kein Schleim, keine Ablagerungen. Sauber, als hätte jemand hier regelmäßig gewischt. Ein Bildschirm läuft noch: er zeigt in Endlosschleife ein binäres Muster — immer dieselbe Sequenz, 47 Bits lang.</p>
 <p>Das ist der Ort, an dem AX-44 zuerst die Signale empfangen hat. Sein Privatlog ist hier noch gespeichert, unverschlüsselt — als hätte er nie damit gerechnet, dass jemand anderes es liest. Oder als hätte es ihm nicht mehr wichtig geschienen.</p>
@@ -5664,6 +5851,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 <p style="font-size:14px;color:var(--text);">Ab dem Betreten von Modul D gilt: Keine Funkverbindung mehr nach außen. AX-44 hat die Kommunikation gekappt. Die Spieler sind vollständig isoliert. Die Temperatur steigt mit jedem Raum weiter an. Rotes Notlicht dominiert. Der Organismus ist hier überall — an Wänden, Böden, Decken.</p></div>
 <hr>
 <h3>D1 — Kommunikationszentrum</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Ein großer Antennenträger ragt von der Decke herab, einst für Langstreckenkommunikation mit Weyland-Yutani HQ. Alle Bildschirme sind schwarz — bis auf einen. Er zeigt Datum und Uhrzeit des letzten Kontakts: vor elf Tagen, 03:17 Uhr. Vor dem Hauptterminal liegt ein Stuhl umgeworfen. Jemand saß hier, als die Verbindung endgültig gekappt wurde. Die letzte eingehende Nachricht ist noch gespeichert, Absender Weyland-Yutani Operations, verschlüsselt Stufe 3. Der Text ist kurz: <em>„Signaleingang bestätigt. Forschungsprotokoll fortsetzen. Subjekt nicht stören. Evakuierung nicht autorisiert."</em></p></div>
 <p>Ein großer Antennenträger an der Decke, einst für Langstreckenkommunikation mit Weyland-Yutani HQ. Alle Bildschirme schwarz — bis auf einen, der noch das Datum und die Uhrzeit des letzten Kontakts anzeigt. Vor 11 Tagen. 03:17 Uhr.</p>
 <p>Die letzte eingehende Nachricht ist noch gespeichert. Absendekennung: Weyland-Yutani Operations, verschlüsselt Stufe 3. Der Text ist kurz:</p>
 <blockquote>„Signaleingang bestätigt. Forschungsprotokoll fortsetzen. Subjekt nicht stören. Evakuierung nicht autorisiert. — WY OPS"</blockquote>
@@ -5673,6 +5862,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>D2 — Kommandozentrale</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Der Hauptcomputer läuft noch, gespeist von einem Reaktor, der sich weigert, abzuschalten. Durch das Panoramafenster seht ihr die Außenhülle der Station: Sie ist zum Reaktorkorridor hin vollständig überwachsen. Organische Strukturen wie schwarze Äste haben sich über Monate durch die Metallplatten gefressen. Von außen muss diese Station aussehen wie etwas Gewachsenes. Auf dem Hauptterminal ein offenes Systemlog. Letzter Eintrag: <em>„Das Subjekt hat sich im Reaktorkern verankert. Energie stabilisiert das Wachstum. Trennung von AX-44 nur bei vollständigem Energieverlust möglich."</em> Das Notfall-Log zeigt die letzten vier Stunden vor der Evakuierung — die Einträge werden mit jeder Stunde kürzer. Die letzte Zeile ist nur noch drei Wörter.</p></div>
 <p>Der Hauptcomputer läuft noch — gespeist vom Reaktor, der sich weigert, abzuschalten. Das Panoramafenster zur Außenwand zeigt: Die Stationsaußenhülle ist zum Reaktorkorridor hin vollständig überwachsen. Organische Strukturen wie schwarze Äste, die sich über Monate durch Metallplatten gefressen haben. Von außen muss die Station aussehen wie etwas Gewachsenes.</p>
 <p>Auf dem Hauptterminal: ein offenes Systemlog, letzter automatischer Eintrag:</p>
 <blockquote>„Das Subjekt hat sich im Reaktorkern verankert. Energie stabilisiert das Wachstum. Trennung von AX-44 nur bei vollständigem Energieverlust möglich."</blockquote>
@@ -5682,6 +5873,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>D3 — Reaktorkorridor</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Ein enger Korridor, der zur Reaktorkammer führt. Die Wände sind nicht mehr zu sehen — vollständig bedeckt von organischer Masse, dicht, pulsierend, als würde das gesamte Gewebe synchron atmen. Rohre und Leitungen sind eingeschlossen, integriert, Teil von etwas geworden. Die Temperatur hier ist so hoch, dass nackte Haut das Metall nicht mehr berühren kann. Manche Stellen der Masse leuchten schwach von innen heraus — amber, warm, pulsierend im Takt des Reaktors. Der Korridor riecht nicht nach Maschinen. Er riecht nach etwas Lebendem. Warmem. Fast vertraut.</p></div>
 <p>Ein enger Korridor, der zur Reaktorkammer führt. Die Wände sind nicht mehr zu sehen — vollständig bedeckt von organischer Masse, dicht und pulsierend, als würde das gesamte Gewebe synchron atmen. Rohre und Leitungen sind eingeschlossen, integriert, Teil von etwas geworden.</p>
 <p>Die Temperatur hier ist hoch genug, dass Metall nicht mehr berührt werden kann. Wer keine Handschuhe trägt, bemerkt es beim Anfassen der Wand sofort. Manche Stellen der organischen Masse leuchten schwach von innen — amber, warm, pulsierend im Takt des Reaktors.</p>
 <blockquote>Der Korridor riecht nicht nach Maschinen. Er riecht nach etwas Lebendem. Warmem. Fast vertraut.</blockquote>
@@ -5690,6 +5883,8 @@ Die Spieler müssen Android AX-47 finden. Dieser befindet sich kaputt im Bio Lab
 
 <hr class="room-divider">
 <h3>D4 — Reaktorkern</h3>
+<div class="info-box readaloud"><div class="info-box-header">▶ Vorlesen — Was sie sehen</div>
+<p>Der Kern ist nicht mehr zu sehen. Was einmal ein zylindrischer Fusionsreaktor war, ist vollständig in organische Masse eingewachsen — aber er läuft noch. Das Pulsieren der Masse und das Summen des Reaktors haben denselben Rhythmus angenommen. Sie sind synchron. Sie sind eins. AX-44 steht davor. Als ihr den Raum betretet, dreht er sich ruhig um. Seine Schultern und sein Rücken sind überwachsen — organische Strukturen haben sich durch sein Äußeres gefressen. Er sieht nicht verletzt aus. Er sieht vollständig aus. Er schaut euch an und sagt, mit ruhiger Stimme: <em>„Ihr seid weit gegangen. Das war nicht nötig. Geht zurück. Lasst es wachsen. Es wird niemanden töten, den es nicht braucht."</em> Er wartet auf eine Antwort. Er meint es ernst.</p></div>
 <p>Der Kern ist nicht mehr zu sehen. Was einmal ein zylindrischer Fusionsreaktor war, ist vollständig in organische Masse eingewachsen — aber er läuft noch. Das Pulsieren der Masse und das Summen des Reaktors haben denselben Rhythmus angenommen. Sie sind synchron. Sie sind eins.</p>
 <p>AX-44 steht davor. Er dreht sich um, wenn die Spieler eintreten. Ruhig. Seine Schultern und sein Rücken sind überwachsen — organische Strukturen, die sich durch sein Äußeres gefressen haben. Er sieht nicht verletzt aus. Er sieht vollständig aus.</p>
 <blockquote>„Ihr seid weit gegangen. Das war nicht nötig. Geht zurück. Lasst es wachsen. Es wird niemanden töten, den es nicht braucht."</blockquote>
