@@ -1555,7 +1555,9 @@
 .rations-col-label {
   font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--rp-ink-bright);
+  display: inline-flex; align-items: center; gap: 7px;
 }
+.rc-icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
 .rations-col-sku {
   font-size: 9px; color: var(--rp-ink-dim); letter-spacing: 0.15em;
 }
@@ -8880,12 +8882,95 @@ window.startSupplyPanel = function() {
   let _rationsData = { food: 0, muesli: 0, bier: 0 };
 
   // ── Physics canvas ─────────────────────────────────────────────────────────
-  const ITEM_SZ    = 22;   // emoji render size (CSS px)
-  const STACK_STEP = 18;   // vertical spacing between stacked items
+  const ITEM_SZ    = 28;   // sprite render size (CSS px)
+  const STACK_STEP = 22;   // vertical spacing between stacked items
   const GRAVITY    = 0.42;
   const DISPLAY_MAX = 60;
 
-  function makePhysics(canvasEl, icon) {
+  // ─── Sprite drawings (ported from Claude Design handoff — centered at 0,0) ──
+  // drawFn(ctx, sz) — sz ≈ ITEM_SZ in CSS px
+  function drawSpriteRation(ctx, sz) {
+    const w = sz * 0.78, h = sz * 1.0;
+    const x = -w/2, y = -h/2;
+    const g = ctx.createLinearGradient(0, y, 0, y+h);
+    g.addColorStop(0, '#4a4636'); g.addColorStop(1, '#2a281d');
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+    ctx.lineWidth = 0.6; ctx.strokeStyle = '#000'; ctx.strokeRect(x, y, w, h);
+    // top seal
+    ctx.fillStyle = '#1a1812'; ctx.fillRect(x, y, w, h * 0.09);
+    // label patch
+    ctx.fillStyle = '#8a7d5a';
+    ctx.fillRect(x + w*0.12, y + h*0.26, w*0.76, h*0.36);
+    // gold band hints
+    ctx.fillStyle = 'rgba(216,178,107,0.35)';
+    ctx.fillRect(x, y + h*0.95, w, h*0.04);
+    // seam highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(x + w*0.08, y + h*0.12, w*0.05, h*0.78);
+  }
+  function drawSpriteRationPremium(ctx, sz) {
+    const w = sz * 0.78, h = sz * 1.0;
+    const x = -w/2, y = -h/2;
+    const g = ctx.createLinearGradient(0, y, 0, y+h);
+    g.addColorStop(0, '#6a5a2e'); g.addColorStop(1, '#3a2f14');
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+    ctx.lineWidth = 0.6; ctx.strokeStyle = '#000'; ctx.strokeRect(x, y, w, h);
+    ctx.fillStyle = '#1a1812'; ctx.fillRect(x, y, w, h * 0.09);
+    ctx.fillStyle = '#d8b26b';
+    ctx.fillRect(x + w*0.12, y + h*0.26, w*0.76, h*0.36);
+    ctx.fillStyle = 'rgba(216,178,107,0.6)';
+    ctx.fillRect(x, y + h*0.16, w, h*0.03);
+    ctx.fillRect(x, y + h*0.89, w, h*0.03);
+  }
+  function drawSpriteBar(ctx, sz) {
+    const w = sz * 1.15, h = sz * 0.48;
+    const x = -w/2, y = -h/2;
+    const bodyX = x + w*0.13, bodyW = w*0.74;
+    // body
+    const g = ctx.createLinearGradient(0, y, 0, y+h);
+    g.addColorStop(0, '#3d4a2e'); g.addColorStop(1, '#1f2518');
+    ctx.fillStyle = g; ctx.fillRect(bodyX, y, bodyW, h);
+    ctx.lineWidth = 0.5; ctx.strokeStyle = '#000'; ctx.strokeRect(bodyX, y, bodyW, h);
+    // wrapper twists (triangles)
+    ctx.fillStyle = '#2a331f';
+    ctx.beginPath();
+    ctx.moveTo(x, y + h/2); ctx.lineTo(bodyX, y); ctx.lineTo(bodyX, y + h);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + w, y + h/2); ctx.lineTo(bodyX + bodyW, y); ctx.lineTo(bodyX + bodyW, y + h);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // gold stripes
+    ctx.fillStyle = 'rgba(216,178,107,0.75)';
+    ctx.fillRect(bodyX, y + h*0.38, bodyW, h*0.08);
+    ctx.fillStyle = 'rgba(216,178,107,0.4)';
+    ctx.fillRect(bodyX, y + h*0.55, bodyW, h*0.04);
+  }
+  function drawSpriteCan(ctx, sz) {
+    const w = sz * 0.52, h = sz * 1.0;
+    const x = -w/2, y = -h/2;
+    // cylinder body
+    const g = ctx.createLinearGradient(x, 0, x+w, 0);
+    g.addColorStop(0,    '#2a2a2e');
+    g.addColorStop(0.18, '#5a5a62');
+    g.addColorStop(0.5,  '#8a8a92');
+    g.addColorStop(0.82, '#5a5a62');
+    g.addColorStop(1,    '#2a2a2e');
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+    ctx.lineWidth = 0.5; ctx.strokeStyle = '#000'; ctx.strokeRect(x, y, w, h);
+    // rims
+    ctx.fillStyle = '#1a1a1e';
+    ctx.fillRect(x, y, w, h*0.08);
+    ctx.fillRect(x, y + h*0.92, w, h*0.08);
+    // red label
+    ctx.fillStyle = '#8a2a20';
+    ctx.fillRect(x, y + h*0.30, w, h*0.38);
+    // gold accents
+    ctx.fillStyle = '#d8b26b';
+    ctx.fillRect(x, y + h*0.30, w, h*0.025);
+    ctx.fillRect(x, y + h*0.655, w, h*0.025);
+  }
+
+  function makePhysics(canvasEl, drawFn) {
     const c   = canvasEl;
     const ctx = c.getContext('2d');
     let cssW = 0, cssH = 0;        // canvas size in CSS px (used for all math)
@@ -8996,9 +9081,6 @@ window.startSupplyPanel = function() {
       _applyTarget(); // retry if setCount was called before canvas was sized
 
       ctx.clearRect(0, 0, cssW, cssH);
-      ctx.font = ITEM_SZ + 'px serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
 
       for (const p of particles) {
         if (!p.settled) {
@@ -9030,7 +9112,7 @@ window.startSupplyPanel = function() {
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rot);
-        ctx.fillText(icon, 0, 0);
+        drawFn(ctx, ITEM_SZ);
         ctx.restore();
       }
 
@@ -9162,9 +9244,9 @@ window.startSupplyPanel = function() {
     const fc = document.getElementById('rationsFoodCanvas');
     const mc = document.getElementById('rationsMuesliCanvas');
     const bc = document.getElementById('rationsBierCanvas');
-    if (fc) _physFood   = makePhysics(fc, '🥫');
-    if (mc) _physMuesli = makePhysics(mc, '🍫');
-    if (bc) _physBier   = makePhysics(bc, '🍺');
+    if (fc) _physFood   = makePhysics(fc, drawSpriteRation);
+    if (mc) _physMuesli = makePhysics(mc, drawSpriteBar);
+    if (bc) _physBier   = makePhysics(bc, drawSpriteCan);
 
     // Clock ticker in top-bar pill
     (function tickClock() {
@@ -9265,7 +9347,14 @@ window.startSupplyPanel = function() {
         <span class="rc-corner bl"></span>
         <span class="rc-corner br"></span>
         <div class="rations-col-header">
-          <span class="rations-col-label">🥫 Standard Rations</span>
+          <span class="rations-col-label">
+            <svg class="rc-icon" viewBox="0 0 14 18" width="11" height="14" aria-hidden="true">
+              <rect x="1" y="1" width="12" height="16" fill="#4a4636" stroke="#000" stroke-width="0.6"/>
+              <rect x="1" y="1" width="12" height="2" fill="#1a1812"/>
+              <rect x="3" y="6" width="8" height="6" fill="#8a7d5a"/>
+            </svg>
+            Standard Rations
+          </span>
           <span class="rations-col-sku">RTN-STD-04A · MRE-S</span>
         </div>
         <div class="rc-meta">
@@ -9300,7 +9389,15 @@ window.startSupplyPanel = function() {
         <span class="rc-corner bl"></span>
         <span class="rc-corner br"></span>
         <div class="rations-col-header">
-          <span class="rations-col-label">🍫 Müsliriegel <span class="scott-badge">SCOTT ONLY</span></span>
+          <span class="rations-col-label">
+            <svg class="rc-icon" viewBox="0 0 22 10" width="18" height="8" aria-hidden="true">
+              <polygon points="0,5 3,1 3,9" fill="#2a331f" stroke="#000" stroke-width="0.3"/>
+              <polygon points="22,5 19,1 19,9" fill="#2a331f" stroke="#000" stroke-width="0.3"/>
+              <rect x="3" y="1" width="16" height="8" fill="#3d4a2e" stroke="#000" stroke-width="0.4"/>
+              <rect x="3" y="4.2" width="16" height="0.8" fill="#d8b26b" opacity="0.75"/>
+            </svg>
+            Müsliriegel <span class="scott-badge">SCOTT ONLY</span>
+          </span>
           <span class="rations-col-sku">NBR-09C · N-BAR</span>
         </div>
         <div class="rc-meta">
@@ -9335,7 +9432,17 @@ window.startSupplyPanel = function() {
         <span class="rc-corner bl"></span>
         <span class="rc-corner br"></span>
         <div class="rations-col-header">
-          <span class="rations-col-label">🍺 Bier</span>
+          <span class="rations-col-label">
+            <svg class="rc-icon" viewBox="0 0 10 18" width="8" height="14" aria-hidden="true">
+              <rect x="0.5" y="0.5" width="9" height="17" fill="#8a8a92" stroke="#000" stroke-width="0.4"/>
+              <rect x="0.5" y="0.5" width="9" height="1.2" fill="#1a1a1e"/>
+              <rect x="0.5" y="16.3" width="9" height="1.2" fill="#1a1a1e"/>
+              <rect x="0.5" y="6" width="9" height="6" fill="#8a2a20"/>
+              <rect x="0.5" y="6" width="9" height="0.5" fill="#d8b26b"/>
+              <rect x="0.5" y="11.5" width="9" height="0.5" fill="#d8b26b"/>
+            </svg>
+            Bier
+          </span>
           <span class="rations-col-sku">BEV-KR-12F · KRVK</span>
         </div>
         <div class="rc-meta">
