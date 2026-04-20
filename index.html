@@ -3271,12 +3271,27 @@
   </div>
 </div>
 
+<script src="config.js"></script>
 <script type="module">
 // ============================================================
 // PASSWORD GATE
 // ============================================================
-const PASSWORD    = "nostromo";   // 👈 Player password
-const GM_PASSWORD = "GMnostromo"; // 👈 GM password
+// Password hashes are loaded from config.js (gitignored).
+// See config.example.js for the template.
+const CFG = window.APP_CONFIG || {};
+const PASSWORD_HASH    = CFG.playerPasswordHash || '';
+const GM_PASSWORD_HASH = CFG.gmPasswordHash     || '';
+if (!PASSWORD_HASH || !GM_PASSWORD_HASH) {
+  console.error('[config] config.js missing or incomplete — copy config.example.js to config.js');
+}
+
+async function sha256Hex(str) {
+  const buf  = new TextEncoder().encode(str);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 let isGM = false;
 
 // Assign a deterministic color from a callsign string
@@ -3291,7 +3306,7 @@ function colorFromName(name) {
   return palette[Math.abs(hash) % palette.length];
 }
 
-window.checkPassword = function() {
+window.checkPassword = async function() {
   const pwInput   = document.getElementById('pwInput');
   const unInput   = document.getElementById('pwUsername');
   const err       = document.getElementById('pwError');
@@ -3304,14 +3319,15 @@ window.checkPassword = function() {
     setTimeout(() => { unInput.classList.remove('error'); err.textContent=''; }, 1500);
     return;
   }
-  if (pwInput.value !== PASSWORD && pwInput.value !== GM_PASSWORD) {
+  const inputHash = await sha256Hex(pwInput.value);
+  if (inputHash !== PASSWORD_HASH && inputHash !== GM_PASSWORD_HASH) {
     err.textContent = 'ACCESS DENIED — INVALID CREDENTIALS';
     pwInput.classList.add('error');
     pwInput.value = '';
     setTimeout(() => { pwInput.classList.remove('error'); err.textContent=''; }, 1500);
     return;
   }
-  isGM = (pwInput.value === GM_PASSWORD);
+  isGM = (inputHash === GM_PASSWORD_HASH);
 
   // Non-GM trying to log in while session is closed
   if (!isGM && sessionIsOpen === false) {
@@ -6838,10 +6854,10 @@ window.bvToggleGMPanel = function() {
   document.getElementById('bvGMPanel').classList.toggle('active');
 };
 
-window.bvGMAuth = function() {
+window.bvGMAuth = async function() {
   const pw = document.getElementById('bvGMPw').value;
   const err = document.getElementById('bvGMErr');
-  if (pw === GM_PASSWORD) {
+  if ((await sha256Hex(pw)) === GM_PASSWORD_HASH) {
     bvGMAuthed = true;
     document.getElementById('bvGMLogin').style.display = 'none';
     document.getElementById('bvGMControls').style.display = 'block';
