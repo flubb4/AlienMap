@@ -831,19 +831,19 @@
   .hunt-alien {
     position:absolute; display:flex; flex-direction:column; align-items:center; gap:3px;
     cursor:crosshair; user-select:none; z-index:3; transform:translate(-50%,-50%);
+    will-change:left,top;
   }
-  .hunt-alien:hover .hunt-alien-emoji { filter:brightness(1.5) drop-shadow(0 0 10px rgba(255,200,80,.9)); transform:scale(1.12); }
+  .hunt-alien:hover .hunt-alien-emoji { filter:brightness(1.4); transform:scale(1.1); }
 
   .hunt-alien-inner {
     position:relative; display:inline-flex; align-items:center; justify-content:center;
-    animation:alienHover 3s ease-in-out infinite alternate;
+    animation:alienHover 4s ease-in-out infinite alternate;
+    will-change:transform;
   }
   @keyframes alienHover {
-    0%   { transform:translate(0,0) rotate(-3deg) scale(1); }
-    25%  { transform:translate(5px,-9px) rotate(2deg) scale(1.03); }
-    50%  { transform:translate(-6px,7px) rotate(-5deg) scale(.97); }
-    75%  { transform:translate(8px,2px) rotate(3deg) scale(1.04); }
-    100% { transform:translate(-4px,-6px) rotate(-2deg) scale(1); }
+    0%   { transform:translate(0,0) rotate(-3deg); }
+    50%  { transform:translate(5px,-8px) rotate(3deg); }
+    100% { transform:translate(-4px,5px) rotate(-2deg); }
   }
   .hunt-alien-emoji {
     font-size:28px; line-height:1; display:block;
@@ -4266,12 +4266,12 @@ function renderAlienHunt(area, data, now) {
   lbl.textContent = canShoot ? '// ENGAGE XENOMORPHS — SHOOT TO CLAIM' : allPicked ? '// ALL TARGETS NEUTRALIZED' : '// AWAITING OPERATIVES';
   field.appendChild(lbl);
 
-  // Starfield
+  // Starfield (reduced for perf)
   const starColors = ['#ffffff','#aaddff','#ffddaa','#ffaabb','#aaffdd'];
-  for (let i = 0; i < 55; i++) {
+  for (let i = 0; i < 28; i++) {
     const s = document.createElement('div'); s.className='hunt-star';
     const sz = Math.random()<.12?3:Math.random()<.35?2:1;
-    s.style.cssText=`left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%;width:${sz}px;height:${sz}px;animation-delay:${(Math.random()*3).toFixed(2)}s;animation-duration:${(1+Math.random()*2.5).toFixed(1)}s;background:${starColors[Math.floor(Math.random()*starColors.length)]}`;
+    s.style.cssText=`left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%;width:${sz}px;height:${sz}px;animation-delay:${(Math.random()*3).toFixed(2)}s;animation-duration:${(1.5+Math.random()*2).toFixed(1)}s;background:${starColors[Math.floor(Math.random()*starColors.length)]}`;
     field.appendChild(s);
   }
 
@@ -4353,23 +4353,29 @@ function renderAlienHunt(area, data, now) {
 
   area.appendChild(field);
 
+  // Cache DOM refs once after field is in DOM — avoids getElementById on every frame
+  alienHuntMoveStates.forEach(s => {
+    s.el = field.querySelector('#huntalien_'+s.id) || null;
+  });
+
   // ── Movement loop ────────────────────────────────────────────────────────
+  const huntFieldEl = field;
   let lastTs = 0;
   function animLoop(ts) {
-    if (!document.getElementById('alienHuntField')) { stopAlienHunt(); return; }
+    if (!huntFieldEl.isConnected) { stopAlienHunt(); return; }
     const dt = Math.min(ts - lastTs, 80);
     lastTs = ts;
     if (dt > 0) {
       alienHuntMoveStates.forEach(s => {
-        if (s.dead) return;
+        if (s.dead || !s.el) return;
         s.x += s.vx * dt;
         s.y += s.vy * dt;
         if (s.x < 5)  { s.vx =  Math.abs(s.vx); s.x = 5;  }
         if (s.x > 90) { s.vx = -Math.abs(s.vx); s.x = 90; }
         if (s.y < 8)  { s.vy =  Math.abs(s.vy); s.y = 8;  }
         if (s.y > 85) { s.vy = -Math.abs(s.vy); s.y = 85; }
-        const el = document.getElementById('huntalien_'+s.id);
-        if (el) { el.style.left = s.x.toFixed(2)+'%'; el.style.top = s.y.toFixed(2)+'%'; }
+        s.el.style.left = s.x.toFixed(1)+'%';
+        s.el.style.top  = s.y.toFixed(1)+'%';
       });
     }
     alienHuntAnimFrame = requestAnimationFrame(animLoop);
