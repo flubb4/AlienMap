@@ -3276,14 +3276,13 @@
 // ============================================================
 // PASSWORD GATE
 // ============================================================
-// Password hashes are loaded from config.js (gitignored).
-// See config.example.js for the template.
+// SHA-256 hashes of player + GM passwords.
+// Inline defaults work on GitHub Pages; config.js can override locally.
 const CFG = window.APP_CONFIG || {};
-const PASSWORD_HASH    = CFG.playerPasswordHash || '';
-const GM_PASSWORD_HASH = CFG.gmPasswordHash     || '';
-if (!PASSWORD_HASH || !GM_PASSWORD_HASH) {
-  console.error('[config] config.js missing or incomplete — copy config.example.js to config.js');
-}
+// sha256("nostromo")
+const PASSWORD_HASH    = CFG.playerPasswordHash || '1fb565c514350bd302b6311e93127aa2720342b57851517e0cb6fbcb637800c2';
+// sha256("GMnostromo")
+const GM_PASSWORD_HASH = CFG.gmPasswordHash     || '7cde34385c69f449cfd4e43c3237ab91900108005e17796fe61b4c001cd9633d';
 
 async function sha256Hex(str) {
   const buf  = new TextEncoder().encode(str);
