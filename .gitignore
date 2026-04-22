@@ -1,2 +1,12 @@
 # Local config with password hashes — never commit
 config.js
+
+# Plaintext campaign book source (staticrypt input) — never commit
+_source/
+
+# Staticrypt intermediate output folder
+encrypted/
+
+# Local backups
+*_backup_*.html
+index_backup_*.html
