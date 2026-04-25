@@ -655,6 +655,8 @@ function zoomBy(factor) {
   viewX=cx-(cx-viewX)*(ns/viewScale); viewY=cy-(cy-viewY)*(ns/viewScale); viewScale=ns; draw();
 }
 function resetView() { fitMap(); }
+window.zoomBy = zoomBy;
+window.resetView = resetView;
 
 // ---- Modal ----
 function openModal(x,y) {
@@ -4616,7 +4618,7 @@ function renderWDReveal(d) {
       const pts1 = s1 + (bluffBonus && winner===p1 ? bluffBonus : 0);
       const pts2 = s2 + (bluffBonus && winner===p2 ? bluffBonus : 0);
       gmMath = `
-        <div class="wd-gm-math" id="wdGMmath" style="opacity:0">
+        <div class="wd-gm-math" style="opacity:0">
           <div>DICE ROLLED: <span class="hi">${p1}=${b1}</span> vs <span class="hi">${p2}=${b2}</span></div>
           <div>SIXES: <span class="hi">${p1}=${s1}</span> vs <span class="hi">${p2}=${s2}</span></div>
           <div>POINTS THIS ROUND: <span class="hi">${p1}+${pts1}</span> / <span class="hi">${p2}+${pts2}</span></div>
@@ -4625,7 +4627,7 @@ function renderWDReveal(d) {
     } else {
       const totalXfer = transfer + riskBonus + bluffBonus + (winner?tiePot:0);
       gmMath = `
-        <div class="wd-gm-math" id="wdGMmath" style="opacity:0">
+        <div class="wd-gm-math" style="opacity:0">
           <div>BETS: <span class="hi">${p1}=${b1}</span> vs <span class="hi">${p2}=${b2}</span> → diff=<span class="hi">${Math.abs(b1-b2)}</span></div>
           <div>SIXES: <span class="hi">${p1}=${s1}</span> vs <span class="hi">${p2}=${s2}</span></div>
           ${isTie ? `<div>TIE — each loses 1 die to pot (pot now <span class="hi">${(d.tiePot||0)+2}</span>)</div>` :
@@ -4730,7 +4732,7 @@ function wdAnimateReveal(d) {
   setTimeout(() => {
     const banner = document.getElementById('wdResultBanner');
     if (banner) { banner.classList.add('animate'); banner.style.opacity = '1'; }
-    const math = document.getElementById('wdGMmath');
+    const math = document.querySelector('.wd-gm-math');
     if (math) math.style.opacity = '1';
   }, t);
   t += 400;
@@ -5657,48 +5659,48 @@ function crtShow(text) {
   footer.classList.remove('visible');
   crtSkipped = false;
   crtTyping  = true;
-  if (crtInterval) clearInterval(crtInterval);
+  if (crtInterval) { cancelAnimationFrame(crtInterval); crtInterval = null; }
 
   overlay.classList.add('open');
 
-  // Add blinking cursor element
   var cursor = document.createElement('span');
   cursor.id = 'crtCursor';
   body.appendChild(cursor);
 
-  var chars  = text.split('');
-  var i      = 0;
-  var DELAY  = 28; // ms per character
+  var chars   = text.split('');
+  var i       = 0;
+  var DELAY   = 28;
+  var lastTs  = null;
+  var accum   = 0;
 
-  crtInterval = setInterval(function() {
-    if (i >= chars.length) {
-      clearInterval(crtInterval);
+  function tick(ts) {
+    if (lastTs !== null) accum += ts - lastTs;
+    lastTs = ts;
+
+    while (accum >= DELAY && i < chars.length) {
+      accum -= DELAY;
+      body.insertBefore(document.createTextNode(chars[i++]), cursor);
+    }
+    body.scrollTop = 999999;
+
+    if (i < chars.length) {
+      crtInterval = requestAnimationFrame(tick);
+    } else {
       crtInterval = null;
       crtTyping   = false;
       cursor.remove();
       footer.classList.add('visible');
-      return;
     }
-    // Insert character before cursor
-    var ch = chars[i++];
-    var node = document.createTextNode(ch);
-    body.insertBefore(node, cursor);
-    // Auto-scroll
-    body.scrollTop = body.scrollHeight;
-  }, DELAY);
+  }
+  crtInterval = requestAnimationFrame(tick);
 }
 
 window.crtSkip = function() {
-  // Instantly show full text
-  if (crtInterval) clearInterval(crtInterval);
-  crtInterval = null;
-  crtTyping   = false;
-  crtSkipped  = true;
+  if (crtInterval) { cancelAnimationFrame(crtInterval); crtInterval = null; }
+  crtTyping  = false;
+  crtSkipped = true;
   var body   = document.getElementById('crtBody');
   var footer = document.getElementById('crtFooter');
-  // Rebuild with full text (retrieve from last handout — reconstruct from body nodes)
-  var full = body.innerText || body.textContent;
-  // Remove cursor if present
   var cur = document.getElementById('crtCursor');
   if (cur) cur.remove();
   footer.classList.add('visible');
@@ -5708,7 +5710,7 @@ function crtClose() {
   document.getElementById('crtOverlay').classList.remove('open');
   document.getElementById('crtBody').innerHTML = '';
   document.getElementById('crtFooter').classList.remove('visible');
-  if (crtInterval) { clearInterval(crtInterval); crtInterval = null; }
+  if (crtInterval) { cancelAnimationFrame(crtInterval); crtInterval = null; }
   crtTyping = false;
 }
 
